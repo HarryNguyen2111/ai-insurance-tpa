@@ -1,6 +1,6 @@
-# API-C1 shared contracts (#19)
+# API-C1/C2 shared contracts (#19, #20)
 
-Contract proposals only; no endpoints, identity server, provider credentials or legal/benefit approvals. Source of truth: `../../docs/ai-specs/02-openapi-contracts.yaml` (OpenAPI 3.0.3, API version 1.2.0). API-C2 EOB and workbench line operations and EOB schema are preserved unchanged. `/health` remains the existing process-only endpoint and is not expanded here.
+Contract proposals only; no endpoints, identity server, provider credentials or legal/benefit approvals. Source of truth: `../../docs/ai-specs/02-openapi-contracts.yaml` (OpenAPI 3.0.3, API version 1.2.0). API-C2 completes the EOB and workbench line contracts and adds the versioned benefits/payment/search/export/catalog contracts. API-C1 operations, headers, security, errors and schemas are preserved semantically and compared to the prerequisite snapshot in tests. `/health` remains the existing process-only endpoint and is not expanded here.
 
 ## Commands and compatibility
 
@@ -35,7 +35,7 @@ AI result is a proposal, never a monetary approval/rejection. Core verifies auth
 - #13 / #21: Zalo exchange's code/PKCE/state/redirect fields are a technical adapter proposal, **not verified Zalo support**. Actual flow, one-time proof verification, client binding and OIDC federation require official provider/sandbox evidence. Fail closed 503 PROVIDER_NOT_CONFIGURED until resolved; never mint identity from client user IDs.
 - #11 / #26: approved consent purposes, policy text/version, guardian authority, evidence/retention and lawful processing dataset need accountable owner approval. Schema does not supply legal terms. E-card redemption protocol and provider integration need approval; opaque QR TTL <=60s is a technical requirement only.
 - #13 / #28–31 / #39: tax-source verification semantics, Viettel response mapping/model/prompt versions, redaction evaluation, mTLS trust and HMAC secret rotation need provider/security evidence. No production credentials or foreign AI endpoints supplied.
-- File limits, idempotency retention and replay windows are explicit technical proposals; pilot sizing and operational configuration still require validation. Benefits/EOB/payment contracts belong to #20.
+- File limits, idempotency retention and replay windows are explicit technical proposals; pilot sizing and operational configuration still require validation. Benefits/EOB/payment shapes are specified by #20; provider configuration remains blocked.
 
 ## Evidence limits and acceptance mapping
 
@@ -43,4 +43,45 @@ Fixtures use synthetic UUIDs, dates and `.invalid` domains. Positive fixtures co
 
 PT15 maps file constraints/quarantine semantics, PT16 maps required service signature/event/time fields and minimal versioned result, PT22 maps required key/version and 409 error contract. These do **not** execute scanner attacks, signature verification, replay-window/dedup persistence, authorization, concurrency or platform scenarios. TC04's unchanged expected warning is checked for response-schema compatibility only; no preflight business engine is implemented. TC01–03/05–06 require the future benefit engine; no full golden/platform PASS claimed.
 
-Three baseline lint warnings remain: missing `servers` (no provider/server invented), and missing operationId on original EOB GET/workbench PATCH (API-C2). New scoped operations have IDs; schema/reference/security lint errors fail. Unused new components and duplicate YAML aliases were removed.
+The remaining baseline lint warning is missing `servers` (no provider/server invented). Three additional `no-unused-components` warnings are intentional for the C2 event-only roots declared under `x-domain-events`; they have generated types/runtime schemas and positive/negative fixtures, but no invented HTTP event endpoint. C2 completes the two legacy operation IDs; strict schema/reference/security lint errors still fail.
+
+## API-C2 scope and server obligations
+
+This is a contract-only proposal before endpoint implementation. It creates no endpoint, DB migration, workflow, money engine, provider adapter, issuer, identity server or UI. Versioned policy/rule creation and reads expose approved immutable source/config references, not invented policy values. Calculation snapshots include stable line order, input/output hash and rule/config/catalog/model/prompt/engine versions. Policy-specific extra rules resolve through the immutable configuration reference; missing terms require review. Money maps to Decimal ROUND_HALF_UP and PostgreSQL NUMERIC(15,2), never JSON floats or Elasticsearch arithmetic. Runtime schemas enforce shape/bounds only, not sums, rounding or conservation.
+
+EOB publication creates an immutable version and atomically adjusts reservations; first publication requires version 0 without a prior hash, replacement requires both current version and hash. A new version invalidates old OTP challenges, signatures and insurer approvals. Line decisions require immutable cited clause provenance and explanationVi; published snapshots cannot be overwritten. Once payment is submitted, EOB/payee/amount edits are blocked pending a controlled adjustment. OTP is bound to member/claim/EOB version/hash with durable expiry, resend/attempt caps and one-time use; exact delivery/code semantics remain pending. Plaintext codes must not enter logs, telemetry, events or workflow history. Schema validation cannot enforce expiry, identity, challenge consumption or hash verification.
+
+Insurer decisions derive maker/checker stage and actors server-side; checker must differ from maker and reference a current maker decision. Thresholds and required approvals resolve from approved configuration, never example amounts. Original receipt requires actual staff verification, immutable receipt evidence and received document IDs; a tracking code alone is insufficient. Finance verifies current signature/approval/original/reservation/funds gates under lock before payment intent creation. Amount/currency/payee derive from approved snapshots. Semantic payout keys remain unique beyond transport idempotency retention. UNKNOWN never permits blind retry: only independently verified callback/query/reconciliation evidence may resolve it. A new attempt after FAILED requires definitive non-success evidence. PAID requires confirmed success plus atomic reservation consumption, balanced journal, audit and outbox. POSTED journals are immutable; corrections require a new balanced reversal referencing the original. No journal mutation API is added.
+
+The payment callback is a generic **internal** adapter contract, not a bank wire protocol or confirmation that any bank supports these fields. It requires service identity/mTLS AND HMAC raw-body verification, the same explicit timestamp/event header boundary as C1, replay-window checks and durable service/payment/attempt/event plus body-hash deduplication. Header/body IDs must agree. Stale/reordered/conflicting status cannot downgrade success. Core independently verifies provider evidence, payment/attempt binding and immutable payout snapshot. These checks, service trust/key rotation and bank idempotency are not implemented by the schema. Internal bodies contain opaque references, not raw bank payloads, account numbers, document text or caller tenant IDs.
+
+Search accepts only exploded `status`, `benefitType`, `cursor`, `limit` query fields (`style: form`, `explode: true`); adapters reject unknown keys before runtime validation. Server injects verified tenant and object permissions for query/get/mget/count/suggest/aggregation/export. Projection returns only IDs, status, benefit type, version and timestamp, with explicit eventual consistency. No free-text PII or DSL, arbitrary fields or money aggregation. PostgreSQL detail remains authoritative; search outages must not block submit/payment. Export checks every payment at create/execute/download, uses an asynchronous status resource and private signed URL TTL <=300s. Revocation requires an authorized gateway when object storage cannot revoke a granted URL. Fixed columns exclude PII. CSV writers must neutralize formula prefixes `=`, `+`, `-`, `@` after whitespace/control, then quote/escape cells; XLSX writers use text cells. These are writer obligations, not executed CSV attack tests.
+
+Catalog proposals are tenant-scoped, have immutable line/evidence/clause provenance and do not modify a global catalog. A separate authorized reviewer (different from proposer) reviews the current proposal/catalog version. Global curator authority is provisioned separately, never inferred from tenant membership. Approval creates a new scoped version; previously cited versions remain immutable.
+
+## Pending owner/provider decisions (not approvals)
+
+- #11: actual approved policy text/clauses, benefit values, thresholds, guardian/consent/signature legal effect, dataset and retention remain pending.
+- #12: issuer, audience, algorithms/JWKS, membership/permission/MFA mapping, service trust, key lifecycle and identity evidence remain pending. Described roles are permissions, not a new identity server or assumed provider claims.
+- #13: actual bank status/idempotency/callback/reconciliation semantics, Zalo exchange/message/OTP capabilities, approved adapters and sandbox evidence remain pending. Technical internal HMAC and opaque OTP shapes do not assert provider support.
+- #14: independent security/readiness decisions and provider sign-off remain pending; this PR neither edits nor substitutes for its decisions/security documentation.
+
+Until these are resolved, provider-dependent behavior must fail closed with 503 PROVIDER_NOT_CONFIGURED. Synthetic fixtures are shape evidence only, not approved policy terms, actual bank behavior or usable signature proof. Technical replay windows, retention/input bounds and signed URL TTL are proposals needing operational validation.
+
+## C2 evidence mapping (schema-only)
+
+| Original scenario | Executed contract coverage | Still required at runtime |
+| --- | --- | --- |
+| TC01/02/03/05 | Unchanged golden expected money/routing fits Money/calculation schemas | Decimal engine, conservation, caps, routing and clauses |
+| TC06 | Unchanged expected routing fits calculation schema; no amount inferred | Waiting-period engine, evidence and routing |
+| PT09 | Query/projection/export allowlists reject tenant/DSL/PII field shapes | Real cross-tenant query/get/count/suggest/aggregation/export authorization |
+| PT11 | Exact EOB version/hash required; first/replacement publish pairing | Durable invalidation of old OTP/approval/reservations |
+| PT12 | UNKNOWN shape, minimal authenticated callback headers/payload | Bank timeout, evidence validation, concurrency, dedup and no second payout |
+| PT13 | Receipt evidence/documents and payment gate references required | Actual receipt, maker-checker, signature expiry, locks/funds |
+| PT18 | Provenance and expected catalog/proposal versions required | Separate reviewer authority and immutable catalog publication |
+| PT22 | Mutation key/version/hash and shared 409 shapes, C1 preservation | Durable canonical hash/replay/semantic uniqueness |
+| PT24 | Challenge/verification fields and no code leakage in outputs | Rate limits, durable attempt caps, expiry and one-time use across restarts |
+
+`c1-baseline.json` is a semantic snapshot of C1 from origin/main `4a35e84fb488672609975a9ef724d0a1c53b5600`; tests compare every preserved operation and component. It is not a replacement for original golden expectations. C2 fixtures use synthetic data, with positive/negative boundaries and required-field checks. No PT or business golden PASS is claimed; only schema compatibility and existing scaffold checks are executed.
+
+C2 event schemas are explicit `x-domain-events` roots in OpenAPI and use the same upstream generation/runtime validation. `eob.published`, `payment.status-changed`, `catalog.proposal-reviewed` contain only immutable IDs/version/hash/status references in a versioned outbox envelope, never PII, raw evidence, OTP, URLs or money totals. Tenant is assigned by trusted core. Consumers require durable inbox dedup and aggregate version/order/gap handling. Compatibility policy: keep emitted `schemaVersion=1.0.0` shape immutable; breaking required-field/type/enum changes require a new schema version and dual-version consumer migration before publication. These fixtures validate the current shape, not Schema Registry compatibility, Kafka delivery or actual emitters.
