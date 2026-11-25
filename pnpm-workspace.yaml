@@ -1,5 +1,6 @@
 packages:
   - apps/*
+  - packages/*
 
 # Nest core's optional postinstall donation message is not required to build.
 onlyBuiltDependencies: []
