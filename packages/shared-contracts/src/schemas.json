@@ -2621,7 +2621,5312 @@
     "description": "Redacted extraction proposal, not verified tax evidence; excludes raw buyer name/address/identity. Seller identifier must be authorized for service processing; never log payload.",
     "$schema": "http://json-schema.org/draft-04/schema#"
   },
+  "VersionNumber": {
+    "type": "integer",
+    "minimum": 1,
+    "maximum": 2147483647,
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "VersionedReference": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "version",
+      "hash"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "hash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "EobBinding": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "eobVersion",
+      "eobHash"
+    ],
+    "properties": {
+      "eobVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eobHash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ContractClause": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "clauseId",
+      "source",
+      "sourceVersion",
+      "contractClauseCited",
+      "explanationVi"
+    ],
+    "properties": {
+      "clauseId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "source": {
+        "type": "string",
+        "enum": [
+          "BENEFIT_RULE",
+          "MEDICAL_CATALOG"
+        ]
+      },
+      "sourceVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "contractClauseCited": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "explanationVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      }
+    },
+    "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PolicyVersionInput": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "effectiveFrom",
+      "effectiveTo",
+      "sourceDocument",
+      "endorsements",
+      "precedence",
+      "clauses"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "effectiveFrom": {
+        "type": "string",
+        "format": "date"
+      },
+      "effectiveTo": {
+        "type": "string",
+        "format": "date"
+      },
+      "sourceDocument": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "endorsements": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "version",
+            "hash"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "minItems": 0,
+        "maxItems": 100,
+        "uniqueItems": true
+      },
+      "precedence": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 0,
+        "maxItems": 100,
+        "uniqueItems": true
+      },
+      "clauses": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "clauseId",
+            "source",
+            "sourceVersion",
+            "contractClauseCited",
+            "explanationVi"
+          ],
+          "properties": {
+            "clauseId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "source": {
+              "type": "string",
+              "enum": [
+                "BENEFIT_RULE",
+                "MEDICAL_CATALOG"
+              ]
+            },
+            "sourceVersion": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "version",
+                "hash"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "hash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            },
+            "contractClauseCited": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "explanationVi": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            }
+          },
+          "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+        },
+        "minItems": 1,
+        "maxItems": 100,
+        "uniqueItems": true
+      }
+    },
+    "description": "Creates immutable version, never edits/deletes used policy. Verify approved source, interval and complete deterministic endorsement precedence; no default terms.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PolicyVersion": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "policyId",
+      "policyVersion",
+      "aggregateVersion",
+      "definition",
+      "createdAt"
+    ],
+    "properties": {
+      "policyId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "policyVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "definition": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedAggregateVersion",
+          "effectiveFrom",
+          "effectiveTo",
+          "sourceDocument",
+          "endorsements",
+          "precedence",
+          "clauses"
+        ],
+        "properties": {
+          "expectedAggregateVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "sourceDocument": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "endorsements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "version",
+                "hash"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "hash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "precedence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "clauses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "clauseId",
+                "source",
+                "sourceVersion",
+                "contractClauseCited",
+                "explanationVi"
+              ],
+              "properties": {
+                "clauseId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "BENEFIT_RULE",
+                    "MEDICAL_CATALOG"
+                  ]
+                },
+                "sourceVersion": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "id",
+                    "version",
+                    "hash"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "version": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2147483647
+                    },
+                    "hash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  }
+                },
+                "contractClauseCited": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                "explanationVi": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                }
+              },
+              "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "description": "Creates immutable version, never edits/deletes used policy. Verify approved source, interval and complete deterministic endorsement precedence; no default terms."
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "BenefitRuleVersionInput": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "policyVersion",
+      "benefitType",
+      "annualLimit",
+      "deductiblePerClaim",
+      "copayInsurerPct",
+      "waitingDaysNormal",
+      "waitingDaysSpecial",
+      "configurationVersion",
+      "configuration",
+      "clauses"
+    ],
+    "properties": {
+      "configuration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stpExecutionMode",
+          "ruleOrder"
+        ],
+        "properties": {
+          "stpExecutionMode": {
+            "type": "string",
+            "enum": [
+              "SHADOW",
+              "ENABLED",
+              "DISABLED"
+            ]
+          },
+          "ruleOrder": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "maxVisitsPerYear": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "waitingDaysMaternity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "maxPrescriptionDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "stpAutoApproveLimit": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "dualApprovalThreshold": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "originalDocumentsThreshold": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          }
+        },
+        "description": "Approved immutable configuration snapshot; no default thresholds/periods. Optional rules absent means unspecified, not zero/unlimited/waived. Server requires complete applicable contract terms before publication; missing terms require review. Rule order contains approved stable rule identifiers; shadow is deployment default until explicit tenant/plan approval."
+      },
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "policyVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "benefitType": {
+        "type": "string",
+        "enum": [
+          "OUTPATIENT",
+          "INPATIENT",
+          "DENTAL",
+          "MATERNITY",
+          "ACCIDENT",
+          "HOSPITAL_INCOME"
+        ]
+      },
+      "annualLimit": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "perVisitLimit": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "deductiblePerClaim": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "copayInsurerPct": {
+        "type": "string",
+        "pattern": "^(100\\.00|[0-9]{1,2}\\.[0-9]{2})$"
+      },
+      "waitingDaysNormal": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "waitingDaysSpecial": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "configurationVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "clauses": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "clauseId",
+            "source",
+            "sourceVersion",
+            "contractClauseCited",
+            "explanationVi"
+          ],
+          "properties": {
+            "clauseId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "source": {
+              "type": "string",
+              "enum": [
+                "BENEFIT_RULE",
+                "MEDICAL_CATALOG"
+              ]
+            },
+            "sourceVersion": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "version",
+                "hash"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "hash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            },
+            "contractClauseCited": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "explanationVi": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            }
+          },
+          "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+        },
+        "minItems": 1,
+        "maxItems": 100,
+        "uniqueItems": true
+      }
+    },
+    "description": "All values from approved immutable contract/config; no thresholds/defaults inferred. Plan-specific terms resolve via configurationVersion; missing terms require review, not invented rejection.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "BenefitRuleVersion": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "ruleVersion",
+      "aggregateVersion",
+      "definition",
+      "createdAt"
+    ],
+    "properties": {
+      "ruleVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "definition": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedAggregateVersion",
+          "policyVersion",
+          "benefitType",
+          "annualLimit",
+          "deductiblePerClaim",
+          "copayInsurerPct",
+          "waitingDaysNormal",
+          "waitingDaysSpecial",
+          "configurationVersion",
+          "configuration",
+          "clauses"
+        ],
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "stpExecutionMode",
+              "ruleOrder"
+            ],
+            "properties": {
+              "stpExecutionMode": {
+                "type": "string",
+                "enum": [
+                  "SHADOW",
+                  "ENABLED",
+                  "DISABLED"
+                ]
+              },
+              "ruleOrder": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "maxVisitsPerYear": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              },
+              "waitingDaysMaternity": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              },
+              "maxPrescriptionDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              },
+              "stpAutoApproveLimit": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+                "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+              },
+              "dualApprovalThreshold": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+                "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+              },
+              "originalDocumentsThreshold": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+                "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+              }
+            },
+            "description": "Approved immutable configuration snapshot; no default thresholds/periods. Optional rules absent means unspecified, not zero/unlimited/waived. Server requires complete applicable contract terms before publication; missing terms require review. Rule order contains approved stable rule identifiers; shadow is deployment default until explicit tenant/plan approval."
+          },
+          "expectedAggregateVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "policyVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "benefitType": {
+            "type": "string",
+            "enum": [
+              "OUTPATIENT",
+              "INPATIENT",
+              "DENTAL",
+              "MATERNITY",
+              "ACCIDENT",
+              "HOSPITAL_INCOME"
+            ]
+          },
+          "annualLimit": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "perVisitLimit": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "deductiblePerClaim": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "copayInsurerPct": {
+            "type": "string",
+            "pattern": "^(100\\.00|[0-9]{1,2}\\.[0-9]{2})$"
+          },
+          "waitingDaysNormal": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "waitingDaysSpecial": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "configurationVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "clauses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "clauseId",
+                "source",
+                "sourceVersion",
+                "contractClauseCited",
+                "explanationVi"
+              ],
+              "properties": {
+                "clauseId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "BENEFIT_RULE",
+                    "MEDICAL_CATALOG"
+                  ]
+                },
+                "sourceVersion": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "id",
+                    "version",
+                    "hash"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "version": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2147483647
+                    },
+                    "hash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  }
+                },
+                "contractClauseCited": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                "explanationVi": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                }
+              },
+              "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "description": "All values from approved immutable contract/config; no thresholds/defaults inferred. Plan-specific terms resolve via configurationVersion; missing terms require review, not invented rejection."
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "CalculationRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "policyVersion",
+      "benefitRuleVersion",
+      "configurationVersion"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "policyVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "benefitRuleVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "configurationVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "description": "Core selects authorized claim/member/coverage/documents and reservation accounts under lock. Caller cannot assert balances/totals. Calculation alone is not publication or payout authorization.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "LineDecision": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "decisionStatus",
+      "approvedAmount",
+      "contractClause",
+      "explanationVi"
+    ],
+    "properties": {
+      "decisionStatus": {
+        "type": "string",
+        "enum": [
+          "APPROVED",
+          "PARTIAL",
+          "REJECTED"
+        ]
+      },
+      "approvedAmount": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "contractClause": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clauseId",
+          "source",
+          "sourceVersion",
+          "contractClauseCited",
+          "explanationVi"
+        ],
+        "properties": {
+          "clauseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "BENEFIT_RULE",
+              "MEDICAL_CATALOG"
+            ]
+          },
+          "sourceVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "contractClauseCited": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "explanationVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+      },
+      "explanationVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      }
+    },
+    "description": "All reductions/rejections require immutable cited clause and explanationVi. Server verifies Decimal amount conservation and status consistency; schema alone cannot compare money.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "EobLine": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "lineId",
+      "itemName",
+      "requested",
+      "approved",
+      "rejected",
+      "status",
+      "clauseCited",
+      "contractClause",
+      "explanationVi",
+      "evidenceIds"
+    ],
+    "properties": {
+      "lineId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "itemName": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "requested": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "approved": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "rejected": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "APPROVED",
+          "PARTIAL",
+          "REJECTED"
+        ]
+      },
+      "clauseCited": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "contractClause": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clauseId",
+          "source",
+          "sourceVersion",
+          "contractClauseCited",
+          "explanationVi"
+        ],
+        "properties": {
+          "clauseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "BENEFIT_RULE",
+              "MEDICAL_CATALOG"
+            ]
+          },
+          "sourceVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "contractClauseCited": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "explanationVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+      },
+      "explanationVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "evidenceIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 1,
+        "maxItems": 20,
+        "uniqueItems": true
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "EobSummary": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "totalRequested",
+      "totalApproved",
+      "totalRejected",
+      "remainingAnnualLimit"
+    ],
+    "properties": {
+      "totalRequested": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "totalApproved": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "totalRejected": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "remainingAnnualLimit": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "AuditProof": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "hashChainTail",
+      "contractLocked"
+    ],
+    "properties": {
+      "hashChainTail": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "contractLocked": {
+        "type": "boolean",
+        "enum": [
+          true
+        ]
+      }
+    },
+    "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "CalculationRun": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "calculationRunId",
+      "claimId",
+      "aggregateVersion",
+      "inputSnapshot",
+      "policyVersion",
+      "benefitRuleVersion",
+      "configurationVersion",
+      "catalogVersion",
+      "modelVersion",
+      "promptVersion",
+      "engineVersion",
+      "roundingMode",
+      "roundingScale",
+      "lineOrder",
+      "summary",
+      "lineItems",
+      "outputHash",
+      "triageLane",
+      "stpEligible",
+      "stpExecutionMode",
+      "createdAt"
+    ],
+    "properties": {
+      "calculationRunId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "inputSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "policyVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "benefitRuleVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "configurationVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "catalogVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "modelVersion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "promptVersion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "engineVersion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "roundingMode": {
+        "type": "string",
+        "enum": [
+          "ROUND_HALF_UP"
+        ]
+      },
+      "roundingScale": {
+        "type": "integer",
+        "enum": [
+          0
+        ]
+      },
+      "lineOrder": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 1,
+        "maxItems": 1000,
+        "uniqueItems": true
+      },
+      "summary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "totalRequested",
+          "totalApproved",
+          "totalRejected",
+          "remainingAnnualLimit"
+        ],
+        "properties": {
+          "totalRequested": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "totalApproved": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "totalRejected": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "remainingAnnualLimit": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          }
+        }
+      },
+      "lineItems": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lineId",
+            "itemName",
+            "requested",
+            "approved",
+            "rejected",
+            "status",
+            "clauseCited",
+            "contractClause",
+            "explanationVi",
+            "evidenceIds"
+          ],
+          "properties": {
+            "lineId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "itemName": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "requested": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+              "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+            },
+            "approved": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+              "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+            },
+            "rejected": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+              "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "APPROVED",
+                "PARTIAL",
+                "REJECTED"
+              ]
+            },
+            "clauseCited": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "contractClause": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "clauseId",
+                "source",
+                "sourceVersion",
+                "contractClauseCited",
+                "explanationVi"
+              ],
+              "properties": {
+                "clauseId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "BENEFIT_RULE",
+                    "MEDICAL_CATALOG"
+                  ]
+                },
+                "sourceVersion": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "id",
+                    "version",
+                    "hash"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "version": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2147483647
+                    },
+                    "hash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  }
+                },
+                "contractClauseCited": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                "explanationVi": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                }
+              },
+              "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+            },
+            "explanationVi": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "evidenceIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "minItems": 1,
+              "maxItems": 20,
+              "uniqueItems": true
+            }
+          }
+        },
+        "minItems": 1,
+        "maxItems": 1000,
+        "uniqueItems": true
+      },
+      "outputHash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "triageLane": {
+        "type": "string",
+        "enum": [
+          "GREEN_STP",
+          "YELLOW_REVIEW",
+          "RED_FRAUD"
+        ]
+      },
+      "stpEligible": {
+        "type": "boolean"
+      },
+      "stpExecutionMode": {
+        "type": "string",
+        "enum": [
+          "SHADOW",
+          "ENABLED",
+          "DISABLED"
+        ]
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "description": "Immutable input/output snapshots, stable line order and exact engine/rule/config/catalog/model/prompt versions. Decimal ROUND_HALF_UP only; no float calculations. STP operational default SHADOW until approved per tenant/plan. TC03 cap requires review; TC06 defines routing only, no inferred amounts.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PublishEobRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "expectedEobVersion",
+      "calculationRun"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "expectedEobVersion": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "expectedEobHash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "calculationRun": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "oneOf": [
+      {
+        "properties": {
+          "expectedEobVersion": {
+            "type": "integer",
+            "enum": [
+              0
+            ]
+          }
+        },
+        "not": {
+          "required": [
+            "expectedEobHash"
+          ],
+          "properties": {
+            "expectedEobHash": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "required": [
+          "expectedEobHash"
+        ],
+        "properties": {
+          "expectedEobHash": {
+            "type": "string"
+          },
+          "expectedEobVersion": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    ],
+    "description": "First publish version=0 without hash; replacement requires current nonzero version AND hash. Server validates relationship, current snapshot and clauses, atomically reserves/releases limits and creates immutable EOB version. Revoke old OTP/approvals. Submitted payout blocks edits; adjustments use controlled reversal flow.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ExplainableEOBResponse": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "claimCode",
+      "claimId",
+      "status",
+      "aggregateVersion",
+      "eobVersion",
+      "eobHash",
+      "contractVersionId",
+      "policyVersion",
+      "benefitRuleVersion",
+      "configurationVersion",
+      "calculationRun",
+      "summary",
+      "lineItems",
+      "reservationIds",
+      "auditProof",
+      "publishedAt"
+    ],
+    "properties": {
+      "claimCode": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "PREFLIGHT",
+          "SUBMITTED",
+          "AI_PROCESSING",
+          "GREEN_STP",
+          "DOCTOR_REVIEW",
+          "FRAUD_HOLD",
+          "SUPPLEMENT_REQUIRED",
+          "WAITING_ORIGINAL_DOCS",
+          "EOB_READY",
+          "OTP_SIGNED",
+          "PAYOUT_PROCESSING",
+          "PAID",
+          "REJECTED",
+          "CLOSED_EXPIRED"
+        ]
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eobVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eobHash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "contractVersionId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "policyVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "benefitRuleVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "configurationVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "calculationRun": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "summary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "totalRequested",
+          "totalApproved",
+          "totalRejected",
+          "remainingAnnualLimit"
+        ],
+        "properties": {
+          "totalRequested": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "totalApproved": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "totalRejected": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "remainingAnnualLimit": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          }
+        }
+      },
+      "lineItems": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lineId",
+            "itemName",
+            "requested",
+            "approved",
+            "rejected",
+            "status",
+            "clauseCited",
+            "contractClause",
+            "explanationVi",
+            "evidenceIds"
+          ],
+          "properties": {
+            "lineId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "itemName": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "requested": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+              "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+            },
+            "approved": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+              "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+            },
+            "rejected": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+              "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "APPROVED",
+                "PARTIAL",
+                "REJECTED"
+              ]
+            },
+            "clauseCited": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "contractClause": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "clauseId",
+                "source",
+                "sourceVersion",
+                "contractClauseCited",
+                "explanationVi"
+              ],
+              "properties": {
+                "clauseId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "BENEFIT_RULE",
+                    "MEDICAL_CATALOG"
+                  ]
+                },
+                "sourceVersion": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "id",
+                    "version",
+                    "hash"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "version": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2147483647
+                    },
+                    "hash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  }
+                },
+                "contractClauseCited": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                "explanationVi": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                }
+              },
+              "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+            },
+            "explanationVi": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "evidenceIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "minItems": 1,
+              "maxItems": 20,
+              "uniqueItems": true
+            }
+          }
+        },
+        "minItems": 1,
+        "maxItems": 1000,
+        "uniqueItems": true
+      },
+      "reservationIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 0,
+        "maxItems": 100,
+        "uniqueItems": true
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      },
+      "publishedAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "description": "Immutable published snapshot; canonicalization version comes from approved config. Every read authorized; PostgreSQL truth. New version invalidates earlier signatures and approvals.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "LineDecisionRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "expectedEobVersion",
+      "decision"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "expectedEobVersion": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "expectedEobHash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "decision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "decisionStatus",
+          "approvedAmount",
+          "contractClause",
+          "explanationVi"
+        ],
+        "properties": {
+          "decisionStatus": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PARTIAL",
+              "REJECTED"
+            ]
+          },
+          "approvedAmount": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "contractClause": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "clauseId",
+              "source",
+              "sourceVersion",
+              "contractClauseCited",
+              "explanationVi"
+            ],
+            "properties": {
+              "clauseId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "BENEFIT_RULE",
+                  "MEDICAL_CATALOG"
+                ]
+              },
+              "sourceVersion": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "version",
+                  "hash"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                }
+              },
+              "contractClauseCited": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "explanationVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              }
+            },
+            "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+          },
+          "explanationVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "description": "All reductions/rejections require immutable cited clause and explanationVi. Server verifies Decimal amount conservation and status consistency; schema alone cannot compare money."
+      },
+      "updateMedicalCatalogAs": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "DRUG",
+          "SUPPLEMENT_TPCN",
+          "COSMETIC"
+        ]
+      }
+    },
+    "oneOf": [
+      {
+        "properties": {
+          "expectedEobVersion": {
+            "type": "integer",
+            "enum": [
+              0
+            ]
+          }
+        },
+        "not": {
+          "required": [
+            "expectedEobHash"
+          ],
+          "properties": {
+            "expectedEobHash": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "required": [
+          "expectedEobHash"
+        ],
+        "properties": {
+          "expectedEobHash": {
+            "type": "string"
+          },
+          "expectedEobVersion": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    ],
+    "description": "Assigned MFA reviewer records versioned decision, never mutates published EOB or catalog. Non-NONE relabel creates proposal with provenance only; invalidates old confirmations and requires republish.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "LineDecisionResult": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "claimId",
+      "lineId",
+      "aggregateVersion",
+      "decision",
+      "requiresEobPublication",
+      "auditProof"
+    ],
+    "properties": {
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "lineId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "decision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "decisionStatus",
+          "approvedAmount",
+          "contractClause",
+          "explanationVi"
+        ],
+        "properties": {
+          "decisionStatus": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PARTIAL",
+              "REJECTED"
+            ]
+          },
+          "approvedAmount": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+            "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+          },
+          "contractClause": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "clauseId",
+              "source",
+              "sourceVersion",
+              "contractClauseCited",
+              "explanationVi"
+            ],
+            "properties": {
+              "clauseId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "BENEFIT_RULE",
+                  "MEDICAL_CATALOG"
+                ]
+              },
+              "sourceVersion": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "version",
+                  "hash"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                }
+              },
+              "contractClauseCited": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "explanationVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              }
+            },
+            "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+          },
+          "explanationVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "description": "All reductions/rejections require immutable cited clause and explanationVi. Server verifies Decimal amount conservation and status consistency; schema alone cannot compare money."
+      },
+      "requiresEobPublication": {
+        "type": "boolean",
+        "enum": [
+          true
+        ]
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      },
+      "catalogProposalId": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "OtpChallengeRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "eob"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      }
+    },
+    "description": "Owner/guardian; destination resolved from verified member, never caller phone. Durable resend/attempt/expiry/one-use policy from approved config. Provider delivery semantics pending #11/#12/#13/#14.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "OtpChallenge": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "challengeId",
+      "claimId",
+      "memberId",
+      "aggregateVersion",
+      "eob",
+      "expiresAt",
+      "resendAfter",
+      "maxAttempts",
+      "policyVersion",
+      "status"
+    ],
+    "properties": {
+      "challengeId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "memberId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "expiresAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "resendAfter": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "maxAttempts": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "policyVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "PENDING"
+        ]
+      }
+    },
+    "description": "No OTP, hash or phone in output/log/event/history. Server-issued policy times/limits; not proof of provider delivery.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "OtpVerifyRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "eob",
+      "challengeId",
+      "code"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "challengeId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "code": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      }
+    },
+    "description": "Opaque secret code, no guessed provider digit count. Never log/retain plaintext. Verify durable hash, expiry, attempts, subject and one-use under lock. Wrong/expired/consumed 422; stale EOB 409; abuse 429. Idempotent success replay returns original signature without consuming twice.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "EobSignature": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "signatureId",
+      "claimId",
+      "memberId",
+      "challengeId",
+      "aggregateVersion",
+      "eob",
+      "signedAt",
+      "validUntil",
+      "status",
+      "policyVersion",
+      "auditProof"
+    ],
+    "properties": {
+      "signatureId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "memberId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "challengeId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "signedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "validUntil": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "VALID",
+          "INVALIDATED",
+          "EXPIRED"
+        ]
+      },
+      "policyVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      }
+    },
+    "description": "Exact EOB confirmation evidence, not assertion of legally qualified signature. Recheck validity/revocation and current EOB at payout.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "InsurerDecisionRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "eob",
+      "decision",
+      "reasonVi",
+      "contractClause"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "decision": {
+        "type": "string",
+        "enum": [
+          "APPROVE",
+          "REJECT"
+        ]
+      },
+      "makerDecisionId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "reasonVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "contractClause": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clauseId",
+          "source",
+          "sourceVersion",
+          "contractClauseCited",
+          "explanationVi"
+        ],
+        "properties": {
+          "clauseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "BENEFIT_RULE",
+              "MEDICAL_CATALOG"
+            ]
+          },
+          "sourceVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "contractClauseCited": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "explanationVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+      }
+    },
+    "description": "Server derives maker/checker and actor from verified grant/config. Checker differs from maker and references current maker decision. Cite approved clause for rejection; no hardcoded amount thresholds.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "InsurerDecision": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "decisionId",
+      "claimId",
+      "aggregateVersion",
+      "eob",
+      "decision",
+      "stage",
+      "actorId",
+      "configurationVersion",
+      "reasonVi",
+      "contractClause",
+      "decidedAt",
+      "auditProof"
+    ],
+    "properties": {
+      "decisionId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "decision": {
+        "type": "string",
+        "enum": [
+          "APPROVE",
+          "REJECT"
+        ]
+      },
+      "stage": {
+        "type": "string",
+        "enum": [
+          "MAKER",
+          "CHECKER"
+        ]
+      },
+      "actorId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "makerDecisionId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "configurationVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "reasonVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "contractClause": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clauseId",
+          "source",
+          "sourceVersion",
+          "contractClauseCited",
+          "explanationVi"
+        ],
+        "properties": {
+          "clauseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "BENEFIT_RULE",
+              "MEDICAL_CATALOG"
+            ]
+          },
+          "sourceVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "contractClauseCited": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "explanationVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+      },
+      "decidedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "OriginalReceiptRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "eob",
+      "receivedDocumentIds",
+      "receiptEvidence"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "receivedDocumentIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 1,
+        "maxItems": 50,
+        "uniqueItems": true
+      },
+      "receiptEvidence": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "trackingCode": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      }
+    },
+    "description": "Authorized receipt staff physically verifies receipt and immutable CLEAN evidence linked to claim/member. Tracking alone insufficient. Server records receiver/time; missing/mismatched evidence 422.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "OriginalReceipt": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "receiptId",
+      "claimId",
+      "aggregateVersion",
+      "eob",
+      "receivedDocumentIds",
+      "receiptEvidence",
+      "receivedBy",
+      "receivedAt",
+      "status",
+      "auditProof"
+    ],
+    "properties": {
+      "receiptId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "receivedDocumentIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 1,
+        "maxItems": 50,
+        "uniqueItems": true
+      },
+      "receiptEvidence": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "receivedBy": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "receivedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "RECEIVED"
+        ]
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PaymentIntentRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "claimId",
+      "expectedAggregateVersion",
+      "eob",
+      "signatureId",
+      "approvalDecisionIds",
+      "reservationIds",
+      "payeeSnapshot",
+      "semanticPayoutKey"
+    ],
+    "properties": {
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "signatureId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "approvalDecisionIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 0,
+        "maxItems": 100,
+        "uniqueItems": true
+      },
+      "originalReceiptId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "reservationIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 1,
+        "maxItems": 100,
+        "uniqueItems": true
+      },
+      "payeeSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "semanticPayoutKey": {
+        "type": "string",
+        "minLength": 16,
+        "maxLength": 100,
+        "pattern": "^[A-Za-z0-9._:-]+$"
+      }
+    },
+    "description": "Core derives immutable amount/currency/payee from current approved EOB and authorized payee snapshot. Caller cannot assert bank/amount. Lock/check valid signature, required maker-checker/originals, reservations and funds. Semantic key uniqueness outlives transport key. UNKNOWN blocks new payout; failed retry only after definitive non-success evidence.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PaymentStatus": {
+    "type": "string",
+    "enum": [
+      "CREATED",
+      "SUBMITTED",
+      "UNKNOWN",
+      "SUCCEEDED",
+      "FAILED"
+    ],
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PaymentIntent": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "paymentId",
+      "claimId",
+      "aggregateVersion",
+      "eob",
+      "amount",
+      "currency",
+      "payeeSnapshot",
+      "semanticPayoutKey",
+      "status",
+      "createdAt",
+      "updatedAt",
+      "auditProof"
+    ],
+    "properties": {
+      "attemptId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Server-created stable non-PII identifier of the applicable payment attempt. Returned by authorized payment reads for every state after CREATED; use this exact reference in reconciliation. Never regenerate it on retries or UNKNOWN timeout. Core verifies it belongs to this payment and current obligation; stale or mismatched attempt returns 409 STALE_VERSION."
+      },
+      "paymentId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "amount": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "currency": {
+        "type": "string",
+        "enum": [
+          "VND"
+        ]
+      },
+      "payeeSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "semanticPayoutKey": {
+        "type": "string",
+        "minLength": 16,
+        "maxLength": 100,
+        "pattern": "^[A-Za-z0-9._:-]+$"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "CREATED",
+          "SUBMITTED",
+          "UNKNOWN",
+          "SUCCEEDED",
+          "FAILED"
+        ]
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updatedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "journalId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      }
+    },
+    "oneOf": [
+      {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED"
+            ]
+          }
+        }
+      },
+      {
+        "required": [
+          "attemptId"
+        ],
+        "properties": {
+          "attemptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUBMITTED",
+              "UNKNOWN",
+              "SUCCEEDED",
+              "FAILED"
+            ]
+          }
+        }
+      }
+    ],
+    "description": "CREATED -> SUBMITTED -> SUCCEEDED|FAILED|UNKNOWN. Timeout UNKNOWN never blind retry. Only authenticated evidence-backed callback/query/reconciliation resolves UNKNOWN. PAID only after definitive success with balanced journal + audit + reservation consumption + outbox atomically. POSTED journals immutable, corrections only by new balanced reversal referencing original; no UPDATE/DELETE. Payee/amount locked after approval/submission.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PaymentCallback": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "schemaVersion",
+      "eventId",
+      "paymentId",
+      "attemptId",
+      "expectedAggregateVersion",
+      "occurredAt",
+      "status",
+      "evidenceReference"
+    ],
+    "properties": {
+      "schemaVersion": {
+        "type": "string",
+        "enum": [
+          "1.0.0"
+        ]
+      },
+      "eventId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "paymentId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "attemptId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "occurredAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "SUCCEEDED",
+          "FAILED",
+          "UNKNOWN"
+        ]
+      },
+      "evidenceReference": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      }
+    },
+    "description": "Generic internal adapter contract, NOT bank wire format. Verified service maps payment/attempt to tenant and verifies evidence against submitted amount/payee/semantic key. No caller tenant/raw bank/PII. Stale/out-of-order/conflicting terminal updates 409 then reconcile; never downgrade success. Actual bank contract pending.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PaymentAcknowledgement": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "eventId",
+      "paymentId",
+      "disposition"
+    ],
+    "properties": {
+      "eventId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "paymentId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "disposition": {
+        "type": "string",
+        "enum": [
+          "ACCEPTED",
+          "DUPLICATE"
+        ]
+      }
+    },
+    "description": "Commit durable inbox/dedup, status/audit/outbox and journal if applicable before ack. Valid identical replay no repeated side effects; changed body 409. No exactly-once promise.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ReconciliationRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "paymentId",
+      "expectedAggregateVersion",
+      "eob",
+      "attemptId",
+      "evidenceDocument",
+      "observedStatus",
+      "reasonVi"
+    ],
+    "properties": {
+      "paymentId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "attemptId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "evidenceDocument": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "observedStatus": {
+        "type": "string",
+        "enum": [
+          "SUCCEEDED",
+          "FAILED",
+          "UNKNOWN"
+        ]
+      },
+      "reasonVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      }
+    },
+    "description": "Finance MFA; independently verify immutable authorized evidence against provider, attempt, amount/payee and obligation. Caller assertion alone cannot settle; unresolved remains UNKNOWN, never resubmit blindly.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ReconciliationRecord": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "reconciliationId",
+      "paymentId",
+      "aggregateVersion",
+      "evidenceDocument",
+      "resolvedStatus",
+      "recordedAt",
+      "recordedBy",
+      "auditProof"
+    ],
+    "properties": {
+      "reconciliationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "paymentId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "evidenceDocument": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "resolvedStatus": {
+        "type": "string",
+        "enum": [
+          "CREATED",
+          "SUBMITTED",
+          "UNKNOWN",
+          "SUCCEEDED",
+          "FAILED"
+        ]
+      },
+      "recordedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "recordedBy": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ClaimSearchQuery": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "PREFLIGHT",
+          "SUBMITTED",
+          "AI_PROCESSING",
+          "GREEN_STP",
+          "DOCTOR_REVIEW",
+          "FRAUD_HOLD",
+          "SUPPLEMENT_REQUIRED",
+          "WAITING_ORIGINAL_DOCS",
+          "EOB_READY",
+          "OTP_SIGNED",
+          "PAYOUT_PROCESSING",
+          "PAID",
+          "REJECTED",
+          "CLOSED_EXPIRED"
+        ]
+      },
+      "benefitType": {
+        "type": "string",
+        "enum": [
+          "OUTPATIENT",
+          "INPATIENT",
+          "DENTAL",
+          "MATERNITY",
+          "ACCIDENT",
+          "HOSPITAL_INCOME"
+        ]
+      },
+      "cursor": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2048
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20
+      }
+    },
+    "description": "Only these query fields. Reject tenant/DSL/PII/sort/unknown fields 422. HTTP adapter deliberately parses integer limit before validation; validator never coerces.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ClaimSearchHit": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "claimId",
+      "status",
+      "benefitType",
+      "aggregateVersion",
+      "updatedAt"
+    ],
+    "properties": {
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "PREFLIGHT",
+          "SUBMITTED",
+          "AI_PROCESSING",
+          "GREEN_STP",
+          "DOCTOR_REVIEW",
+          "FRAUD_HOLD",
+          "SUPPLEMENT_REQUIRED",
+          "WAITING_ORIGINAL_DOCS",
+          "EOB_READY",
+          "OTP_SIGNED",
+          "PAYOUT_PROCESSING",
+          "PAID",
+          "REJECTED",
+          "CLOSED_EXPIRED"
+        ]
+      },
+      "benefitType": {
+        "type": "string",
+        "enum": [
+          "OUTPATIENT",
+          "INPATIENT",
+          "DENTAL",
+          "MATERNITY",
+          "ACCIDENT",
+          "HOSPITAL_INCOME"
+        ]
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "updatedAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "description": "Minimal projection allowlist, no names/CCCD/phone/bank/documents/diagnosis/raw OCR/XML. No monetary aggregation; PostgreSQL business truth.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ClaimSearchPage": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "items",
+      "indexedAt",
+      "consistency"
+    ],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "claimId",
+            "status",
+            "benefitType",
+            "aggregateVersion",
+            "updatedAt"
+          ],
+          "properties": {
+            "claimId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "PREFLIGHT",
+                "SUBMITTED",
+                "AI_PROCESSING",
+                "GREEN_STP",
+                "DOCTOR_REVIEW",
+                "FRAUD_HOLD",
+                "SUPPLEMENT_REQUIRED",
+                "WAITING_ORIGINAL_DOCS",
+                "EOB_READY",
+                "OTP_SIGNED",
+                "PAYOUT_PROCESSING",
+                "PAID",
+                "REJECTED",
+                "CLOSED_EXPIRED"
+              ]
+            },
+            "benefitType": {
+              "type": "string",
+              "enum": [
+                "OUTPATIENT",
+                "INPATIENT",
+                "DENTAL",
+                "MATERNITY",
+                "ACCIDENT",
+                "HOSPITAL_INCOME"
+              ]
+            },
+            "aggregateVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "description": "Minimal projection allowlist, no names/CCCD/phone/bank/documents/diagnosis/raw OCR/XML. No monetary aggregation; PostgreSQL business truth."
+        },
+        "minItems": 0,
+        "maxItems": 100,
+        "uniqueItems": true
+      },
+      "nextCursor": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2048
+      },
+      "indexedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "consistency": {
+        "type": "string",
+        "enum": [
+          "EVENTUAL"
+        ]
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PaymentExportRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "format",
+      "paymentIds",
+      "columns"
+    ],
+    "properties": {
+      "format": {
+        "type": "string",
+        "enum": [
+          "CSV",
+          "XLSX"
+        ]
+      },
+      "paymentIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 1,
+        "maxItems": 100,
+        "uniqueItems": true
+      },
+      "columns": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "paymentId",
+            "claimId",
+            "status",
+            "amount",
+            "currency",
+            "updatedAt"
+          ]
+        },
+        "minItems": 1,
+        "maxItems": 6,
+        "uniqueItems": true
+      }
+    },
+    "description": "Fixed column allowlist, no PII/tenant/DSL. Verify each payment at creation/execution/download. Neutralize CSV formulas =,+,-,@ after leading whitespace/control, quote/escape CSV and force XLSX text cells. Money exact decimal text; no bank T+N scheduling promise.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ExportJobPending": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "exportId",
+      "status",
+      "statusUrl",
+      "createdAt"
+    ],
+    "properties": {
+      "exportId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "PENDING"
+        ]
+      },
+      "statusUrl": {
+        "type": "string",
+        "pattern": "^/v1/insurer/payment-exports/[0-9a-f-]{36}$"
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ExportJobReady": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "exportId",
+      "status",
+      "downloadUrl",
+      "expiresAt",
+      "sha256"
+    ],
+    "properties": {
+      "exportId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "READY"
+        ]
+      },
+      "downloadUrl": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      },
+      "expiresAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "sha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "description": "Private signed URL TTL <=300s, no-store, no logs/events/history. Revalidate membership/object permission; use authorized download gateway if storage cannot enforce revocation.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ExportJobFailed": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "exportId",
+      "status",
+      "error"
+    ],
+    "properties": {
+      "exportId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "FAILED"
+        ]
+      },
+      "error": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "UNAUTHENTICATED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "IDEMPOTENCY_CONFLICT",
+              "STALE_VERSION",
+              "OPERATION_IN_PROGRESS",
+              "VALIDATION_FAILED",
+              "DOMAIN_VIOLATION",
+              "RATE_LIMITED",
+              "DEPENDENCY_UNAVAILABLE",
+              "PROVIDER_NOT_CONFIGURED",
+              "INVALID_SIGNATURE",
+              "REPLAY_REJECTED"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "ExportJob": {
+    "oneOf": [
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exportId",
+          "status",
+          "statusUrl",
+          "createdAt"
+        ],
+        "properties": {
+          "exportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING"
+            ]
+          },
+          "statusUrl": {
+            "type": "string",
+            "pattern": "^/v1/insurer/payment-exports/[0-9a-f-]{36}$"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exportId",
+          "status",
+          "downloadUrl",
+          "expiresAt",
+          "sha256"
+        ],
+        "properties": {
+          "exportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "READY"
+            ]
+          },
+          "downloadUrl": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Private signed URL TTL <=300s, no-store, no logs/events/history. Revalidate membership/object permission; use authorized download gateway if storage cannot enforce revocation."
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exportId",
+          "status",
+          "error"
+        ],
+        "properties": {
+          "exportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "FAILED"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "messageVi",
+              "correlationId"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "UNAUTHENTICATED",
+                  "FORBIDDEN",
+                  "NOT_FOUND",
+                  "IDEMPOTENCY_CONFLICT",
+                  "STALE_VERSION",
+                  "OPERATION_IN_PROGRESS",
+                  "VALIDATION_FAILED",
+                  "DOMAIN_VIOLATION",
+                  "RATE_LIMITED",
+                  "DEPENDENCY_UNAVAILABLE",
+                  "PROVIDER_NOT_CONFIGURED",
+                  "INVALID_SIGNATURE",
+                  "REPLAY_REJECTED"
+                ]
+              },
+              "messageVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "correlationId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "CatalogProposalRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "claimId",
+      "lineId",
+      "expectedAggregateVersion",
+      "eob",
+      "expectedCatalogVersion",
+      "proposedCategory",
+      "evidenceIds",
+      "contractClause",
+      "reasonVi"
+    ],
+    "properties": {
+      "claimId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "lineId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "eob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eobVersion",
+          "eobHash"
+        ],
+        "properties": {
+          "eobVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eobHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+      },
+      "expectedCatalogVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "proposedCategory": {
+        "type": "string",
+        "enum": [
+          "DRUG",
+          "SUPPLEMENT_TPCN",
+          "COSMETIC",
+          "LAB_TEST",
+          "CONSULTATION"
+        ]
+      },
+      "evidenceIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minItems": 1,
+        "maxItems": 20,
+        "uniqueItems": true
+      },
+      "contractClause": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clauseId",
+          "source",
+          "sourceVersion",
+          "contractClauseCited",
+          "explanationVi"
+        ],
+        "properties": {
+          "clauseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "BENEFIT_RULE",
+              "MEDICAL_CATALOG"
+            ]
+          },
+          "sourceVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "contractClauseCited": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "explanationVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+      },
+      "reasonVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      }
+    },
+    "description": "Assigned reviewer creates tenant-scoped proposal with immutable provenance, never direct global catalog update. Global curator authority separate; no caller global scope.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "CatalogProposal": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "proposalId",
+      "aggregateVersion",
+      "proposerId",
+      "scope",
+      "proposal",
+      "status",
+      "createdAt",
+      "auditProof"
+    ],
+    "properties": {
+      "proposalId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "proposerId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "scope": {
+        "type": "string",
+        "enum": [
+          "TENANT"
+        ]
+      },
+      "proposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claimId",
+          "lineId",
+          "expectedAggregateVersion",
+          "eob",
+          "expectedCatalogVersion",
+          "proposedCategory",
+          "evidenceIds",
+          "contractClause",
+          "reasonVi"
+        ],
+        "properties": {
+          "claimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expectedAggregateVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "eob": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "eobVersion",
+              "eobHash"
+            ],
+            "properties": {
+              "eobVersion": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "eobHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+          },
+          "expectedCatalogVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "proposedCategory": {
+            "type": "string",
+            "enum": [
+              "DRUG",
+              "SUPPLEMENT_TPCN",
+              "COSMETIC",
+              "LAB_TEST",
+              "CONSULTATION"
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true
+          },
+          "contractClause": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "clauseId",
+              "source",
+              "sourceVersion",
+              "contractClauseCited",
+              "explanationVi"
+            ],
+            "properties": {
+              "clauseId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "BENEFIT_RULE",
+                  "MEDICAL_CATALOG"
+                ]
+              },
+              "sourceVersion": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "version",
+                  "hash"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                }
+              },
+              "contractClauseCited": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "explanationVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              }
+            },
+            "description": "Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions."
+          },
+          "reasonVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "description": "Assigned reviewer creates tenant-scoped proposal with immutable provenance, never direct global catalog update. Global curator authority separate; no caller global scope."
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "APPROVED",
+          "REJECTED"
+        ]
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "CatalogReviewRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedAggregateVersion",
+      "expectedCatalogVersion",
+      "decision",
+      "reasonVi"
+    ],
+    "properties": {
+      "expectedAggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "expectedCatalogVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "decision": {
+        "type": "string",
+        "enum": [
+          "APPROVE",
+          "REJECT"
+        ]
+      },
+      "reasonVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      }
+    },
+    "description": "Reviewer differs from proposer. Verify tenant authority or separately provisioned global curator authority; tenant membership never grants global writes. Stale proposal/catalog 409. Approval creates new scoped version; immutable cited versions unchanged.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "CatalogReview": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "reviewId",
+      "proposalId",
+      "aggregateVersion",
+      "reviewerId",
+      "decision",
+      "reasonVi",
+      "reviewedAt",
+      "auditProof"
+    ],
+    "properties": {
+      "reviewId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "proposalId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "reviewerId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "decision": {
+        "type": "string",
+        "enum": [
+          "APPROVE",
+          "REJECT"
+        ]
+      },
+      "reasonVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "reviewedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "resultingCatalogVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "auditProof": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hashChainTail",
+          "contractLocked"
+        ],
+        "properties": {
+          "hashChainTail": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contractLocked": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "EobPublishedEvent": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "eventId",
+      "eventType",
+      "schemaVersion",
+      "tenantId",
+      "aggregateId",
+      "aggregateVersion",
+      "occurredAt",
+      "correlationId",
+      "causationId",
+      "payload"
+    ],
+    "properties": {
+      "eventId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "eventType": {
+        "type": "string",
+        "enum": [
+          "eob.published"
+        ]
+      },
+      "schemaVersion": {
+        "type": "string",
+        "enum": [
+          "1.0.0"
+        ]
+      },
+      "tenantId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "occurredAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "correlationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "causationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "payload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eob",
+          "calculationRunId"
+        ],
+        "properties": {
+          "eob": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "eobVersion",
+              "eobHash"
+            ],
+            "properties": {
+              "eobVersion": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "eobHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+          },
+          "calculationRunId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "description": "Internal outbox envelope only, tenantId derived by trusted core. No public tenant selector. Minimal non-PII payload; partition by tenantId:aggregateId, consumer inbox dedup and aggregate version ordering/gap reconciliation required. No exactly-once promise.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PaymentStatusChangedEvent": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "eventId",
+      "eventType",
+      "schemaVersion",
+      "tenantId",
+      "aggregateId",
+      "aggregateVersion",
+      "occurredAt",
+      "correlationId",
+      "causationId",
+      "payload"
+    ],
+    "properties": {
+      "eventId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "eventType": {
+        "type": "string",
+        "enum": [
+          "payment.status-changed"
+        ]
+      },
+      "schemaVersion": {
+        "type": "string",
+        "enum": [
+          "1.0.0"
+        ]
+      },
+      "tenantId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "occurredAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "correlationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "causationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "payload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "SUBMITTED",
+              "UNKNOWN",
+              "SUCCEEDED",
+              "FAILED"
+            ]
+          }
+        }
+      }
+    },
+    "description": "Internal outbox envelope only, tenantId derived by trusted core. No public tenant selector. Minimal non-PII payload; partition by tenantId:aggregateId, consumer inbox dedup and aggregate version ordering/gap reconciliation required. No exactly-once promise.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "CatalogProposalReviewedEvent": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "eventId",
+      "eventType",
+      "schemaVersion",
+      "tenantId",
+      "aggregateId",
+      "aggregateVersion",
+      "occurredAt",
+      "correlationId",
+      "causationId",
+      "payload"
+    ],
+    "properties": {
+      "eventId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "eventType": {
+        "type": "string",
+        "enum": [
+          "catalog.proposal-reviewed"
+        ]
+      },
+      "schemaVersion": {
+        "type": "string",
+        "enum": [
+          "1.0.0"
+        ]
+      },
+      "tenantId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "occurredAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "correlationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "causationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "payload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "decision"
+        ],
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVE",
+              "REJECT"
+            ]
+          },
+          "catalogVersion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version",
+              "hash"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "description": "Internal outbox envelope only, tenantId derived by trusted core. No public tenant selector. Minimal non-PII payload; partition by tenantId:aggregateId, consumer inbox dedup and aggregate version ordering/gap reconciliation required. No exactly-once promise.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "BenefitConfiguration": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "stpExecutionMode",
+      "ruleOrder"
+    ],
+    "properties": {
+      "stpExecutionMode": {
+        "type": "string",
+        "enum": [
+          "SHADOW",
+          "ENABLED",
+          "DISABLED"
+        ]
+      },
+      "ruleOrder": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 20,
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "maxVisitsPerYear": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "waitingDaysMaternity": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "maxPrescriptionDays": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "stpAutoApproveLimit": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "dualApprovalThreshold": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "originalDocumentsThreshold": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      }
+    },
+    "description": "Approved immutable configuration snapshot; no default thresholds/periods. Optional rules absent means unspecified, not zero/unlimited/waived. Server requires complete applicable contract terms before publication; missing terms require review. Rule order contains approved stable rule identifiers; shadow is deployment default until explicit tenant/plan approval.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
   "AiCallbackHeaders": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "X-Signature-HMAC",
+      "X-Event-Id",
+      "X-Signature-Timestamp"
+    ],
+    "properties": {
+      "X-Signature-HMAC": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "X-Event-Id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "X-Signature-Timestamp": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "PaymentCallbackHeaders": {
     "type": "object",
     "additionalProperties": false,
     "required": [
