@@ -15,7 +15,10 @@
     "dev": "turbo run dev",
     "infra:up": "docker compose -f infra/compose/compose.yaml up -d --wait --wait-timeout 300",
     "infra:down": "docker compose -f infra/compose/compose.yaml down",
-    "infra:smoke": "docker compose -f infra/compose/compose.yaml --profile test run --build --rm smoke"
+    "infra:smoke": "docker compose -f infra/compose/compose.yaml --profile test run --build --rm smoke",
+    "db:migrate": "pnpm --filter @tpa/database migrate",
+    "db:generate": "pnpm --filter @tpa/database generate",
+    "db:test:integration": "pnpm --filter @tpa/database test:integration"
   },
   "devDependencies": {
     "turbo": "2.11.13"
