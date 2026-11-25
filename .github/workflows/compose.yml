@@ -1,0 +1,45 @@
+name: Development Compose
+on:
+  pull_request:
+    branches: [main, ao/backend-scaffold/core-api]
+  push:
+    branches: [main, ao/dev-compose/stack]
+permissions:
+  contents: read
+jobs:
+  dependency-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      COMPOSE_PROJECT_NAME: tpa-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      AO_SESSION_ID: ci-${{ github.run_id }}
+    defaults:
+      run:
+        working-directory: infra/compose
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Inspect capacity and validate configuration
+        run: |
+          nproc
+          free -h
+          df -h .
+          docker version
+          docker compose version
+          docker ps --format '{{.Names}} {{.Ports}}'
+          docker compose config --quiet
+      - name: Pull pinned dependencies and build smoke SDKs
+        run: |
+          docker compose pull
+          docker compose --profile test build smoke
+      - name: Start and wait for dependency health
+        run: docker compose up -d --wait --wait-timeout 300
+      - name: Execute synthetic dependency smoke
+        run: docker compose --profile test run --rm smoke
+      - name: Dependency diagnostics on failure
+        if: failure()
+        run: |
+          docker compose ps -a
+          docker compose logs --tail=80
+      - name: Remove only this job's synthetic resources
+        if: always()
+        run: docker compose --profile test down --volumes --remove-orphans
