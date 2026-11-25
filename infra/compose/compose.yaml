@@ -1,0 +1,189 @@
+# Local synthetic development only: single node, no HA, no published ports.
+name: ${COMPOSE_PROJECT_NAME:-tpa-dev}
+x-common: &common
+  labels:
+    ao.session: ${AO_SESSION_ID:-standalone-dev}
+  restart: "no"
+  cpus: 1.0
+  networks: [dev]
+x-health: &health
+  interval: 10s
+  timeout: 5s
+  retries: 30
+  start_period: 30s
+services:
+  postgres:
+    <<: *common
+    image: pgvector/pgvector:0.8.7-pg16-trixie@sha256:c28c0b700f3f1b5eec14082b31ad6e7c8a566d14386323609c615315e7c0ffc8
+    mem_limit: 384m
+    environment:
+      POSTGRES_DB: tpa_dev
+      POSTGRES_USER: tpa_bootstrap
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev-only-postgres}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      <<: *health
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U tpa_bootstrap -d tpa_dev"]
+  redis:
+    <<: *common
+    image: redis:7.4.12-alpine3.22@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
+    mem_limit: 128m
+    command: [redis-server, --maxmemory, 64mb, --maxmemory-policy, allkeys-lru, --save, "", --appendonly, "no"]
+    healthcheck:
+      <<: *health
+      test: [CMD, redis-cli, ping]
+  s3:
+    <<: *common
+    image: chrislusf/seaweedfs:4.55@sha256:7ca46aeae2f223b37e5d91593c17ab37738eec6df6ab69b48a0487f7643342b9
+    mem_limit: 384m
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-dev-only-access}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-dev-only-secret}
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - |
+        umask 077
+        printf '{"identities":[{"name":"local-dev","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' "$$S3_ACCESS_KEY" "$$S3_SECRET_KEY" > /tmp/s3.json
+        exec weed server -dir=/data -ip=s3 -s3 -s3.config=/tmp/s3.json -volume.max=4 -master.volumeSizeLimitMB=256 -master.telemetry=false
+    volumes:
+      - s3:/data
+      - ./seaweedfs/master.toml:/etc/seaweedfs/master.toml:ro
+    healthcheck:
+      <<: *health
+      test: [CMD-SHELL, "nc -z 127.0.0.1 8333 && wget -q -O /dev/null http://127.0.0.1:9333/cluster/status"]
+  imgproxy:
+    <<: *common
+    image: ghcr.io/imgproxy/imgproxy:v4.0.25@sha256:cad8bfc8031d75efaeab622454f62a3e10dd1fe3a21056d40ab67aed812388cb
+    mem_limit: 256m
+    environment:
+      IMGPROXY_KEY: ${IMGPROXY_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      IMGPROXY_SALT: ${IMGPROXY_SALT:-1111111111111111111111111111111111111111111111111111111111111111}
+      IMGPROXY_USE_S3: "true"
+      IMGPROXY_S3_ENDPOINT: http://s3:8333
+      IMGPROXY_S3_REGION: us-east-1
+      IMGPROXY_S3_ENDPOINT_USE_PATH_STYLE: "true"
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY:-dev-only-access}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY:-dev-only-secret}
+      IMGPROXY_ALLOWED_SOURCES: s3://tpa-smoke/
+      IMGPROXY_CONCURRENCY: "1"
+    depends_on:
+      s3: {condition: service_healthy}
+    healthcheck:
+      <<: *health
+      test: [CMD, imgproxy, health]
+  temporal-db:
+    <<: *common
+    image: postgres:16.16-bookworm@sha256:cd0e9518bda5f2ea667ff84d22795d089720c883f288e215d97ce57437e8ef37
+    mem_limit: 256m
+    environment:
+      POSTGRES_DB: temporal
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: ${TEMPORAL_DB_PASSWORD:-dev-only-temporal}
+    volumes:
+      - temporal-db:/var/lib/postgresql/data
+      - ./temporal-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      <<: *health
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U temporal -d temporal"]
+  temporal:
+    <<: *common
+    image: temporalio/auto-setup:1.29.7@sha256:f14912b699cf73015ad5c4fc18d522d4b014db90e794039214dfb7c022c2644f
+    mem_limit: 512m
+    environment:
+      DB: postgres12
+      DB_PORT: "5432"
+      POSTGRES_SEEDS: temporal-db
+      POSTGRES_USER: temporal
+      POSTGRES_PWD: ${TEMPORAL_DB_PASSWORD:-dev-only-temporal}
+      SKIP_DB_CREATE: "true"
+      SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES: "true"
+      TEMPORAL_ADDRESS: temporal:7233
+    depends_on:
+      temporal-db: {condition: service_healthy}
+    healthcheck:
+      <<: *health
+      test: [CMD-SHELL, "temporal operator cluster health --address temporal:7233 && temporal operator namespace describe --namespace default --address temporal:7233 >/dev/null"]
+  kafka:
+    <<: *common
+    image: apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
+    mem_limit: 768m
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_NUM_PARTITIONS: "1"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx256m
+      KAFKA_LOG_RETENTION_HOURS: "24"
+    volumes: [kafka:/var/lib/kafka/data]
+    healthcheck:
+      <<: *health
+      test: [CMD-SHELL, "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list >/dev/null"]
+  registry:
+    <<: *common
+    image: apicurio/apicurio-registry:3.3.5@sha256:8d34d381de75264c3a56389e5a457cafb566b9a7b994c5308e5951114aeeffc0
+    mem_limit: 512m
+    environment:
+      APICURIO_STORAGE_KIND: kafkasql
+      APICURIO_REST_DELETION_ARTIFACT_ENABLED: "true"
+      APICURIO_KAFKASQL_BOOTSTRAP_SERVERS: kafka:9092
+      JAVA_OPTS_APPEND: -Xms128m -Xmx256m
+    depends_on:
+      kafka: {condition: service_healthy}
+    healthcheck:
+      <<: *health
+      test: [CMD-SHELL, "curl -fsS http://127.0.0.1:9000/health/ready >/dev/null"]
+  elasticsearch:
+    <<: *common
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.7@sha256:8aa3b18f6a26880f4c2fa1ffb37a48213e201b0b6a1a47412c66b1f5d533de91
+    mem_limit: 1g
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "false"
+      xpack.security.transport.ssl.enabled: "false"
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-dev-only-elastic}
+      ES_JAVA_OPTS: -Xms384m -Xmx384m
+    volumes: [elasticsearch:/usr/share/elasticsearch/data]
+    healthcheck:
+      <<: *health
+      test: [CMD-SHELL, 'curl -fsS -u "elastic:$$ELASTIC_PASSWORD" "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s" >/dev/null']
+  smoke:
+    <<: *common
+    profiles: [test]
+    build: ./smoke
+    mem_limit: 512m
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev-only-postgres}
+      TEMPORAL_DB_PASSWORD: ${TEMPORAL_DB_PASSWORD:-dev-only-temporal}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-dev-only-elastic}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-dev-only-access}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-dev-only-secret}
+      IMGPROXY_KEY: ${IMGPROXY_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      IMGPROXY_SALT: ${IMGPROXY_SALT:-1111111111111111111111111111111111111111111111111111111111111111}
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      imgproxy: {condition: service_healthy}
+      temporal: {condition: service_healthy}
+      registry: {condition: service_healthy}
+      elasticsearch: {condition: service_healthy}
+networks:
+  dev: {}
+volumes:
+  postgres: {}
+  temporal-db: {}
+  s3: {}
+  kafka: {}
+  elasticsearch: {}

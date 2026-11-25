@@ -36,3 +36,11 @@ process on an ephemeral loopback port, checks HTTP, and sends SIGTERM.
 See [development notes](docs/development.md) for upstream provenance, compatibility,
 validation evidence and pending work. No frontend, identity server, claim/payment
 API, database adapter or custom workflow implementation is included.
+
+## Local infrastructure
+
+The dev-only mandatory dependency stack and synthetic connectivity tests live in
+[infra/compose](infra/compose/README.md). From the root, `pnpm infra:up`,
+`pnpm infra:smoke`, and `pnpm infra:down` use native Docker Compose. No host ports
+are published by default. This is separate from the process-only API scaffold;
+production and domain acceptance remain pending.

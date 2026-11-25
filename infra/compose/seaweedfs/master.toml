@@ -1,0 +1,6 @@
+# Keep the single-node synthetic store small; upstream defaults grow 7 at a time.
+[master.volume_growth]
+copy_1 = 1
+copy_2 = 1
+copy_3 = 1
+copy_other = 1
