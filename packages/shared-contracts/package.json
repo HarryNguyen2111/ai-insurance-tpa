@@ -1,0 +1,33 @@
+{
+  "name": "@tpa/shared-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/validate.cjs"
+    }
+  },
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "lint": "redocly lint ../../docs/ai-specs/02-openapi-contracts.yaml --config redocly.yaml",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm lint && node scripts/generate.mjs --check && node --test test/*.test.mjs",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-draft-04": "1.0.0",
+    "ajv-formats": "3.0.1"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0",
+    "@openapi-contrib/openapi-schema-to-json-schema": "5.1.1",
+    "@redocly/cli": "2.83.0",
+    "@types/node": "24.10.1",
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3",
+    "yaml": "2.9.1"
+  }
+}
