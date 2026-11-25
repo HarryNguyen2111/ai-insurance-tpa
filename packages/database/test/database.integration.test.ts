@@ -62,12 +62,12 @@ test('PG16: reproducible migrations, PT01 role subset and NUMERIC string roundtr
     }
     const migrator = await connect('tpa_migrator');
     const app = await connect('tpa_app');
-    await t.test('fresh + repeated + concurrent migration runs retain two history records', async () => {
+    await t.test('fresh + repeated + concurrent migration runs retain committed history records', async () => {
       await migrateDatabase(url('tpa_migrator'));
       await migrateDatabase(url('tpa_migrator'));
       await Promise.all([migrateDatabase(url('tpa_migrator')), migrateDatabase(url('tpa_migrator'))]);
       const { rows: [row] } = await migrator.query('SELECT count(*)::int AS count FROM drizzle.__drizzle_migrations');
-      assert.equal(row.count, 2);
+      assert.equal(row.count, 3);
       const { rows } = await admin.query("SELECT extname FROM pg_extension WHERE extname IN ('vector','pg_trgm','pgcrypto') ORDER BY extname");
       assert.deepEqual(rows.map(r => r.extname), ['pg_trgm', 'pgcrypto', 'vector']);
       const { rows: tables } = await migrator.query("SELECT tablename FROM pg_tables WHERE schemaname='tpa'");
@@ -105,12 +105,12 @@ test('PG16: reproducible migrations, PT01 role subset and NUMERIC string roundtr
       await cp(migrations, failed, { recursive: true });
       const journalPath = join(failed, 'meta/_journal.json');
       const journal = JSON.parse(await readFile(journalPath, 'utf8'));
-      journal.entries.push({ idx: 2, version: '7', when: journal.entries[1].when + 1, tag: '0002_failed', breakpoints: true });
+      journal.entries.push({ idx: 3, version: '7', when: journal.entries[2].when + 1, tag: '0003_failed', breakpoints: true });
       await writeFile(journalPath, JSON.stringify(journal));
-      await writeFile(join(failed, '0002_failed.sql'), 'CREATE TABLE tpa.must_rollback(id text);\n--> statement-breakpoint\nSELECT 1 / 0;');
+      await writeFile(join(failed, '0003_failed.sql'), 'CREATE TABLE tpa.must_rollback(id text);\n--> statement-breakpoint\nSELECT 1 / 0;');
       await assert.rejects(migrateDatabase(url('tpa_migrator'), failed));
       assert.equal((await migrator.query("SELECT to_regclass('tpa.must_rollback') AS name")).rows[0].name, null);
-      assert.equal((await migrator.query('SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations')).rows[0].n, 2);
+      assert.equal((await migrator.query('SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations')).rows[0].n, 3);
       await migrateDatabase(url('tpa_migrator')); // Lock/connection recovered.
     });
     await t.test('app role has no ownership, elevated attributes or role memberships', async () => {
