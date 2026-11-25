@@ -11834,5 +11834,459 @@
       }
     },
     "valid": true
+  },
+  {
+    "name": "PaymentIntent SUBMITTED exposes stable attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "SUBMITTED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      },
+      "attemptId": "00000000-0000-4000-8000-000000000020"
+    },
+    "valid": true
+  },
+  {
+    "name": "PaymentIntent SUBMITTED rejects missing attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "SUBMITTED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PaymentIntent SUBMITTED rejects malformed attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "SUBMITTED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      },
+      "attemptId": "synthetic-not-a-uuid"
+    },
+    "valid": false
+  },
+  {
+    "name": "PaymentIntent UNKNOWN exposes stable attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "UNKNOWN",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      },
+      "attemptId": "00000000-0000-4000-8000-000000000020"
+    },
+    "valid": true
+  },
+  {
+    "name": "PaymentIntent UNKNOWN rejects missing attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "UNKNOWN",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PaymentIntent UNKNOWN rejects malformed attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "UNKNOWN",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      },
+      "attemptId": "synthetic-not-a-uuid"
+    },
+    "valid": false
+  },
+  {
+    "name": "PaymentIntent SUCCEEDED exposes stable attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "SUCCEEDED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      },
+      "attemptId": "00000000-0000-4000-8000-000000000020"
+    },
+    "valid": true
+  },
+  {
+    "name": "PaymentIntent SUCCEEDED rejects missing attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "SUCCEEDED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PaymentIntent SUCCEEDED rejects malformed attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "SUCCEEDED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      },
+      "attemptId": "synthetic-not-a-uuid"
+    },
+    "valid": false
+  },
+  {
+    "name": "PaymentIntent FAILED exposes stable attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "FAILED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      },
+      "attemptId": "00000000-0000-4000-8000-000000000020"
+    },
+    "valid": true
+  },
+  {
+    "name": "PaymentIntent FAILED rejects missing attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "FAILED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PaymentIntent FAILED rejects malformed attempt",
+    "schema": "PaymentIntent",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "aggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "amount": "0.00",
+      "currency": "VND",
+      "payeeSnapshot": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "semanticPayoutKey": "synthetic-payout-0001",
+      "status": "FAILED",
+      "createdAt": "2026-11-25T08:00:00Z",
+      "updatedAt": "2026-11-25T08:00:00Z",
+      "auditProof": {
+        "hashChainTail": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contractLocked": true
+      },
+      "attemptId": "synthetic-not-a-uuid"
+    },
+    "valid": false
+  },
+  {
+    "name": "ReconciliationRequest uses attempt from authorized UNKNOWN payment",
+    "schema": "ReconciliationRequest",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "expectedAggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "attemptId": "00000000-0000-4000-8000-000000000020",
+      "evidenceDocument": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "observedStatus": "SUCCEEDED",
+      "reasonVi": "synthetic-evidence"
+    },
+    "valid": true
+  },
+  {
+    "name": "Read-to-reconcile requires attemptId",
+    "schema": "ReconciliationRequest",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "expectedAggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "evidenceDocument": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "observedStatus": "SUCCEEDED",
+      "reasonVi": "synthetic-evidence"
+    },
+    "valid": false
+  },
+  {
+    "name": "Read-to-reconcile requires paymentId",
+    "schema": "ReconciliationRequest",
+    "value": {
+      "expectedAggregateVersion": 1,
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "attemptId": "00000000-0000-4000-8000-000000000020",
+      "evidenceDocument": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "observedStatus": "SUCCEEDED",
+      "reasonVi": "synthetic-evidence"
+    },
+    "valid": false
+  },
+  {
+    "name": "Read-to-reconcile requires expectedAggregateVersion",
+    "schema": "ReconciliationRequest",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "eob": {
+        "eobVersion": 1,
+        "eobHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "attemptId": "00000000-0000-4000-8000-000000000020",
+      "evidenceDocument": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "observedStatus": "SUCCEEDED",
+      "reasonVi": "synthetic-evidence"
+    },
+    "valid": false
+  },
+  {
+    "name": "Read-to-reconcile requires eob",
+    "schema": "ReconciliationRequest",
+    "value": {
+      "paymentId": "00000000-0000-4000-8000-000000000001",
+      "expectedAggregateVersion": 1,
+      "attemptId": "00000000-0000-4000-8000-000000000020",
+      "evidenceDocument": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "observedStatus": "SUCCEEDED",
+      "reasonVi": "synthetic-evidence"
+    },
+    "valid": false
   }
 ]

@@ -60,7 +60,7 @@ test('PT12/PT16 callback boundary: HMAC/event/timestamp shape, minimal payload, 
   const headers=spec.paths['/internal/v1/payments/callbacks'].post.parameters;
   assert.deepEqual(headers,spec.paths['/internal/v1/webhooks/ai-result'].post.parameters);
   for(const field of ['tenantId','rawXml','bankAccount','providerPayload'])assert.equal(validate('PaymentCallback',{...valid('PaymentCallback'),[field]:'unsafe'}),false);
-  assert.equal(validate('PaymentIntent',{...valid('PaymentIntent'),status:'UNKNOWN'}),true);
+  assert.equal(validate('PaymentIntent',{...valid('PaymentIntent'),status:'UNKNOWN',attemptId:'00000000-0000-4000-8000-000000000020'}),true);
   assert.match(spec.components.schemas.PaymentIntent.description,/UNKNOWN never blind retry/);
   assert.match(spec.components.schemas.PaymentIntent.description,/POSTED journals immutable/);
 });
@@ -95,4 +95,25 @@ test('line decisions support pre-publication and require exact existing EOB hash
   assert.equal(validate('LineDecisionRequest',missing),false);
   assert.equal(validate('LineDecisionRequest',{...missing,expectedEobVersion:0}),true);
   assert.equal(validate('LineDecisionRequest',{...input,expectedEobVersion:0}),false);
+});
+
+
+test('PT12 contract continuity: authorized UNKNOWN payment exposes the exact attempt needed for reconciliation without callback', () => {
+  const payment=structuredClone(fixtures.find(f=>f.schema==='PaymentIntent'&&f.valid&&f.value.status==='UNKNOWN').value);
+  assert.equal(validate('PaymentIntent',payment),true);
+  const get=spec.paths['/v1/payments/{paymentId}'].get;
+  assert.equal(get.responses['200'].content['application/json'].schema.$ref,'#/components/schemas/PaymentIntent');
+  const create=spec.paths['/v1/payments'].post;
+  assert.equal(create.responses['201'].content['application/json'].schema.$ref,'#/components/schemas/PaymentIntent');
+  const evidence=valid('ReconciliationRequest');
+  const request={...evidence,paymentId:payment.paymentId,attemptId:payment.attemptId,expectedAggregateVersion:payment.aggregateVersion,eob:payment.eob};
+  assert.equal(request.attemptId,payment.attemptId);
+  assert.equal(validate('ReconciliationRequest',request),true);
+  assert.equal(spec.paths['/v1/payment-reconciliations'].post.requestBody.content['application/json'].schema.$ref,'#/components/schemas/ReconciliationRequest');
+  const missing={...payment};delete missing.attemptId;
+  assert.equal(validate('PaymentIntent',missing),false,'UNKNOWN read cannot omit reconciliation reference');
+  const unusable={...request};delete unusable.attemptId;
+  assert.equal(validate('ReconciliationRequest',unusable),false);
+  assert.equal(validate('ReconciliationRequest',{...request,attemptId:'invalid'}),false);
+  // Relationship, tenant/object authorization and stale-attempt checks are server obligations, not UUID-shape validation.
 });

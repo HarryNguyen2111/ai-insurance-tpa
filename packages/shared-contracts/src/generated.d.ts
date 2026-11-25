@@ -1509,6 +1509,11 @@ export interface components {
         PaymentStatus: "CREATED" | "SUBMITTED" | "UNKNOWN" | "SUCCEEDED" | "FAILED";
         /** @description CREATED -> SUBMITTED -> SUCCEEDED|FAILED|UNKNOWN. Timeout UNKNOWN never blind retry. Only authenticated evidence-backed callback/query/reconciliation resolves UNKNOWN. PAID only after definitive success with balanced journal + audit + reservation consumption + outbox atomically. POSTED journals immutable, corrections only by new balanced reversal referencing original; no UPDATE/DELETE. Payee/amount locked after approval/submission. */
         PaymentIntent: {
+            /**
+             * Format: uuid
+             * @description Server-created stable non-PII identifier of the applicable payment attempt. Returned by authorized payment reads for every state after CREATED; use this exact reference in reconciliation. Never regenerate it on retries or UNKNOWN timeout. Core verifies it belongs to this payment and current obligation; stale or mismatched attempt returns 409 STALE_VERSION.
+             */
+            attemptId?: string;
             /** Format: uuid */
             paymentId: string;
             /** Format: uuid */
@@ -1528,7 +1533,15 @@ export interface components {
             /** Format: uuid */
             journalId?: string;
             auditProof: components["schemas"]["AuditProof"];
-        };
+        } & ({
+            /** @enum {string} */
+            status?: "CREATED";
+        } | {
+            /** Format: uuid */
+            attemptId: string;
+            /** @enum {string} */
+            status?: "SUBMITTED" | "UNKNOWN" | "SUCCEEDED" | "FAILED";
+        });
         /** @description Generic internal adapter contract, NOT bank wire format. Verified service maps payment/attempt to tenant and verifies evidence against submitted amount/payee/semantic key. No caller tenant/raw bank/PII. Stale/out-of-order/conflicting terminal updates 409 then reconcile; never downgrade success. Actual bank contract pending. */
         PaymentCallback: {
             /** @enum {string} */

@@ -4322,6 +4322,10 @@ components:
       - updatedAt
       - auditProof
       properties:
+        attemptId:
+          type: string
+          format: uuid
+          description: Server-created stable non-PII identifier of the applicable payment attempt. Returned by authorized payment reads for every state after CREATED; use this exact reference in reconciliation. Never regenerate it on retries or UNKNOWN timeout. Core verifies it belongs to this payment and current obligation; stale or mismatched attempt returns 409 STALE_VERSION.
         paymentId:
           type: string
           format: uuid
@@ -4355,6 +4359,19 @@ components:
           format: uuid
         auditProof:
           $ref: '#/components/schemas/AuditProof'
+      oneOf:
+      - properties:
+          status:
+            type: string
+            enum: [CREATED]
+      - required: [attemptId]
+        properties:
+          attemptId:
+            type: string
+            format: uuid
+          status:
+            type: string
+            enum: [SUBMITTED, UNKNOWN, SUCCEEDED, FAILED]
       description: CREATED -> SUBMITTED -> SUCCEEDED|FAILED|UNKNOWN. Timeout UNKNOWN never blind retry. Only authenticated
         evidence-backed callback/query/reconciliation resolves UNKNOWN. PAID only after definitive success with
         balanced journal + audit + reservation consumption + outbox atomically. POSTED journals immutable, corrections
