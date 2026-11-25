@@ -19,6 +19,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm db:test:integration
+        env:
+          AO_SESSION_ID: ci-db-${{ github.run_id }}-${{ github.run_attempt }}
       - run: pnpm test:e2e
       - run: pnpm build
       - run: pnpm test:smoke
