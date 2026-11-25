@@ -47,6 +47,15 @@ Local run on Linux x64 with Node v24.22.3 and pnpm 10.34.9:
 | `pnpm build` | Exit 0; Nest CLI generated `apps/core-api/dist/main.js` |
 | `pnpm test:smoke` | Exit 0; 1 real compiled-process HTTP/SIGTERM test passed; `GET /health -> 200 {"status":"ok"}` |
 
+The same six commands also passed from a separate `git clone --no-local` in
+`/tmp/tpa-3-clean-check`, starting without node_modules, dist or Turbo cache
+(implementation commit `9fdb289bbc2cecc3d331ef85eb785a99505ce793`).
+Frozen install added 482 packages without resolution; typecheck and build each
+executed with cache misses, unit 1/1, HTTP 3/3 and compiled smoke 1/1 passed.
+The smoke's build prerequisite reused that run's freshly built output; the smoke
+itself and both Jest tasks always execute without cache. `git status --short`
+was empty after the clean-clone run. Verification date: 2026-11-25 (Asia/Bangkok).
+
 An initial Jest run failed without `--experimental-vm-modules` when loading Nest
 12's ESM packages. Restoring the generated starter's flag resolved it; both test
 scripts retain that flag and Node emits its experimental VM Modules warning.
