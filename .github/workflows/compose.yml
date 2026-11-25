@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main, ao/backend-scaffold/core-api]
   push:
-    branches: [main, ao/dev-compose/stack]
+    branches: [main]
 permissions:
   contents: read
 jobs:

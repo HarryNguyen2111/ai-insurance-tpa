@@ -73,7 +73,10 @@ def storage_image():
                       config=Config(signature_version="s3v4", s3={"addressing_style": "path"},
                                     connect_timeout=5, read_timeout=10))
     bucket, key = "tpa-smoke", MARKER + ".heic"
-    s3.create_bucket(Bucket=bucket)
+    try:
+        s3.create_bucket(Bucket=bucket)
+    except s3.exceptions.BucketAlreadyOwnedByYou:
+        s3.head_bucket(Bucket=bucket)
     pillow_heif.register_heif_opener()
     buf = io.BytesIO()
     Image.new("RGB", (1600, 800), (40, 120, 180)).save(buf, format="HEIF", quality=50)
@@ -111,6 +114,7 @@ def events():
     created.raise_for_status()
     admin = AdminClient({"bootstrap.servers": "kafka:9092"})
     topic = "tpa.dev." + MARKER
+    topic_created = False
     try:
         fetched = HTTP.get(url + "/versions/1/content", timeout=10)
         fetched.raise_for_status()
@@ -120,11 +124,13 @@ def events():
         rule.raise_for_status()
         incompatible = dict(schema, properties={"marker": {"type": "integer"}})
         rejected = HTTP.post(url + "/versions", json={"version": "2", "content": content(incompatible)}, timeout=10)
-        assert rejected.status_code == 409, (rejected.status_code, rejected.text)
+        assert rejected.status_code == 400, (rejected.status_code, rejected.text)
+        assert rejected.json()["name"] == "RuleViolationException"
         payload = {"marker": MARKER}
         jsonschema.validate(payload, fetched_schema)
         for future in admin.create_topics([NewTopic(topic, num_partitions=1, replication_factor=1)]).values():
             future.result(timeout=20)
+        topic_created = True
         producer = Producer({"bootstrap.servers": "kafka:9092", "enable.idempotence": True, "acks": "all"})
         delivery = []
         producer.produce(topic, key=MARKER, value=json.dumps(payload), on_delivery=lambda err, msg: delivery.append(err))
@@ -148,8 +154,9 @@ def events():
         ok("Kafka KRaft produce/consume/commit; registry JSON Schema round-trip and incompatible version rejection")
     finally:
         HTTP.delete(url, timeout=10).raise_for_status()
-        for future in admin.delete_topics([topic]).values():
-            future.result(timeout=20)
+        if topic_created:
+            for future in admin.delete_topics([topic]).values():
+                future.result(timeout=20)
 
 
 def search():

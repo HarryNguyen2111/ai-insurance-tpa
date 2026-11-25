@@ -89,8 +89,8 @@ changes are implemented here.
 
 ## Smoke and readiness
 
-`up --wait` checks native service readiness (DB, Redis, S3 master, Imgproxy,
-Temporal cluster, Kafka metadata, registry readiness, Elasticsearch yellow).
+`up --wait` checks native service readiness (DB, Redis, S3 listener/master, Imgproxy,
+Temporal cluster/default namespace, Kafka metadata, registry readiness, Elasticsearch yellow).
 The smoke makes real SDK/HTTP calls after health; health alone is not connectivity
 or domain acceptance. Failure exits nonzero. Unique synthetic marker IDs isolate
 repeated runs. Smoke covers:
@@ -148,12 +148,20 @@ is the upstream driver's name, not a requirement to run PostgreSQL 12. PostgreSQ
 16 is verified through the persistence startup and workflow execution tests.
 
 Smoke SDKs are pinned in `smoke/requirements.txt`: boto3 (Apache-2.0), psycopg
-(LGPL-3.0), redis-py (MIT), confluent-kafka/librdkafka (Apache-2.0/BSD-2-Clause),
+(LGPL-3.0-only), redis-py (MIT), confluent-kafka/librdkafka (Apache-2.0/BSD-2-Clause),
 pillow-heif (BSD-3-Clause, libheif LGPL notices and HEVC codec/patent considerations),
 Temporal Python SDK (MIT), Elasticsearch Python (Apache-2.0), jsonschema (MIT),
-requests (Apache-2.0). See each project's PyPI metadata and linked source license.
+requests (Apache-2.0). Installed package license metadata was inspected in the
+tested image using `importlib.metadata` on 2026-11-25. See the corresponding
+[PyPI package metadata](https://pypi.org/) and each package's linked source license.
 HEVC patent rights are jurisdiction/use dependent; successful decoding is not legal
 clearance. The smoke image is a test tool, not an application dependency decision.
+Apicurio artifact deletion is explicitly enabled for synthetic cleanup only
+(`APICURIO_REST_DELETION_ARTIFACT_ENABLED`); its v3 API reports incompatible
+schema versions as HTTP400 `RuleViolationException`.
+SeaweedFS `master.toml` uses one-volume growth rather than the upstream default
+of seven, with a four-volume cap and 256 MiB target size; anonymous telemetry is
+disabled. Kafka persists at the image-provided non-root-owned `/var/lib/kafka/data`.
 
 ## Validation record
 
@@ -165,8 +173,22 @@ smoke; image build and other processes also need memory. CI uses a standard Ubun
 runner, explicit limits and timeout, no sysctl changes, with owned-resource cleanup.
 
 Scaffold checks: frozen install with Node24.22.3/pnpm10.34.9, typecheck, one unit,
-three HTTP e2e, compiled-process smoke passed; forced local build verification
-pending. Compose runtime smoke and exact-head CI evidence pending.
+three HTTP e2e, compiled-process smoke passed; forced local build also passed. Compose config validation and Python compile checks passed. Warm dependency smoke
+and cold empty-volume startup/full smoke through the root `infra:down`, `infra:up`
+and `infra:smoke` scripts passed on 2026-11-25. Actual runtime versions confirmed:
+PostgreSQL16.16, vector0.8.7, pg_trgm1.6, pgcrypto1.3, Kafka4.4.0,
+Apicurio3.3.5 (KafkaSQL), SeaweedFS4.55, Temporal server1.29.7, Elasticsearch9.5.7;
+Imgproxy's real HEIC-to-WebP decode/resize and signing checks passed. The pinned SDK
+matrix passed against these running servers. This is a compatibility smoke, not
+upgrade/replay/production acceptance. Initial runtime failures (Kafka volume
+ownership, localhost S3 probe, SeaweedFS allocation batch, registry readiness port,
+registry rule status/deletion setting and repeated bucket creation) were fixed and
+the cold run revalidated them. Only the owned project is removed after testing.
+
+Exact-head GitHub CI and independent review are tracked on
+[PR #10](https://github.com/HarryNguyen2111/ai-insurance-tpa/pull/10); local success
+does not stand in for those gates. The parent #9/#2 integration is already on main;
+this task's diff contains no scaffold changes.
 
 ## Troubleshooting
 
