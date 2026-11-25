@@ -1,0 +1,151 @@
+{
+  "version": "1.0.0",
+  "status": "SPECIFICATION_ONLY_NOT_EXECUTED",
+  "description": "Integration/E2E/fault-injection acceptance scenarios; không phải fixture cho pure waterfall runner. Dùng dữ liệu tổng hợp.",
+  "test_cases": [
+    {
+      "id": "PT01_TENANT_ISOLATION",
+      "given": "DB role thực tế, connection tái sử dụng và FK khác tenant",
+      "expected": "Tenant A không đọc/sửa/tham chiếu dữ liệu tenant B; thiếu context bị từ chối",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT02_FIRST_AUDIT_RACE",
+      "given": "Hai append đồng thời trên entity chưa có audit",
+      "expected": "Một chuỗi duy nhất không fork; business mutation và log cùng rollback/commit",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT03_CONCURRENT_LIMIT",
+      "given": "Hai claim đồng thời, hạn mức còn 1000000.00, mỗi claim yêu cầu giữ 800000.00",
+      "expected": "Tổng used+reserved không vượt 1000000.00; request không đủ bị review hoặc từ chối giữ",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT04_GLOBAL_COINSURANCE",
+      "given": "Hai tenant phân bổ cùng invoice với tổng vượt invoice total",
+      "expected": "Khóa/check toàn cục chặn oversubscribe, không tiết lộ claim tenant khác",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT05_OUTBOX_CRASH",
+      "given": "Crash sau commit trước publish và sau publish trước mark",
+      "expected": "Event được chuyển tiếp sau recovery, duplicate không tạo side effect thứ hai",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT06_TEMPORAL_START_CRASH",
+      "given": "Temporal chấp nhận workflow rồi consumer chết trước inbox/offset commit",
+      "expected": "Retry dùng cùng workflow/command ID, chỉ một thay đổi nghiệp vụ",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT07_WORKFLOW_REPLAY",
+      "given": "Restart worker/đổi version khi đang đợi bác sĩ hoặc OTP",
+      "expected": "Replay tương thích, timer và side effect không lặp",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT08_EVENT_ORDER",
+      "given": "Duplicate, event cũ và aggregate version gap",
+      "expected": "Dedup, không rollback projection, gap được reload/reconcile",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT09_SEARCH_AUTH",
+      "given": "Query/get/mget/count/suggest/aggregation/export khác tenant",
+      "expected": "Không có kết quả, số đếm hoặc field rò rỉ",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT10_SEARCH_RECOVERY",
+      "given": "Elasticsearch outage rồi rebuild và replay cả tombstone",
+      "expected": "Submit/payment vẫn chạy; projection mới đúng version và không hồi sinh dữ liệu đã xóa",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT11_STALE_EOB_OTP",
+      "given": "EOB v1 đã ký rồi publish v2",
+      "expected": "Chữ ký và approval v1 không đủ điều kiện payout v2",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT12_PAYMENT_TIMEOUT",
+      "given": "Ngân hàng đã xử lý nhưng request timeout, callback lặp",
+      "expected": "UNKNOWN được đối soát về SUCCEEDED; không gửi lại mù, chỉ một payout và journal",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT13_PAYMENT_GATES",
+      "given": "Maker tự duyệt hoặc chưa nhận bản gốc hoặc OTP hết hạn",
+      "expected": "Không submit payout; tracking code đơn thuần không đủ",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT14_JOURNAL_BALANCE",
+      "given": "Post journal lệch Nợ/Có hoặc sửa journal đã post",
+      "expected": "Transaction bị chặn; sửa sai chỉ bằng reversal cân bằng",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT15_FILE_ATTACKS",
+      "given": "QR trỏ private IP/redirect, XML external entity, file bomb",
+      "expected": "Chặn SSRF/XXE/oversize, giữ file quarantine, không truy cập mạng nội bộ",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT16_WEBHOOK_REPLAY",
+      "given": "Chữ ký sai, timestamp cũ, event ID lặp",
+      "expected": "Sai/expired bị từ chối; event hợp lệ lặp không tạo kết quả lần hai",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT17_PII_BOUNDARIES",
+      "given": "Chạy luồng bằng dữ liệu PII tổng hợp có marker",
+      "expected": "Không có plaintext marker trong log/Kafka/history/index/DLQ; document/field access có quyền",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT18_CATALOG_REVIEW",
+      "given": "Bác sĩ sửa nhãn TPCN trong claim",
+      "expected": "Tạo proposal có provenance; danh mục chung chưa đổi trước curator approval",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT19_AI_PROVENANCE",
+      "given": "QR parse được nhưng chưa xác minh; similarity cao",
+      "expected": "Không tự VERIFIED_VALID hoặc từ chối gian lận, có source/confidence/model version",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT20_DR_RESTORE",
+      "given": "Restore DB/object/Temporal rồi replay event và payment callbacks",
+      "expected": "Đo RPO/RTO, không mất đối soát hoặc payout trùng; restore report có evidence",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT21_K8S_ROLLOUT",
+      "given": "Rolling restart pod với workflow/event đang chạy",
+      "expected": "Graceful drain/recovery, probes đúng, không mất committed claim",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT22_IDEMPOTENCY_PAYLOAD",
+      "given": "Gửi lại cùng operation/key với payload khác",
+      "expected": "409; cùng payload trả kết quả cũ trong retention được định nghĩa",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT23_STP_SHADOW",
+      "given": "Case đủ GREEN_STP nhưng execution mode SHADOW",
+      "expected": "Eligibility được ghi nhận, vẫn cần người duyệt trước publish/chi trả",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    },
+    {
+      "id": "PT24_OTP_ABUSE",
+      "given": "Gửi/thử OTP quá giới hạn, challenge hết hạn hoặc dùng lại",
+      "expected": "Rate limit/attempt cap/expiry/one-time use bền vững qua restart",
+      "verification": "Integration/E2E runner tương ứng, kèm evidence; triển khai theo 08."
+    }
+  ]
+}

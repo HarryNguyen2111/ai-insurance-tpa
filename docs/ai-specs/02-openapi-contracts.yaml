@@ -1,0 +1,238 @@
+openapi: 3.0.3
+info:
+  title: MPS TPA Core & AI Worker API Contracts
+  version: 1.1.0
+  description: Hop dong giao tiep chuan giua Zalo Mini App, Next.js Workbench, NestJS Core API va Python AI Worker.
+
+# Contract nền: endpoint mới liệt kê trong 07 phải được đặc tả đầy đủ trước implementation.
+# Bearer token phải được xác minh issuer/audience/expiry/membership phía server.
+security:
+  - bearerAuth: []
+x-platform-requirements:
+  architecture: 06-backend-platform-architecture.md
+  domain: 07-domain-data-and-api-requirements.md
+  acceptance: 08-delivery-and-acceptance.md
+  tenantSource: verified-principal-membership
+  idempotency: same-key-different-payload-returns-409
+
+paths:
+  /v1/claims/upload-url:
+    post:
+      summary: Cap Pre-signed S3 URL (Direct-to-S3, khong qua Core API RAM)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fileName, contentType, docType]
+              properties:
+                fileName: { type: string, example: "hoa_don_01.heic" }
+                contentType: { type: string, example: "image/heic" }
+                docType: { type: string, enum: [INVOICE_PHOTO, ITEMIZED_LIST, PRESCRIPTION, LAB_ORDER, LAB_RESULT, DISCHARGE_PAPER, VNEID_HISTORY] }
+      responses:
+        "200":
+          description: Tra ve link upload S3 co han 5 phut
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uploadUrl: { type: string }
+                  s3ObjectKey: { type: string }
+
+  /v1/claims/preflight-check:
+    post:
+      summary: Tien kiem nhanh p95 muc tieu <=3s; tac vu sau dung pending contract theo dac ta 07
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [memberId, benefitType, documents]
+              properties:
+                memberId: { type: string, format: uuid }
+                benefitType: { type: string, enum: [OUTPATIENT, INPATIENT, DENTAL, ACCIDENT] }
+                documents:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      docType: { type: string }
+                      s3ObjectKey: { type: string }
+      responses:
+        "200":
+          description: Ket qua tien kiem (blur, ND 70 dia chi cong ty, dau do, quy tac 5 ngay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  passed: { type: boolean }
+                  warnings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code: { type: string, example: "ND70_COMPANY_ADDRESS" }
+                        severity: { type: string, enum: [BLOCKER, WARNING] }
+                        messageVi: { type: string }
+
+  /v1/claims:
+    post:
+      summary: Submit ho so boi thuong chinh thuc (bat buoc Idempotency-Key)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [memberId, benefitType, visitDate, totalRequested, consentAccepted, documents]
+              properties:
+                memberId: { type: string, format: uuid }
+                benefitType: { type: string }
+                visitDate: { type: string, format: date }
+                totalRequested: { type: string, example: "1500000.00" }
+                consentAccepted: { type: boolean, enum: [true] }
+                documents: { type: array, items: { type: object } }
+      responses:
+        "201":
+          description: Da tao ho so va khoi tao luong xu ly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  claimId: { type: string, format: uuid }
+                  claimCode: { type: string }
+                  status: { type: string }
+
+  /v1/claims/{claimId}/eob:
+    get:
+      summary: Lay Bang Giai Trinh Quyen Loi (Explainable EOB) cho Zalo Mini App
+      parameters:
+        - in: path
+          name: claimId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Bang giai trình tung dong kem dieu khoan trich dan va audit hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExplainableEOBResponse"
+
+  /v1/workbench/claims/{claimId}/lines/{lineId}:
+    patch:
+      summary: Bac si tham dinh dieu chinh/duyet/tu choi 1 dong chi phi (Contract-Locked)
+      parameters:
+        - in: path
+          name: claimId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: path
+          name: lineId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decisionStatus, approvedAmount, contractClauseCited, explanationVi]
+              properties:
+                decisionStatus: { type: string, enum: [APPROVED, PARTIAL, REJECTED] }
+                approvedAmount: { type: string, example: "0.00" }
+                contractClauseCited: { type: string, example: "Dieu 5.3 - Loai tru Thuc pham chuc nang" }
+                explanationVi: { type: string }
+                updateMedicalCatalogAs: { type: string, enum: [NONE, DRUG, SUPPLEMENT_TPCN, COSMETIC] }
+      responses:
+        "200":
+          description: Da cap nhat dong chi phi va ghi noi chuoi Audit Hash
+
+  /internal/v1/webhooks/ai-result:
+    post:
+      security:
+        - internalHmac: []
+      description: Service identity/mTLS tại ingress; HMAC trên raw body kèm timestamp và event ID. Kiểm tra replay window và dedup trước xử lý.
+      summary: Webhook noi bo tu Python AI Worker gui ve NestJS Core API (Ky HMAC-SHA256)
+      parameters:
+        - in: header
+          name: X-Signature-HMAC
+          required: true
+          schema: { type: string }
+        - in: header
+          name: X-Event-Id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: header
+          name: X-Signature-Timestamp
+          required: true
+          schema: { type: string, format: date-time }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [claimId, taxVerification, extractedLines, fraudSignals]
+              properties:
+                claimId: { type: string, format: uuid }
+                taxVerification: { type: object }
+                extractedLines: { type: array, items: { type: object } }
+                fraudSignals: { type: object }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalHmac:
+      type: apiKey
+      in: header
+      name: X-Signature-HMAC
+  schemas:
+    ExplainableEOBResponse:
+      type: object
+      required: [claimCode, status, eobVersion, eobHash, summary, lineItems, auditProof]
+      properties:
+        eobVersion: { type: integer, minimum: 1 }
+        eobHash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        contractVersionId: { type: string, format: uuid }
+
+        claimCode: { type: string }
+        status: { type: string }
+        summary:
+          type: object
+          properties:
+            totalRequested: { type: string }
+            totalApproved: { type: string }
+            totalRejected: { type: string }
+            remainingAnnualLimit: { type: string }
+        lineItems:
+          type: array
+          items:
+            type: object
+            properties:
+              lineId: { type: string }
+              itemName: { type: string }
+              requested: { type: string }
+              approved: { type: string }
+              rejected: { type: string }
+              status: { type: string }
+              clauseCited: { type: string }
+              explanationVi: { type: string }
+        auditProof:
+          type: object
+          properties:
+            hashChainTail: { type: string }
+            contractLocked: { type: boolean }

@@ -1,0 +1,238 @@
+{
+  "version": "1.0.0",
+  "description": "Bo Test Cases chuan de AI Coding Agent tu kiem thu Waterfall Engine, Preflight va Edge Cases.",
+  "test_cases": [
+    {
+      "id": "TC01_OUTPATIENT_WITH_TPCN_COPAY_80",
+      "description": "Ngoai tru co kham + thuoc + TPCN, dong chi tra 80/20 -> Phai tu choi TPCN va day qua Bac si duyet lai.",
+      "input": {
+        "benefit_type": "OUTPATIENT",
+        "is_tax_verified": true,
+        "is_merged_summary": false,
+        "fraud_risk_score": 5,
+        "days_active": 120,
+        "is_chronic_special": false,
+        "rule": {
+          "annual_limit": "10000000.00",
+          "per_visit_limit": "2000000.00",
+          "copay_insurer_pct": "80.00",
+          "deductible_per_claim": "0.00",
+          "used_annual_amount": "3000000.00",
+          "waiting_days_normal": 30,
+          "stp_auto_approve_limit": "2000000.00",
+          "contract_clause_ref": "Dieu 2.1 - Quyen loi Ngoai tru"
+        },
+        "lines": [
+          {
+            "line_id": "L1",
+            "raw_item_name": "Kham chuyen khoa Noi",
+            "category": "CONSULTATION",
+            "unit_price": "500000.00",
+            "requested_amount": "500000.00"
+          },
+          {
+            "line_id": "L2",
+            "raw_item_name": "Augmentin 1g (14 vien)",
+            "category": "DRUG",
+            "unit_price": "400000.00",
+            "reference_unit_price": "380000.00",
+            "requested_amount": "400000.00"
+          },
+          {
+            "line_id": "L3",
+            "raw_item_name": "Vien uong Bo gan Boganic (TPCN)",
+            "category": "SUPPLEMENT_TPCN",
+            "unit_price": "600000.00",
+            "requested_amount": "600000.00",
+            "exclusion_clause": "Dieu 5.3 - Loai tru Thuc pham chuc nang"
+          }
+        ]
+      },
+      "expected": {
+        "total_requested": "1500000.00",
+        "total_approved": "720000.00",
+        "total_rejected": "780000.00",
+        "remaining_annual_limit_after": "6280000.00",
+        "triage_lane": "YELLOW_REVIEW",
+        "line_decisions": {
+          "L1": { "approved": "400000.00", "status": "PARTIAL" },
+          "L2": { "approved": "320000.00", "status": "PARTIAL" },
+          "L3": { "approved": "0.00", "status": "REJECTED", "ai_flag": "TPCN_EXCLUDED" }
+        }
+      }
+    },
+    {
+      "id": "TC02_GREEN_STP_CLEAN_XML",
+      "description": "Ho so Ngoai tru sach 100%, XML chi tiet da xac thuc Thue, duoi 2tr -> Tu dong duyet GREEN_STP.",
+      "input": {
+        "benefit_type": "OUTPATIENT",
+        "is_tax_verified": true,
+        "is_merged_summary": false,
+        "fraud_risk_score": 0,
+        "days_active": 90,
+        "is_chronic_special": false,
+        "rule": {
+          "annual_limit": "10000000.00",
+          "per_visit_limit": "2000000.00",
+          "copay_insurer_pct": "100.00",
+          "deductible_per_claim": "0.00",
+          "used_annual_amount": "0.00",
+          "waiting_days_normal": 30,
+          "stp_auto_approve_limit": "2000000.00",
+          "contract_clause_ref": "Dieu 2.1 - Quyen loi Ngoai tru"
+        },
+        "lines": [
+          {
+            "line_id": "L1",
+            "raw_item_name": "Kham Tai Mui Hong",
+            "category": "CONSULTATION",
+            "unit_price": "300000.00",
+            "requested_amount": "300000.00"
+          },
+          {
+            "line_id": "L2",
+            "raw_item_name": "Khang sinh Cefuroxim 500mg",
+            "category": "DRUG",
+            "unit_price": "250000.00",
+            "reference_unit_price": "240000.00",
+            "requested_amount": "250000.00"
+          }
+        ]
+      },
+      "expected": {
+        "total_requested": "550000.00",
+        "total_approved": "550000.00",
+        "total_rejected": "0.00",
+        "remaining_annual_limit_after": "9450000.00",
+        "triage_lane": "GREEN_STP"
+      }
+    },
+    {
+      "id": "TC03_ANNUAL_LIMIT_EXHAUSTED_CAP",
+      "description": "Han muc nam con lai chi con 500.000d nhung yeu cau 1.000.000d (80% = 800k) -> Chi duoc duyet toi da 500.000d.",
+      "input": {
+        "benefit_type": "OUTPATIENT",
+        "is_tax_verified": true,
+        "is_merged_summary": false,
+        "fraud_risk_score": 0,
+        "days_active": 200,
+        "is_chronic_special": false,
+        "rule": {
+          "annual_limit": "10000000.00",
+          "per_visit_limit": "2000000.00",
+          "copay_insurer_pct": "80.00",
+          "deductible_per_claim": "0.00",
+          "used_annual_amount": "9500000.00",
+          "waiting_days_normal": 30,
+          "stp_auto_approve_limit": "2000000.00",
+          "contract_clause_ref": "Dieu 2.1 - Han muc nam"
+        },
+        "lines": [
+          {
+            "line_id": "L1",
+            "raw_item_name": "Xet nghiem mau tong quat",
+            "category": "LAB_TEST",
+            "unit_price": "1000000.00",
+            "requested_amount": "1000000.00"
+          }
+        ]
+      },
+      "expected": {
+        "total_requested": "1000000.00",
+        "total_approved": "500000.00",
+        "total_rejected": "500000.00",
+        "remaining_annual_limit_after": "0.00",
+        "triage_lane": "YELLOW_REVIEW"
+      }
+    },
+    {
+      "id": "TC04_PREFLIGHT_ND70_COMPANY_ADDRESS",
+      "description": "Hoa don ghi ten Cong ty TNHH hoac MST Cong ty -> Preflight phai canh bao theo Nghi dinh 70.",
+      "input": {
+        "preflight": {
+          "blur_score": 120.5,
+          "buyer_name": "CONG TY TNHH ABC VIET NAM",
+          "buyer_mst": "0101234567",
+          "prescription_date": "2026-11-10",
+          "invoice_date": "2026-11-10",
+          "has_hospital_stamp": true,
+          "is_emr_hospital": false
+        }
+      },
+      "expected": {
+        "passed": false,
+        "warning_codes": ["ND70_COMPANY_ADDRESS"]
+      }
+    },
+    {
+      "id": "TC05_MERGED_XML_PUBLIC_HOSPITAL",
+      "description": "Benh vien cong xuat XML gop 1 dong 2.000.000d -> Khong duoc chay GREEN_STP, phai doi chieu Bang ke chi tiet.",
+      "input": {
+        "benefit_type": "OUTPATIENT",
+        "is_tax_verified": true,
+        "is_merged_summary": true,
+        "fraud_risk_score": 0,
+        "days_active": 150,
+        "is_chronic_special": false,
+        "rule": {
+          "annual_limit": "10000000.00",
+          "per_visit_limit": "2000000.00",
+          "copay_insurer_pct": "100.00",
+          "deductible_per_claim": "0.00",
+          "used_annual_amount": "0.00",
+          "waiting_days_normal": 30,
+          "stp_auto_approve_limit": "2000000.00",
+          "contract_clause_ref": "Dieu 2.1"
+        },
+        "lines": [
+          {
+            "line_id": "L1",
+            "raw_item_name": "Thuoc khang viem theo bang ke",
+            "category": "DRUG",
+            "unit_price": "1500000.00",
+            "requested_amount": "1500000.00"
+          }
+        ]
+      },
+      "expected": {
+        "total_approved": "1500000.00",
+        "triage_lane": "YELLOW_REVIEW"
+      }
+    },
+    {
+      "id": "TC06_WAITING_DAYS_CHRONIC_365",
+      "description": "Benh man tinh ICD-10 (E11 Tieu duong) kham o ngay thu 100 (< 365 ngay) -> Khoa STP, day YELLOW_REVIEW.",
+      "input": {
+        "benefit_type": "OUTPATIENT",
+        "is_tax_verified": true,
+        "is_merged_summary": false,
+        "fraud_risk_score": 0,
+        "days_active": 100,
+        "is_chronic_special": true,
+        "rule": {
+          "annual_limit": "10000000.00",
+          "per_visit_limit": "2000000.00",
+          "copay_insurer_pct": "100.00",
+          "deductible_per_claim": "0.00",
+          "used_annual_amount": "0.00",
+          "waiting_days_normal": 30,
+          "waiting_days_special": 365,
+          "stp_auto_approve_limit": "2000000.00",
+          "contract_clause_ref": "Dieu 4.1 - Thoi gian cho benh dac biet 365 ngay"
+        },
+        "lines": [
+          {
+            "line_id": "L1",
+            "raw_item_name": "Thuoc dieu tri tieu duong Metformin",
+            "category": "DRUG",
+            "unit_price": "400000.00",
+            "requested_amount": "400000.00"
+          }
+        ]
+      },
+      "expected": {
+        "triage_lane": "YELLOW_REVIEW"
+      }
+    }
+  ]
+}
