@@ -1,0 +1,4290 @@
+[
+  {
+    "name": "Hash valid",
+    "schema": "Hash",
+    "valid": true,
+    "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "name": "Money valid",
+    "schema": "Money",
+    "valid": true,
+    "value": "720000.00"
+  },
+  {
+    "name": "BenefitType valid",
+    "schema": "BenefitType",
+    "valid": true,
+    "value": "OUTPATIENT"
+  },
+  {
+    "name": "DocumentType valid",
+    "schema": "DocumentType",
+    "valid": true,
+    "value": "INVOICE_PHOTO"
+  },
+  {
+    "name": "ClaimStatus valid",
+    "schema": "ClaimStatus",
+    "valid": true,
+    "value": "PREFLIGHT"
+  },
+  {
+    "name": "ApiError valid",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Membership valid",
+    "schema": "Membership",
+    "valid": true,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "roles": [
+        "MEMBER"
+      ],
+      "memberIds": [],
+      "version": 1
+    }
+  },
+  {
+    "name": "Me valid",
+    "schema": "Me",
+    "valid": true,
+    "value": {
+      "principalId": "00000000-0000-4000-8000-000000000001",
+      "memberships": [],
+      "mfaVerified": true
+    }
+  },
+  {
+    "name": "MembershipSelection valid",
+    "schema": "MembershipSelection",
+    "valid": true,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "MembershipContext valid",
+    "schema": "MembershipContext",
+    "valid": true,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "contextToken": "x"
+    }
+  },
+  {
+    "name": "ZaloExchange valid",
+    "schema": "ZaloExchange",
+    "valid": true,
+    "value": {
+      "authorizationCode": "x",
+      "codeVerifier": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "redirectUri": "https://synthetic.invalid/object",
+      "state": "xxxxxxxxxxxxxxxx"
+    }
+  },
+  {
+    "name": "AuthSession valid",
+    "schema": "AuthSession",
+    "valid": true,
+    "value": {
+      "accessToken": "x",
+      "tokenType": "Bearer",
+      "expiresIn": 1
+    }
+  },
+  {
+    "name": "ConsentRequest valid",
+    "schema": "ConsentRequest",
+    "valid": true,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "accepted": true
+    }
+  },
+  {
+    "name": "ConsentRecord valid",
+    "schema": "ConsentRecord",
+    "valid": true,
+    "value": {
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recordedAt": "2026-11-25T01:00:00Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "ECard valid",
+    "schema": "ECard",
+    "valid": true,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "coverageVersionId": "00000000-0000-4000-8000-000000000001",
+      "displayNameMasked": "x",
+      "cardNumberMasked": "x",
+      "qrToken": "x",
+      "issuedAt": "2026-11-25T01:00:00Z",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ContentType valid",
+    "schema": "ContentType",
+    "valid": true,
+    "value": "image/jpeg"
+  },
+  {
+    "name": "UploadRequest valid",
+    "schema": "UploadRequest",
+    "valid": true,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "UploadHeaders valid",
+    "schema": "UploadHeaders",
+    "valid": true,
+    "value": {
+      "Content-Type": "image/jpeg",
+      "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    }
+  },
+  {
+    "name": "UploadGrant valid",
+    "schema": "UploadGrant",
+    "valid": true,
+    "value": {
+      "uploadId": "00000000-0000-4000-8000-000000000001",
+      "uploadUrl": "https://synthetic.invalid/object",
+      "method": "PUT",
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "requiredHeaders": {
+        "Content-Type": "image/jpeg",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    }
+  },
+  {
+    "name": "UploadComplete valid",
+    "schema": "UploadComplete",
+    "valid": true,
+    "value": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sizeBytes": 1
+    }
+  },
+  {
+    "name": "Document valid",
+    "schema": "Document",
+    "valid": true,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "PreflightRequest valid",
+    "schema": "PreflightRequest",
+    "valid": true,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "Warning valid",
+    "schema": "Warning",
+    "valid": true,
+    "value": {
+      "code": "BLURRY_IMAGE",
+      "severity": "BLOCKER",
+      "messageVi": "x",
+      "ruleVersion": "x"
+    }
+  },
+  {
+    "name": "PreflightCompleted valid",
+    "schema": "PreflightCompleted",
+    "valid": true,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "version": 1,
+      "passed": true,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "PreflightPending valid",
+    "schema": "PreflightPending",
+    "valid": true,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "PENDING",
+      "version": 1,
+      "statusUrl": "/v1/preflights/00000000-0000-4000-8000-000000000001",
+      "retryAfterSeconds": 1
+    }
+  },
+  {
+    "name": "PreflightFailed valid",
+    "schema": "PreflightFailed",
+    "valid": true,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "FAILED",
+      "version": 1,
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "messageVi": "x",
+        "correlationId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  },
+  {
+    "name": "PreflightStatus valid",
+    "schema": "PreflightStatus",
+    "valid": true,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "version": 1,
+      "passed": true,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSubmit valid",
+    "schema": "ClaimSubmit",
+    "valid": true,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSummary valid",
+    "schema": "ClaimSummary",
+    "valid": true,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimDetail valid",
+    "schema": "ClaimDetail",
+    "valid": true,
+    "value": {
+      "claim": {
+        "claimId": "00000000-0000-4000-8000-000000000001",
+        "claimCode": "x",
+        "memberId": "00000000-0000-4000-8000-000000000001",
+        "benefitType": "OUTPATIENT",
+        "visitDate": "2026-11-25",
+        "totalRequested": "720000.00",
+        "status": "PREFLIGHT",
+        "version": 1,
+        "createdAt": "2026-11-25T01:00:00Z",
+        "updatedAt": "2026-11-25T01:00:00Z"
+      },
+      "documents": [],
+      "supplementAllowed": true
+    }
+  },
+  {
+    "name": "ClaimList valid",
+    "schema": "ClaimList",
+    "valid": true,
+    "value": {
+      "items": []
+    }
+  },
+  {
+    "name": "ClaimSupplement valid",
+    "schema": "ClaimSupplement",
+    "valid": true,
+    "value": {
+      "expectedVersion": 1,
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "Region valid",
+    "schema": "Region",
+    "valid": true,
+    "value": {
+      "x": 0.5,
+      "y": 0.5,
+      "width": 0.5,
+      "height": 0.5
+    }
+  },
+  {
+    "name": "Evidence valid",
+    "schema": "Evidence",
+    "valid": true,
+    "value": {
+      "evidenceId": "00000000-0000-4000-8000-000000000001",
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "documentVersion": 1,
+      "page": 1,
+      "field": "x",
+      "source": "XML",
+      "confidence": 0.5
+    }
+  },
+  {
+    "name": "TaxVerification valid",
+    "schema": "TaxVerification",
+    "valid": true,
+    "value": {
+      "parseStatus": "PARSED",
+      "verificationStatus": "UNVERIFIED",
+      "source": "x",
+      "checkedAt": "2026-11-25T01:00:00Z",
+      "evidenceIds": []
+    }
+  },
+  {
+    "name": "ExtractedLine valid",
+    "schema": "ExtractedLine",
+    "valid": true,
+    "value": {
+      "lineId": "00000000-0000-4000-8000-000000000001",
+      "itemName": "x",
+      "quantity": "720000.00",
+      "unitPrice": "720000.00",
+      "requestedAmount": "720000.00",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "FraudSignal valid",
+    "schema": "FraudSignal",
+    "valid": true,
+    "value": {
+      "code": "IMAGE_SIMILARITY",
+      "confidence": 0.5,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "AiResult valid",
+    "schema": "AiResult",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiAcknowledgement valid",
+    "schema": "AiAcknowledgement",
+    "valid": true,
+    "value": {
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "disposition": "ACCEPTED"
+    }
+  },
+  {
+    "name": "Error401 valid",
+    "schema": "Error401",
+    "valid": true,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error403 valid",
+    "schema": "Error403",
+    "valid": true,
+    "value": {
+      "code": "FORBIDDEN",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error404 valid",
+    "schema": "Error404",
+    "valid": true,
+    "value": {
+      "code": "NOT_FOUND",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error409 valid",
+    "schema": "Error409",
+    "valid": true,
+    "value": {
+      "code": "IDEMPOTENCY_CONFLICT",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error422 valid",
+    "schema": "Error422",
+    "valid": true,
+    "value": {
+      "code": "VALIDATION_FAILED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error429 valid",
+    "schema": "Error429",
+    "valid": true,
+    "value": {
+      "code": "RATE_LIMITED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error503 valid",
+    "schema": "Error503",
+    "valid": true,
+    "value": {
+      "code": "DEPENDENCY_UNAVAILABLE",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "IdempotencyKeyValue valid",
+    "schema": "IdempotencyKeyValue",
+    "valid": true,
+    "value": "xxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "AiCallbackHeaders valid",
+    "schema": "AiCallbackHeaders",
+    "valid": true,
+    "value": {
+      "X-Signature-HMAC": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "X-Event-Id": "00000000-0000-4000-8000-000000000001",
+      "X-Signature-Timestamp": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ExtractedInvoice valid",
+    "schema": "ExtractedInvoice",
+    "valid": true,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceSerial": "x",
+      "invoiceNumber": "x",
+      "invoiceDate": "2026-11-25",
+      "buyerAddressType": "PERSONAL",
+      "totalAmount": "720000.00",
+      "isMergedSummary": true,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ApiError rejects client tenant/unknown fields",
+    "schema": "ApiError",
+    "valid": false,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ApiError requires code",
+    "schema": "ApiError",
+    "valid": false,
+    "value": {
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ApiError requires messageVi",
+    "schema": "ApiError",
+    "valid": false,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ApiError requires correlationId",
+    "schema": "ApiError",
+    "valid": false,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "Membership rejects client tenant/unknown fields",
+    "schema": "Membership",
+    "valid": false,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "roles": [
+        "MEMBER"
+      ],
+      "memberIds": [],
+      "version": 1,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Membership requires membershipId",
+    "schema": "Membership",
+    "valid": false,
+    "value": {
+      "roles": [
+        "MEMBER"
+      ],
+      "memberIds": [],
+      "version": 1
+    }
+  },
+  {
+    "name": "Membership requires roles",
+    "schema": "Membership",
+    "valid": false,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "memberIds": [],
+      "version": 1
+    }
+  },
+  {
+    "name": "Membership requires memberIds",
+    "schema": "Membership",
+    "valid": false,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "roles": [
+        "MEMBER"
+      ],
+      "version": 1
+    }
+  },
+  {
+    "name": "Membership requires version",
+    "schema": "Membership",
+    "valid": false,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "roles": [
+        "MEMBER"
+      ],
+      "memberIds": []
+    }
+  },
+  {
+    "name": "Me rejects client tenant/unknown fields",
+    "schema": "Me",
+    "valid": false,
+    "value": {
+      "principalId": "00000000-0000-4000-8000-000000000001",
+      "memberships": [],
+      "mfaVerified": true,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Me requires principalId",
+    "schema": "Me",
+    "valid": false,
+    "value": {
+      "memberships": [],
+      "mfaVerified": true
+    }
+  },
+  {
+    "name": "Me requires memberships",
+    "schema": "Me",
+    "valid": false,
+    "value": {
+      "principalId": "00000000-0000-4000-8000-000000000001",
+      "mfaVerified": true
+    }
+  },
+  {
+    "name": "Me requires mfaVerified",
+    "schema": "Me",
+    "valid": false,
+    "value": {
+      "principalId": "00000000-0000-4000-8000-000000000001",
+      "memberships": []
+    }
+  },
+  {
+    "name": "MembershipSelection rejects client tenant/unknown fields",
+    "schema": "MembershipSelection",
+    "valid": false,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "MembershipSelection requires membershipId",
+    "schema": "MembershipSelection",
+    "valid": false,
+    "value": {}
+  },
+  {
+    "name": "MembershipContext rejects client tenant/unknown fields",
+    "schema": "MembershipContext",
+    "valid": false,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "contextToken": "x",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "MembershipContext requires membershipId",
+    "schema": "MembershipContext",
+    "valid": false,
+    "value": {
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "contextToken": "x"
+    }
+  },
+  {
+    "name": "MembershipContext requires expiresAt",
+    "schema": "MembershipContext",
+    "valid": false,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "contextToken": "x"
+    }
+  },
+  {
+    "name": "MembershipContext requires contextToken",
+    "schema": "MembershipContext",
+    "valid": false,
+    "value": {
+      "membershipId": "00000000-0000-4000-8000-000000000001",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ZaloExchange rejects client tenant/unknown fields",
+    "schema": "ZaloExchange",
+    "valid": false,
+    "value": {
+      "authorizationCode": "x",
+      "codeVerifier": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "redirectUri": "https://synthetic.invalid/object",
+      "state": "xxxxxxxxxxxxxxxx",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ZaloExchange requires authorizationCode",
+    "schema": "ZaloExchange",
+    "valid": false,
+    "value": {
+      "codeVerifier": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "redirectUri": "https://synthetic.invalid/object",
+      "state": "xxxxxxxxxxxxxxxx"
+    }
+  },
+  {
+    "name": "ZaloExchange requires codeVerifier",
+    "schema": "ZaloExchange",
+    "valid": false,
+    "value": {
+      "authorizationCode": "x",
+      "redirectUri": "https://synthetic.invalid/object",
+      "state": "xxxxxxxxxxxxxxxx"
+    }
+  },
+  {
+    "name": "ZaloExchange requires redirectUri",
+    "schema": "ZaloExchange",
+    "valid": false,
+    "value": {
+      "authorizationCode": "x",
+      "codeVerifier": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "state": "xxxxxxxxxxxxxxxx"
+    }
+  },
+  {
+    "name": "ZaloExchange requires state",
+    "schema": "ZaloExchange",
+    "valid": false,
+    "value": {
+      "authorizationCode": "x",
+      "codeVerifier": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "redirectUri": "https://synthetic.invalid/object"
+    }
+  },
+  {
+    "name": "AuthSession rejects client tenant/unknown fields",
+    "schema": "AuthSession",
+    "valid": false,
+    "value": {
+      "accessToken": "x",
+      "tokenType": "Bearer",
+      "expiresIn": 1,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "AuthSession requires accessToken",
+    "schema": "AuthSession",
+    "valid": false,
+    "value": {
+      "tokenType": "Bearer",
+      "expiresIn": 1
+    }
+  },
+  {
+    "name": "AuthSession requires tokenType",
+    "schema": "AuthSession",
+    "valid": false,
+    "value": {
+      "accessToken": "x",
+      "expiresIn": 1
+    }
+  },
+  {
+    "name": "AuthSession requires expiresIn",
+    "schema": "AuthSession",
+    "valid": false,
+    "value": {
+      "accessToken": "x",
+      "tokenType": "Bearer"
+    }
+  },
+  {
+    "name": "ConsentRequest rejects client tenant/unknown fields",
+    "schema": "ConsentRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "accepted": true,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ConsentRequest requires memberId",
+    "schema": "ConsentRequest",
+    "valid": false,
+    "value": {
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "accepted": true
+    }
+  },
+  {
+    "name": "ConsentRequest requires purpose",
+    "schema": "ConsentRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "accepted": true
+    }
+  },
+  {
+    "name": "ConsentRequest requires policyVersion",
+    "schema": "ConsentRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "accepted": true
+    }
+  },
+  {
+    "name": "ConsentRequest requires policyHash",
+    "schema": "ConsentRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "accepted": true
+    }
+  },
+  {
+    "name": "ConsentRequest requires accepted",
+    "schema": "ConsentRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "ConsentRecord rejects client tenant/unknown fields",
+    "schema": "ConsentRecord",
+    "valid": false,
+    "value": {
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recordedAt": "2026-11-25T01:00:00Z",
+      "version": 1,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ConsentRecord requires consentId",
+    "schema": "ConsentRecord",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recordedAt": "2026-11-25T01:00:00Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "ConsentRecord requires memberId",
+    "schema": "ConsentRecord",
+    "valid": false,
+    "value": {
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recordedAt": "2026-11-25T01:00:00Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "ConsentRecord requires purpose",
+    "schema": "ConsentRecord",
+    "valid": false,
+    "value": {
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recordedAt": "2026-11-25T01:00:00Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "ConsentRecord requires policyVersion",
+    "schema": "ConsentRecord",
+    "valid": false,
+    "value": {
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recordedAt": "2026-11-25T01:00:00Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "ConsentRecord requires policyHash",
+    "schema": "ConsentRecord",
+    "valid": false,
+    "value": {
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "recordedAt": "2026-11-25T01:00:00Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "ConsentRecord requires recordedAt",
+    "schema": "ConsentRecord",
+    "valid": false,
+    "value": {
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1
+    }
+  },
+  {
+    "name": "ConsentRecord requires version",
+    "schema": "ConsentRecord",
+    "valid": false,
+    "value": {
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "purpose": "x",
+      "policyVersion": "x",
+      "policyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recordedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ECard rejects client tenant/unknown fields",
+    "schema": "ECard",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "coverageVersionId": "00000000-0000-4000-8000-000000000001",
+      "displayNameMasked": "x",
+      "cardNumberMasked": "x",
+      "qrToken": "x",
+      "issuedAt": "2026-11-25T01:00:00Z",
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ECard requires memberId",
+    "schema": "ECard",
+    "valid": false,
+    "value": {
+      "coverageVersionId": "00000000-0000-4000-8000-000000000001",
+      "displayNameMasked": "x",
+      "cardNumberMasked": "x",
+      "qrToken": "x",
+      "issuedAt": "2026-11-25T01:00:00Z",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ECard requires coverageVersionId",
+    "schema": "ECard",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "displayNameMasked": "x",
+      "cardNumberMasked": "x",
+      "qrToken": "x",
+      "issuedAt": "2026-11-25T01:00:00Z",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ECard requires displayNameMasked",
+    "schema": "ECard",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "coverageVersionId": "00000000-0000-4000-8000-000000000001",
+      "cardNumberMasked": "x",
+      "qrToken": "x",
+      "issuedAt": "2026-11-25T01:00:00Z",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ECard requires cardNumberMasked",
+    "schema": "ECard",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "coverageVersionId": "00000000-0000-4000-8000-000000000001",
+      "displayNameMasked": "x",
+      "qrToken": "x",
+      "issuedAt": "2026-11-25T01:00:00Z",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ECard requires qrToken",
+    "schema": "ECard",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "coverageVersionId": "00000000-0000-4000-8000-000000000001",
+      "displayNameMasked": "x",
+      "cardNumberMasked": "x",
+      "issuedAt": "2026-11-25T01:00:00Z",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ECard requires issuedAt",
+    "schema": "ECard",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "coverageVersionId": "00000000-0000-4000-8000-000000000001",
+      "displayNameMasked": "x",
+      "cardNumberMasked": "x",
+      "qrToken": "x",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ECard requires expiresAt",
+    "schema": "ECard",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "coverageVersionId": "00000000-0000-4000-8000-000000000001",
+      "displayNameMasked": "x",
+      "cardNumberMasked": "x",
+      "qrToken": "x",
+      "issuedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "UploadRequest rejects client tenant/unknown fields",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "UploadRequest requires memberId",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "UploadRequest requires fileName",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "UploadRequest requires contentType",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "UploadRequest requires docType",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "UploadRequest requires sizeBytes",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "UploadRequest requires sha256",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1
+    }
+  },
+  {
+    "name": "UploadHeaders rejects client tenant/unknown fields",
+    "schema": "UploadHeaders",
+    "valid": false,
+    "value": {
+      "Content-Type": "image/jpeg",
+      "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "UploadHeaders requires Content-Type",
+    "schema": "UploadHeaders",
+    "valid": false,
+    "value": {
+      "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    }
+  },
+  {
+    "name": "UploadHeaders requires x-amz-checksum-sha256",
+    "schema": "UploadHeaders",
+    "valid": false,
+    "value": {
+      "Content-Type": "image/jpeg"
+    }
+  },
+  {
+    "name": "UploadGrant rejects client tenant/unknown fields",
+    "schema": "UploadGrant",
+    "valid": false,
+    "value": {
+      "uploadId": "00000000-0000-4000-8000-000000000001",
+      "uploadUrl": "https://synthetic.invalid/object",
+      "method": "PUT",
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "requiredHeaders": {
+        "Content-Type": "image/jpeg",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "UploadGrant requires uploadId",
+    "schema": "UploadGrant",
+    "valid": false,
+    "value": {
+      "uploadUrl": "https://synthetic.invalid/object",
+      "method": "PUT",
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "requiredHeaders": {
+        "Content-Type": "image/jpeg",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    }
+  },
+  {
+    "name": "UploadGrant requires uploadUrl",
+    "schema": "UploadGrant",
+    "valid": false,
+    "value": {
+      "uploadId": "00000000-0000-4000-8000-000000000001",
+      "method": "PUT",
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "requiredHeaders": {
+        "Content-Type": "image/jpeg",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    }
+  },
+  {
+    "name": "UploadGrant requires method",
+    "schema": "UploadGrant",
+    "valid": false,
+    "value": {
+      "uploadId": "00000000-0000-4000-8000-000000000001",
+      "uploadUrl": "https://synthetic.invalid/object",
+      "expiresAt": "2026-11-25T01:00:00Z",
+      "requiredHeaders": {
+        "Content-Type": "image/jpeg",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    }
+  },
+  {
+    "name": "UploadGrant requires expiresAt",
+    "schema": "UploadGrant",
+    "valid": false,
+    "value": {
+      "uploadId": "00000000-0000-4000-8000-000000000001",
+      "uploadUrl": "https://synthetic.invalid/object",
+      "method": "PUT",
+      "requiredHeaders": {
+        "Content-Type": "image/jpeg",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    }
+  },
+  {
+    "name": "UploadGrant requires requiredHeaders",
+    "schema": "UploadGrant",
+    "valid": false,
+    "value": {
+      "uploadId": "00000000-0000-4000-8000-000000000001",
+      "uploadUrl": "https://synthetic.invalid/object",
+      "method": "PUT",
+      "expiresAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "UploadComplete rejects client tenant/unknown fields",
+    "schema": "UploadComplete",
+    "valid": false,
+    "value": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sizeBytes": 1,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "UploadComplete requires sha256",
+    "schema": "UploadComplete",
+    "valid": false,
+    "value": {
+      "sizeBytes": 1
+    }
+  },
+  {
+    "name": "UploadComplete requires sizeBytes",
+    "schema": "UploadComplete",
+    "valid": false,
+    "value": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "Document rejects client tenant/unknown fields",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Document requires documentId",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Document requires memberId",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Document requires docType",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Document requires contentType",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Document requires sizeBytes",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Document requires sha256",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "version": 1,
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Document requires version",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "scanStatus": "QUARANTINED",
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Document requires scanStatus",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Document requires createdAt",
+    "schema": "Document",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "docType": "INVOICE_PHOTO",
+      "contentType": "image/jpeg",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+      "scanStatus": "QUARANTINED"
+    }
+  },
+  {
+    "name": "PreflightRequest rejects client tenant/unknown fields",
+    "schema": "PreflightRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "PreflightRequest requires memberId",
+    "schema": "PreflightRequest",
+    "valid": false,
+    "value": {
+      "benefitType": "OUTPATIENT",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "PreflightRequest requires benefitType",
+    "schema": "PreflightRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "PreflightRequest requires documentIds",
+    "schema": "PreflightRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT"
+    }
+  },
+  {
+    "name": "Warning rejects client tenant/unknown fields",
+    "schema": "Warning",
+    "valid": false,
+    "value": {
+      "code": "BLURRY_IMAGE",
+      "severity": "BLOCKER",
+      "messageVi": "x",
+      "ruleVersion": "x",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Warning requires code",
+    "schema": "Warning",
+    "valid": false,
+    "value": {
+      "severity": "BLOCKER",
+      "messageVi": "x",
+      "ruleVersion": "x"
+    }
+  },
+  {
+    "name": "Warning requires severity",
+    "schema": "Warning",
+    "valid": false,
+    "value": {
+      "code": "BLURRY_IMAGE",
+      "messageVi": "x",
+      "ruleVersion": "x"
+    }
+  },
+  {
+    "name": "Warning requires messageVi",
+    "schema": "Warning",
+    "valid": false,
+    "value": {
+      "code": "BLURRY_IMAGE",
+      "severity": "BLOCKER",
+      "ruleVersion": "x"
+    }
+  },
+  {
+    "name": "Warning requires ruleVersion",
+    "schema": "Warning",
+    "valid": false,
+    "value": {
+      "code": "BLURRY_IMAGE",
+      "severity": "BLOCKER",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "PreflightCompleted rejects client tenant/unknown fields",
+    "schema": "PreflightCompleted",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "version": 1,
+      "passed": true,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "PreflightCompleted requires preflightId",
+    "schema": "PreflightCompleted",
+    "valid": false,
+    "value": {
+      "status": "COMPLETED",
+      "version": 1,
+      "passed": true,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "PreflightCompleted requires status",
+    "schema": "PreflightCompleted",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "version": 1,
+      "passed": true,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "PreflightCompleted requires version",
+    "schema": "PreflightCompleted",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "passed": true,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "PreflightCompleted requires passed",
+    "schema": "PreflightCompleted",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "version": 1,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "PreflightCompleted requires warnings",
+    "schema": "PreflightCompleted",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "version": 1,
+      "passed": true,
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "PreflightCompleted requires completedAt",
+    "schema": "PreflightCompleted",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "version": 1,
+      "passed": true,
+      "warnings": []
+    }
+  },
+  {
+    "name": "PreflightPending rejects client tenant/unknown fields",
+    "schema": "PreflightPending",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "PENDING",
+      "version": 1,
+      "statusUrl": "/v1/preflights/00000000-0000-4000-8000-000000000001",
+      "retryAfterSeconds": 1,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "PreflightPending requires preflightId",
+    "schema": "PreflightPending",
+    "valid": false,
+    "value": {
+      "status": "PENDING",
+      "version": 1,
+      "statusUrl": "/v1/preflights/00000000-0000-4000-8000-000000000001",
+      "retryAfterSeconds": 1
+    }
+  },
+  {
+    "name": "PreflightPending requires status",
+    "schema": "PreflightPending",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "version": 1,
+      "statusUrl": "/v1/preflights/00000000-0000-4000-8000-000000000001",
+      "retryAfterSeconds": 1
+    }
+  },
+  {
+    "name": "PreflightPending requires version",
+    "schema": "PreflightPending",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "PENDING",
+      "statusUrl": "/v1/preflights/00000000-0000-4000-8000-000000000001",
+      "retryAfterSeconds": 1
+    }
+  },
+  {
+    "name": "PreflightPending requires statusUrl",
+    "schema": "PreflightPending",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "PENDING",
+      "version": 1,
+      "retryAfterSeconds": 1
+    }
+  },
+  {
+    "name": "PreflightPending requires retryAfterSeconds",
+    "schema": "PreflightPending",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "PENDING",
+      "version": 1,
+      "statusUrl": "/v1/preflights/00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "PreflightFailed rejects client tenant/unknown fields",
+    "schema": "PreflightFailed",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "FAILED",
+      "version": 1,
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "messageVi": "x",
+        "correlationId": "00000000-0000-4000-8000-000000000001"
+      },
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "PreflightFailed requires preflightId",
+    "schema": "PreflightFailed",
+    "valid": false,
+    "value": {
+      "status": "FAILED",
+      "version": 1,
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "messageVi": "x",
+        "correlationId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  },
+  {
+    "name": "PreflightFailed requires status",
+    "schema": "PreflightFailed",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "version": 1,
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "messageVi": "x",
+        "correlationId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  },
+  {
+    "name": "PreflightFailed requires version",
+    "schema": "PreflightFailed",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "FAILED",
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "messageVi": "x",
+        "correlationId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  },
+  {
+    "name": "PreflightFailed requires error",
+    "schema": "PreflightFailed",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "FAILED",
+      "version": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit rejects client tenant/unknown fields",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ClaimSubmit requires memberId",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit requires benefitType",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit requires visitDate",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit requires totalRequested",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit requires consentAccepted",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit requires consentId",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit requires documentIds",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit requires preflightId",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit requires expectedPreflightVersion",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ClaimSummary rejects client tenant/unknown fields",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ClaimSummary requires claimId",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires claimCode",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires memberId",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires benefitType",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires visitDate",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires totalRequested",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires status",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires version",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "createdAt": "2026-11-25T01:00:00Z",
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires createdAt",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "updatedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimSummary requires updatedAt",
+    "schema": "ClaimSummary",
+    "valid": false,
+    "value": {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimCode": "x",
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "status": "PREFLIGHT",
+      "version": 1,
+      "createdAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ClaimDetail rejects client tenant/unknown fields",
+    "schema": "ClaimDetail",
+    "valid": false,
+    "value": {
+      "claim": {
+        "claimId": "00000000-0000-4000-8000-000000000001",
+        "claimCode": "x",
+        "memberId": "00000000-0000-4000-8000-000000000001",
+        "benefitType": "OUTPATIENT",
+        "visitDate": "2026-11-25",
+        "totalRequested": "720000.00",
+        "status": "PREFLIGHT",
+        "version": 1,
+        "createdAt": "2026-11-25T01:00:00Z",
+        "updatedAt": "2026-11-25T01:00:00Z"
+      },
+      "documents": [],
+      "supplementAllowed": true,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ClaimDetail requires claim",
+    "schema": "ClaimDetail",
+    "valid": false,
+    "value": {
+      "documents": [],
+      "supplementAllowed": true
+    }
+  },
+  {
+    "name": "ClaimDetail requires documents",
+    "schema": "ClaimDetail",
+    "valid": false,
+    "value": {
+      "claim": {
+        "claimId": "00000000-0000-4000-8000-000000000001",
+        "claimCode": "x",
+        "memberId": "00000000-0000-4000-8000-000000000001",
+        "benefitType": "OUTPATIENT",
+        "visitDate": "2026-11-25",
+        "totalRequested": "720000.00",
+        "status": "PREFLIGHT",
+        "version": 1,
+        "createdAt": "2026-11-25T01:00:00Z",
+        "updatedAt": "2026-11-25T01:00:00Z"
+      },
+      "supplementAllowed": true
+    }
+  },
+  {
+    "name": "ClaimDetail requires supplementAllowed",
+    "schema": "ClaimDetail",
+    "valid": false,
+    "value": {
+      "claim": {
+        "claimId": "00000000-0000-4000-8000-000000000001",
+        "claimCode": "x",
+        "memberId": "00000000-0000-4000-8000-000000000001",
+        "benefitType": "OUTPATIENT",
+        "visitDate": "2026-11-25",
+        "totalRequested": "720000.00",
+        "status": "PREFLIGHT",
+        "version": 1,
+        "createdAt": "2026-11-25T01:00:00Z",
+        "updatedAt": "2026-11-25T01:00:00Z"
+      },
+      "documents": []
+    }
+  },
+  {
+    "name": "ClaimList rejects client tenant/unknown fields",
+    "schema": "ClaimList",
+    "valid": false,
+    "value": {
+      "items": [],
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ClaimList requires items",
+    "schema": "ClaimList",
+    "valid": false,
+    "value": {}
+  },
+  {
+    "name": "ClaimSupplement rejects client tenant/unknown fields",
+    "schema": "ClaimSupplement",
+    "valid": false,
+    "value": {
+      "expectedVersion": 1,
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ClaimSupplement requires expectedVersion",
+    "schema": "ClaimSupplement",
+    "valid": false,
+    "value": {
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ClaimSupplement requires documentIds",
+    "schema": "ClaimSupplement",
+    "valid": false,
+    "value": {
+      "expectedVersion": 1
+    }
+  },
+  {
+    "name": "Region rejects client tenant/unknown fields",
+    "schema": "Region",
+    "valid": false,
+    "value": {
+      "x": 0.5,
+      "y": 0.5,
+      "width": 0.5,
+      "height": 0.5,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Region requires x",
+    "schema": "Region",
+    "valid": false,
+    "value": {
+      "y": 0.5,
+      "width": 0.5,
+      "height": 0.5
+    }
+  },
+  {
+    "name": "Region requires y",
+    "schema": "Region",
+    "valid": false,
+    "value": {
+      "x": 0.5,
+      "width": 0.5,
+      "height": 0.5
+    }
+  },
+  {
+    "name": "Region requires width",
+    "schema": "Region",
+    "valid": false,
+    "value": {
+      "x": 0.5,
+      "y": 0.5,
+      "height": 0.5
+    }
+  },
+  {
+    "name": "Region requires height",
+    "schema": "Region",
+    "valid": false,
+    "value": {
+      "x": 0.5,
+      "y": 0.5,
+      "width": 0.5
+    }
+  },
+  {
+    "name": "Evidence rejects client tenant/unknown fields",
+    "schema": "Evidence",
+    "valid": false,
+    "value": {
+      "evidenceId": "00000000-0000-4000-8000-000000000001",
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "documentVersion": 1,
+      "page": 1,
+      "field": "x",
+      "source": "XML",
+      "confidence": 0.5,
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Evidence requires evidenceId",
+    "schema": "Evidence",
+    "valid": false,
+    "value": {
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "documentVersion": 1,
+      "page": 1,
+      "field": "x",
+      "source": "XML",
+      "confidence": 0.5
+    }
+  },
+  {
+    "name": "Evidence requires documentId",
+    "schema": "Evidence",
+    "valid": false,
+    "value": {
+      "evidenceId": "00000000-0000-4000-8000-000000000001",
+      "documentVersion": 1,
+      "page": 1,
+      "field": "x",
+      "source": "XML",
+      "confidence": 0.5
+    }
+  },
+  {
+    "name": "Evidence requires documentVersion",
+    "schema": "Evidence",
+    "valid": false,
+    "value": {
+      "evidenceId": "00000000-0000-4000-8000-000000000001",
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "page": 1,
+      "field": "x",
+      "source": "XML",
+      "confidence": 0.5
+    }
+  },
+  {
+    "name": "Evidence requires page",
+    "schema": "Evidence",
+    "valid": false,
+    "value": {
+      "evidenceId": "00000000-0000-4000-8000-000000000001",
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "documentVersion": 1,
+      "field": "x",
+      "source": "XML",
+      "confidence": 0.5
+    }
+  },
+  {
+    "name": "Evidence requires field",
+    "schema": "Evidence",
+    "valid": false,
+    "value": {
+      "evidenceId": "00000000-0000-4000-8000-000000000001",
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "documentVersion": 1,
+      "page": 1,
+      "source": "XML",
+      "confidence": 0.5
+    }
+  },
+  {
+    "name": "Evidence requires source",
+    "schema": "Evidence",
+    "valid": false,
+    "value": {
+      "evidenceId": "00000000-0000-4000-8000-000000000001",
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "documentVersion": 1,
+      "page": 1,
+      "field": "x",
+      "confidence": 0.5
+    }
+  },
+  {
+    "name": "Evidence requires confidence",
+    "schema": "Evidence",
+    "valid": false,
+    "value": {
+      "evidenceId": "00000000-0000-4000-8000-000000000001",
+      "documentId": "00000000-0000-4000-8000-000000000001",
+      "documentVersion": 1,
+      "page": 1,
+      "field": "x",
+      "source": "XML"
+    }
+  },
+  {
+    "name": "TaxVerification rejects client tenant/unknown fields",
+    "schema": "TaxVerification",
+    "valid": false,
+    "value": {
+      "parseStatus": "PARSED",
+      "verificationStatus": "UNVERIFIED",
+      "source": "x",
+      "checkedAt": "2026-11-25T01:00:00Z",
+      "evidenceIds": [],
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "TaxVerification requires parseStatus",
+    "schema": "TaxVerification",
+    "valid": false,
+    "value": {
+      "verificationStatus": "UNVERIFIED",
+      "source": "x",
+      "checkedAt": "2026-11-25T01:00:00Z",
+      "evidenceIds": []
+    }
+  },
+  {
+    "name": "TaxVerification requires verificationStatus",
+    "schema": "TaxVerification",
+    "valid": false,
+    "value": {
+      "parseStatus": "PARSED",
+      "source": "x",
+      "checkedAt": "2026-11-25T01:00:00Z",
+      "evidenceIds": []
+    }
+  },
+  {
+    "name": "TaxVerification requires source",
+    "schema": "TaxVerification",
+    "valid": false,
+    "value": {
+      "parseStatus": "PARSED",
+      "verificationStatus": "UNVERIFIED",
+      "checkedAt": "2026-11-25T01:00:00Z",
+      "evidenceIds": []
+    }
+  },
+  {
+    "name": "TaxVerification requires checkedAt",
+    "schema": "TaxVerification",
+    "valid": false,
+    "value": {
+      "parseStatus": "PARSED",
+      "verificationStatus": "UNVERIFIED",
+      "source": "x",
+      "evidenceIds": []
+    }
+  },
+  {
+    "name": "TaxVerification requires evidenceIds",
+    "schema": "TaxVerification",
+    "valid": false,
+    "value": {
+      "parseStatus": "PARSED",
+      "verificationStatus": "UNVERIFIED",
+      "source": "x",
+      "checkedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "ExtractedLine rejects client tenant/unknown fields",
+    "schema": "ExtractedLine",
+    "valid": false,
+    "value": {
+      "lineId": "00000000-0000-4000-8000-000000000001",
+      "itemName": "x",
+      "quantity": "720000.00",
+      "unitPrice": "720000.00",
+      "requestedAmount": "720000.00",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ExtractedLine requires lineId",
+    "schema": "ExtractedLine",
+    "valid": false,
+    "value": {
+      "itemName": "x",
+      "quantity": "720000.00",
+      "unitPrice": "720000.00",
+      "requestedAmount": "720000.00",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedLine requires itemName",
+    "schema": "ExtractedLine",
+    "valid": false,
+    "value": {
+      "lineId": "00000000-0000-4000-8000-000000000001",
+      "quantity": "720000.00",
+      "unitPrice": "720000.00",
+      "requestedAmount": "720000.00",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedLine requires quantity",
+    "schema": "ExtractedLine",
+    "valid": false,
+    "value": {
+      "lineId": "00000000-0000-4000-8000-000000000001",
+      "itemName": "x",
+      "unitPrice": "720000.00",
+      "requestedAmount": "720000.00",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedLine requires unitPrice",
+    "schema": "ExtractedLine",
+    "valid": false,
+    "value": {
+      "lineId": "00000000-0000-4000-8000-000000000001",
+      "itemName": "x",
+      "quantity": "720000.00",
+      "requestedAmount": "720000.00",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedLine requires requestedAmount",
+    "schema": "ExtractedLine",
+    "valid": false,
+    "value": {
+      "lineId": "00000000-0000-4000-8000-000000000001",
+      "itemName": "x",
+      "quantity": "720000.00",
+      "unitPrice": "720000.00",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedLine requires evidenceIds",
+    "schema": "ExtractedLine",
+    "valid": false,
+    "value": {
+      "lineId": "00000000-0000-4000-8000-000000000001",
+      "itemName": "x",
+      "quantity": "720000.00",
+      "unitPrice": "720000.00",
+      "requestedAmount": "720000.00"
+    }
+  },
+  {
+    "name": "FraudSignal rejects client tenant/unknown fields",
+    "schema": "FraudSignal",
+    "valid": false,
+    "value": {
+      "code": "IMAGE_SIMILARITY",
+      "confidence": 0.5,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "FraudSignal requires code",
+    "schema": "FraudSignal",
+    "valid": false,
+    "value": {
+      "confidence": 0.5,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "FraudSignal requires confidence",
+    "schema": "FraudSignal",
+    "valid": false,
+    "value": {
+      "code": "IMAGE_SIMILARITY",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "FraudSignal requires evidenceIds",
+    "schema": "FraudSignal",
+    "valid": false,
+    "value": {
+      "code": "IMAGE_SIMILARITY",
+      "confidence": 0.5
+    }
+  },
+  {
+    "name": "AiResult rejects client tenant/unknown fields",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ],
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "AiResult requires schemaVersion",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires eventId",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires claimId",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires expectedClaimVersion",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires extractionRunId",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires occurredAt",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires modelVersion",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires promptVersion",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires ruleVersion",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires inputDocumentIds",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires taxVerification",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires extractedLines",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires fraudSignals",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult requires evidence",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": []
+    }
+  },
+  {
+    "name": "AiAcknowledgement rejects client tenant/unknown fields",
+    "schema": "AiAcknowledgement",
+    "valid": false,
+    "value": {
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "disposition": "ACCEPTED",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "AiAcknowledgement requires eventId",
+    "schema": "AiAcknowledgement",
+    "valid": false,
+    "value": {
+      "disposition": "ACCEPTED"
+    }
+  },
+  {
+    "name": "AiAcknowledgement requires disposition",
+    "schema": "AiAcknowledgement",
+    "valid": false,
+    "value": {
+      "eventId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error401 rejects client tenant/unknown fields",
+    "schema": "Error401",
+    "valid": false,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error401 requires code",
+    "schema": "Error401",
+    "valid": false,
+    "value": {
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error401 requires messageVi",
+    "schema": "Error401",
+    "valid": false,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error401 requires correlationId",
+    "schema": "Error401",
+    "valid": false,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "Error403 rejects client tenant/unknown fields",
+    "schema": "Error403",
+    "valid": false,
+    "value": {
+      "code": "FORBIDDEN",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error403 requires code",
+    "schema": "Error403",
+    "valid": false,
+    "value": {
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error403 requires messageVi",
+    "schema": "Error403",
+    "valid": false,
+    "value": {
+      "code": "FORBIDDEN",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error403 requires correlationId",
+    "schema": "Error403",
+    "valid": false,
+    "value": {
+      "code": "FORBIDDEN",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "Error404 rejects client tenant/unknown fields",
+    "schema": "Error404",
+    "valid": false,
+    "value": {
+      "code": "NOT_FOUND",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error404 requires code",
+    "schema": "Error404",
+    "valid": false,
+    "value": {
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error404 requires messageVi",
+    "schema": "Error404",
+    "valid": false,
+    "value": {
+      "code": "NOT_FOUND",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error404 requires correlationId",
+    "schema": "Error404",
+    "valid": false,
+    "value": {
+      "code": "NOT_FOUND",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "Error409 rejects client tenant/unknown fields",
+    "schema": "Error409",
+    "valid": false,
+    "value": {
+      "code": "IDEMPOTENCY_CONFLICT",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error409 requires code",
+    "schema": "Error409",
+    "valid": false,
+    "value": {
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error409 requires messageVi",
+    "schema": "Error409",
+    "valid": false,
+    "value": {
+      "code": "IDEMPOTENCY_CONFLICT",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error409 requires correlationId",
+    "schema": "Error409",
+    "valid": false,
+    "value": {
+      "code": "IDEMPOTENCY_CONFLICT",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "Error422 rejects client tenant/unknown fields",
+    "schema": "Error422",
+    "valid": false,
+    "value": {
+      "code": "VALIDATION_FAILED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error422 requires code",
+    "schema": "Error422",
+    "valid": false,
+    "value": {
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error422 requires messageVi",
+    "schema": "Error422",
+    "valid": false,
+    "value": {
+      "code": "VALIDATION_FAILED",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error422 requires correlationId",
+    "schema": "Error422",
+    "valid": false,
+    "value": {
+      "code": "VALIDATION_FAILED",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "Error429 rejects client tenant/unknown fields",
+    "schema": "Error429",
+    "valid": false,
+    "value": {
+      "code": "RATE_LIMITED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error429 requires code",
+    "schema": "Error429",
+    "valid": false,
+    "value": {
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error429 requires messageVi",
+    "schema": "Error429",
+    "valid": false,
+    "value": {
+      "code": "RATE_LIMITED",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error429 requires correlationId",
+    "schema": "Error429",
+    "valid": false,
+    "value": {
+      "code": "RATE_LIMITED",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "Error503 rejects client tenant/unknown fields",
+    "schema": "Error503",
+    "valid": false,
+    "value": {
+      "code": "DEPENDENCY_UNAVAILABLE",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error503 requires code",
+    "schema": "Error503",
+    "valid": false,
+    "value": {
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error503 requires messageVi",
+    "schema": "Error503",
+    "valid": false,
+    "value": {
+      "code": "DEPENDENCY_UNAVAILABLE",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error503 requires correlationId",
+    "schema": "Error503",
+    "valid": false,
+    "value": {
+      "code": "DEPENDENCY_UNAVAILABLE",
+      "messageVi": "x"
+    }
+  },
+  {
+    "name": "AiCallbackHeaders rejects client tenant/unknown fields",
+    "schema": "AiCallbackHeaders",
+    "valid": false,
+    "value": {
+      "X-Signature-HMAC": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "X-Event-Id": "00000000-0000-4000-8000-000000000001",
+      "X-Signature-Timestamp": "2026-11-25T01:00:00Z",
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "AiCallbackHeaders requires X-Signature-HMAC",
+    "schema": "AiCallbackHeaders",
+    "valid": false,
+    "value": {
+      "X-Event-Id": "00000000-0000-4000-8000-000000000001",
+      "X-Signature-Timestamp": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "AiCallbackHeaders requires X-Event-Id",
+    "schema": "AiCallbackHeaders",
+    "valid": false,
+    "value": {
+      "X-Signature-HMAC": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "X-Signature-Timestamp": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "AiCallbackHeaders requires X-Signature-Timestamp",
+    "schema": "AiCallbackHeaders",
+    "valid": false,
+    "value": {
+      "X-Signature-HMAC": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "X-Event-Id": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ExtractedInvoice rejects client tenant/unknown fields",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceSerial": "x",
+      "invoiceNumber": "x",
+      "invoiceDate": "2026-11-25",
+      "buyerAddressType": "PERSONAL",
+      "totalAmount": "720000.00",
+      "isMergedSummary": true,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "tenantId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "ExtractedInvoice requires sellerTaxCode",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "invoiceSerial": "x",
+      "invoiceNumber": "x",
+      "invoiceDate": "2026-11-25",
+      "buyerAddressType": "PERSONAL",
+      "totalAmount": "720000.00",
+      "isMergedSummary": true,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedInvoice requires invoiceSerial",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceNumber": "x",
+      "invoiceDate": "2026-11-25",
+      "buyerAddressType": "PERSONAL",
+      "totalAmount": "720000.00",
+      "isMergedSummary": true,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedInvoice requires invoiceNumber",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceSerial": "x",
+      "invoiceDate": "2026-11-25",
+      "buyerAddressType": "PERSONAL",
+      "totalAmount": "720000.00",
+      "isMergedSummary": true,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedInvoice requires invoiceDate",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceSerial": "x",
+      "invoiceNumber": "x",
+      "buyerAddressType": "PERSONAL",
+      "totalAmount": "720000.00",
+      "isMergedSummary": true,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedInvoice requires buyerAddressType",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceSerial": "x",
+      "invoiceNumber": "x",
+      "invoiceDate": "2026-11-25",
+      "totalAmount": "720000.00",
+      "isMergedSummary": true,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedInvoice requires totalAmount",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceSerial": "x",
+      "invoiceNumber": "x",
+      "invoiceDate": "2026-11-25",
+      "buyerAddressType": "PERSONAL",
+      "isMergedSummary": true,
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedInvoice requires isMergedSummary",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceSerial": "x",
+      "invoiceNumber": "x",
+      "invoiceDate": "2026-11-25",
+      "buyerAddressType": "PERSONAL",
+      "totalAmount": "720000.00",
+      "evidenceIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "ExtractedInvoice requires evidenceIds",
+    "schema": "ExtractedInvoice",
+    "valid": false,
+    "value": {
+      "sellerTaxCode": "0000000000",
+      "invoiceSerial": "x",
+      "invoiceNumber": "x",
+      "invoiceDate": "2026-11-25",
+      "buyerAddressType": "PERSONAL",
+      "totalAmount": "720000.00",
+      "isMergedSummary": true
+    }
+  },
+  {
+    "name": "reject invalid monetary encoding 720000",
+    "schema": "Money",
+    "valid": false,
+    "value": 720000
+  },
+  {
+    "name": "reject invalid monetary encoding 1.2",
+    "schema": "Money",
+    "valid": false,
+    "value": 1.2
+  },
+  {
+    "name": "reject invalid monetary encoding 1e6",
+    "schema": "Money",
+    "valid": false,
+    "value": "1e6"
+  },
+  {
+    "name": "reject invalid monetary encoding -1.00",
+    "schema": "Money",
+    "valid": false,
+    "value": "-1.00"
+  },
+  {
+    "name": "reject invalid monetary encoding 01.00",
+    "schema": "Money",
+    "valid": false,
+    "value": "01.00"
+  },
+  {
+    "name": "reject invalid monetary encoding 1.001",
+    "schema": "Money",
+    "valid": false,
+    "value": "1.001"
+  },
+  {
+    "name": "reject invalid monetary encoding 10000000000000.00",
+    "schema": "Money",
+    "valid": false,
+    "value": "10000000000000.00"
+  },
+  {
+    "name": "reject invalid monetary encoding NaN",
+    "schema": "Money",
+    "valid": false,
+    "value": "NaN"
+  },
+  {
+    "name": "PT15 shape rejects sizeBytes 20971521",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 20971521,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "PT15 shape rejects sizeBytes 0",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 0,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "PT15 shape rejects fileName ../attack.xml",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "../attack.xml",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "PT15 shape rejects sha256 invalid",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "image/jpeg",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "invalid"
+    }
+  },
+  {
+    "name": "PT15 shape rejects contentType application/javascript",
+    "schema": "UploadRequest",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "fileName": "x",
+      "contentType": "application/javascript",
+      "docType": "INVOICE_PHOTO",
+      "sizeBytes": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "PreflightCompleted invalid status",
+    "schema": "PreflightCompleted",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "PENDING",
+      "version": 1,
+      "passed": true,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "PreflightPending invalid status",
+    "schema": "PreflightPending",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "version": 1,
+      "statusUrl": "/v1/preflights/00000000-0000-4000-8000-000000000001",
+      "retryAfterSeconds": 1
+    }
+  },
+  {
+    "name": "PreflightPending invalid statusUrl",
+    "schema": "PreflightPending",
+    "valid": false,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "PENDING",
+      "version": 1,
+      "statusUrl": "http://127.0.0.1",
+      "retryAfterSeconds": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit invalid totalRequested",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": 720000,
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit invalid consentAccepted",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": false,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 1
+    }
+  },
+  {
+    "name": "ClaimSubmit invalid expectedPreflightVersion",
+    "schema": "ClaimSubmit",
+    "valid": false,
+    "value": {
+      "memberId": "00000000-0000-4000-8000-000000000001",
+      "benefitType": "OUTPATIENT",
+      "visitDate": "2026-11-25",
+      "totalRequested": "720000.00",
+      "consentAccepted": true,
+      "consentId": "00000000-0000-4000-8000-000000000001",
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "expectedPreflightVersion": 0
+    }
+  },
+  {
+    "name": "ClaimSupplement invalid expectedVersion",
+    "schema": "ClaimSupplement",
+    "valid": false,
+    "value": {
+      "expectedVersion": 0,
+      "documentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "name": "AiResult invalid expectedClaimVersion",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 0,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult invalid schemaVersion",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "99",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult invalid occurredAt",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "bad-date",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "AiResult invalid inputDocumentIds",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "Error UNAUTHENTICATED",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "UNAUTHENTICATED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error FORBIDDEN",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "FORBIDDEN",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error NOT_FOUND",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "NOT_FOUND",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error IDEMPOTENCY_CONFLICT",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "IDEMPOTENCY_CONFLICT",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error STALE_VERSION",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "STALE_VERSION",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error VALIDATION_FAILED",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "VALIDATION_FAILED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error RATE_LIMITED",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "RATE_LIMITED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error DEPENDENCY_UNAVAILABLE",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "DEPENDENCY_UNAVAILABLE",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error INVALID_SIGNATURE",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "INVALID_SIGNATURE",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Error REPLAY_REJECTED",
+    "schema": "ApiError",
+    "valid": true,
+    "value": {
+      "code": "REPLAY_REJECTED",
+      "messageVi": "x",
+      "correlationId": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "name": "Preflight union PreflightPending",
+    "schema": "PreflightStatus",
+    "valid": true,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "PENDING",
+      "version": 1,
+      "statusUrl": "/v1/preflights/00000000-0000-4000-8000-000000000001",
+      "retryAfterSeconds": 1
+    }
+  },
+  {
+    "name": "Preflight union PreflightCompleted",
+    "schema": "PreflightStatus",
+    "valid": true,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "COMPLETED",
+      "version": 1,
+      "passed": true,
+      "warnings": [],
+      "completedAt": "2026-11-25T01:00:00Z"
+    }
+  },
+  {
+    "name": "Preflight union PreflightFailed",
+    "schema": "PreflightStatus",
+    "valid": true,
+    "value": {
+      "preflightId": "00000000-0000-4000-8000-000000000001",
+      "status": "FAILED",
+      "version": 1,
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "messageVi": "x",
+        "correlationId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  },
+  {
+    "name": "AI cannot approve benefits",
+    "schema": "AiResult",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0.0",
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "expectedClaimVersion": 1,
+      "extractionRunId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-11-25T01:00:00Z",
+      "modelVersion": "x",
+      "promptVersion": "x",
+      "ruleVersion": "x",
+      "inputDocumentIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "taxVerification": {
+        "parseStatus": "PARSED",
+        "verificationStatus": "UNVERIFIED",
+        "source": "x",
+        "checkedAt": "2026-11-25T01:00:00Z",
+        "evidenceIds": []
+      },
+      "extractedLines": [
+        {
+          "lineId": "00000000-0000-4000-8000-000000000001",
+          "itemName": "x",
+          "quantity": "720000.00",
+          "unitPrice": "720000.00",
+          "requestedAmount": "720000.00",
+          "evidenceIds": [
+            "00000000-0000-4000-8000-000000000001"
+          ],
+          "approvedAmount": "1.00"
+        }
+      ],
+      "fraudSignals": [],
+      "evidence": [
+        {
+          "evidenceId": "00000000-0000-4000-8000-000000000001",
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "documentVersion": 1,
+          "page": 1,
+          "field": "x",
+          "source": "XML",
+          "confidence": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "name": "Hash rejects null",
+    "schema": "Hash",
+    "valid": false,
+    "value": null
+  },
+  {
+    "name": "BenefitType rejects null",
+    "schema": "BenefitType",
+    "valid": false,
+    "value": null
+  },
+  {
+    "name": "DocumentType rejects null",
+    "schema": "DocumentType",
+    "valid": false,
+    "value": null
+  },
+  {
+    "name": "ClaimStatus rejects null",
+    "schema": "ClaimStatus",
+    "valid": false,
+    "value": null
+  },
+  {
+    "name": "ContentType rejects null",
+    "schema": "ContentType",
+    "valid": false,
+    "value": null
+  },
+  {
+    "name": "PreflightStatus rejects null",
+    "schema": "PreflightStatus",
+    "valid": false,
+    "value": null
+  },
+  {
+    "name": "IdempotencyKeyValue rejects null",
+    "schema": "IdempotencyKeyValue",
+    "valid": false,
+    "value": null
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": { "outputs": [] },
+    "test": { "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ai-specs/02-openapi-contracts.yaml", "$TURBO_ROOT$/docs/ai-specs/04-golden-test-cases.json"] },
+    "typecheck": { "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ai-specs/02-openapi-contracts.yaml"] }
+  }
+}
