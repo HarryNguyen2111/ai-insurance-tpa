@@ -1,0 +1,203 @@
+{
+  "version": "1.0.0",
+  "status": "SPECIFICATION_ONLY_NOT_EXECUTED",
+  "description": "Acceptance scenarios cho spec #65 (11-dynamic-intake-design.md). Dữ liệu tổng hợp; chưa có runner/implementation. Không báo PASS khi chưa có test tự động và bằng chứng. 'layer' là tầng test dự kiến, 'blockedBy' là quyết định mở/issue phải xong trước.",
+  "test_cases": [
+    {
+      "id": "DI01_TENANT_FORMS_DIFFER",
+      "layer": "api-integration",
+      "given": "Tenant A bind health_outpatient_v1 (12 field), tenant B bind form khác cho cùng OUTPATIENT_VISIT",
+      "expected": "Resolve của member A chỉ trả version A; của B chỉ trả version B; formVersionId của A gọi bằng token B -> 404 NOT_FOUND",
+      "blockedBy": ["#21"]
+    },
+    {
+      "id": "DI02_MULTI_CONFIG_SAME_TENANT",
+      "layer": "unit+api-integration",
+      "given": "Một tenant có binding (plan P1, OUTPATIENT_VISIT), (plan=null, OUTPATIENT_VISIT), (plan=null, HOSPITALIZATION)",
+      "expected": "Member plan P1 nhận binding cụ thể nhất; plan khác nhận binding mặc định; publish hai binding cùng độ cụ thể/kênh/hiệu lực chồng nhau -> 422 CONFIG_INVALID/BINDING_AMBIGUOUS",
+      "blockedBy": []
+    },
+    {
+      "id": "DI03_WORKSPACE_SWITCH_AND_SLUG_SPOOF",
+      "layer": "browser-e2e",
+      "given": "Principal có membership A, không có B; đổi URL slug sang B, gửi header/body tenantId=B",
+      "expected": "Server bỏ qua slug/tenantId client; 403/404 không lộ tồn tại; đổi workspace hợp lệ xóa cache UI/query/IndexedDB của tenant cũ",
+      "blockedBy": ["#21"]
+    },
+    {
+      "id": "DI04_PUBLISH_PERMISSION_MAKER_CHECKER",
+      "layer": "api-integration",
+      "given": "FORM_AUTHOR tạo draft; cùng người cố publish; MEMBER/CLAIM_REVIEWER cố publish; FORM_PUBLISHER không MFA",
+      "expected": "Chỉ FORM_PUBLISHER khác author có mfaVerified=true publish được (OD-06); còn lại 403 FORBIDDEN; publish ghi audit + outbox intake.form-published cùng transaction",
+      "blockedBy": ["#21", "#18", "#23"]
+    },
+    {
+      "id": "DI05_SCHEMA_INJECTION_REJECTED",
+      "layer": "unit+api-integration",
+      "given": "Draft chứa label '<script>', key 'onClick', component 'HTML', regex 'pattern', URL, expression '${}', condition sâu 4 cấp, op 'EVAL'",
+      "expected": "Validate/publish trả 422 CONFIG_INVALID với path lỗi; không lưu version PUBLISHED; renderer không bao giờ dùng dangerouslySetInnerHTML",
+      "blockedBy": []
+    },
+    {
+      "id": "DI06_CONFIG_LIMITS",
+      "layer": "unit",
+      "given": "81 field; 11 step; option 51; condition 11 leaf; tổng 201 leaf; content 65537 byte",
+      "expected": "Mỗi trường hợp 422 CONFIG_INVALID/LIMIT_EXCEEDED; đúng biên (80 field, 10 leaf, 200 leaf, 65536 byte) hợp lệ",
+      "blockedBy": []
+    },
+    {
+      "id": "DI07_REFERENCE_AND_CYCLE",
+      "layer": "unit",
+      "given": "visibleWhen tham chiếu field không tồn tại; A phụ thuộc B và B phụ thuộc A; extensionKey không có trong catalog version",
+      "expected": "422 CONFIG_INVALID (UNKNOWN_FIELD_REF / CONDITION_CYCLE / UNKNOWN_EXTENSION)",
+      "blockedBy": []
+    },
+    {
+      "id": "DI08_CANONICAL_TIGHTEN_ONLY",
+      "layer": "unit",
+      "given": "Config đặt totalRequested requiredAt=NEVER; maxMoney vượt trần backend; đổi component visitDate thành TEXTAREA",
+      "expected": "422 CONFIG_INVALID/CANONICAL_RELAXED; chỉ cho siết chặt",
+      "blockedBy": []
+    },
+    {
+      "id": "DI09_FE_BE_PARITY_VECTORS",
+      "layer": "unit (jest web + zalo + core-api)",
+      "given": "Bộ vector chung >= 200 (config, answers) -> (visible, required, errors) từ packages/intake-rules",
+      "expected": "Web, Zalo và core-api cho kết quả byte-identical; CI fail nếu lệch",
+      "blockedBy": []
+    },
+    {
+      "id": "DI10_DRAFT_VS_SUBMIT_REQUIRED",
+      "layer": "api-integration",
+      "given": "Draft thiếu visitDate và totalRequested",
+      "expected": "PATCH draft 200 với validation.state=INCOMPLETE; review 422 VALIDATION_FAILED fieldErrors [visit_date REQUIRED, total_requested REQUIRED]; submit không có reviewHash hợp lệ -> 409",
+      "blockedBy": []
+    },
+    {
+      "id": "DI11_UNKNOWN_READONLY_HIDDEN",
+      "layer": "api-integration",
+      "given": "PATCH answers có key 'x_unlisted', key system 'status', trường hidden accident_date khi visit_reason=ILLNESS",
+      "expected": "unknown -> 422 UNKNOWN_FIELD; readonly -> 422 READONLY_FIELD; hidden được giữ trong draft nhưng bị loại khỏi submission và hiển thị trong review.excludedHiddenFields",
+      "blockedBy": []
+    },
+    {
+      "id": "DI12_TYPE_AND_EMPTY_SEMANTICS",
+      "layer": "unit+api-integration",
+      "given": "totalRequested=720000 (number), '720000.5', ''; visitDate='2026-13-01'; MULTI_SELECT trùng giá trị; null cho field bắt buộc ở draft",
+      "expected": "Number/sai định dạng/'' -> 422 INVALID_TYPE/INVALID_FORMAT; null xóa giá trị ở draft (200); absent giữ nguyên",
+      "blockedBy": []
+    },
+    {
+      "id": "DI13_PINNED_VERSION_UNCHANGED",
+      "layer": "api-integration",
+      "given": "Claim submit trên v3; publish v4 thêm field required",
+      "expected": "Claim giữ formVersionId v3 + contentHash; GET detail render theo v3; không re-validate claim cũ; draft mới dùng v4",
+      "blockedBy": ["#37"]
+    },
+    {
+      "id": "DI14_RETIRED_VERSION_DRAFT",
+      "layer": "api-integration",
+      "given": "Draft trên v3; publish v4 (v3 -> RETIRED)",
+      "expected": "Draft v3 vẫn review/submit được tới draftExpiresAt; draft mới không tạo được trên v3",
+      "blockedBy": []
+    },
+    {
+      "id": "DI15_REVOKED_VERSION_MIGRATION",
+      "layer": "api-integration",
+      "given": "Draft trên v3; v3 bị REVOKED với reasonCode",
+      "expected": "Submit -> 409 FORM_VERSION_REVOKED; draft.status=MIGRATION_REQUIRED; migrate tạo draft v4 giữ answers cùng key+binding+type hợp lệ, liệt kê droppedFields; documents giữ; phải review lại; audit cả hai bước",
+      "blockedBy": ["#18"]
+    },
+    {
+      "id": "DI16_DUPLICATE_AND_CONCURRENT_SUBMIT",
+      "layer": "api-integration",
+      "given": "Hai submit song song cùng Idempotency-Key; cùng key khác reviewHash; hai key khác nhau cùng draft",
+      "expected": "Một claim duy nhất; lặp cùng payload trả response cũ; khác payload 409 IDEMPOTENCY_CONFLICT; key khác -> 409 STALE_VERSION (draft đã SUBMITTED)",
+      "blockedBy": ["#22", "#37"]
+    },
+    {
+      "id": "DI17_STALE_DRAFT_VERSION",
+      "layer": "api-integration",
+      "given": "Web và Zalo cùng mở draft version 5; web PATCH thành 6; Zalo PATCH expectedVersion=5",
+      "expected": "409 STALE_VERSION; client reload draft và hiển thị xung đột, không ghi đè im lặng",
+      "blockedBy": []
+    },
+    {
+      "id": "DI18_CACHE_ISOLATION_AND_INVALIDATION",
+      "layer": "api-integration",
+      "given": "Redis có config tenant A; tenant B cùng formKey; publish v4 cho A",
+      "expected": "Key cache gồm tenantId+formVersionId+channel; B không đọc được entry A; resolve sau commit publish trả v4 (đọc binding từ PostgreSQL), version cũ vẫn phục vụ draft pinned; Redis down vẫn đúng (chậm hơn)",
+      "blockedBy": []
+    },
+    {
+      "id": "DI19_PUBLIC_BRANDING_NO_PRIVATE_DATA",
+      "layer": "api-integration",
+      "given": "GET public branding theo slug tồn tại / không tồn tại / tenant inactive",
+      "expected": "Chỉ displayName/logoAssetUrl/colors; Cache-Control public max-age<=300; không tenantId nội bộ, form, member; slug sai và inactive trả cùng 404",
+      "blockedBy": []
+    },
+    {
+      "id": "DI20_PII_BOUNDARIES",
+      "layer": "api-integration+log-scan",
+      "given": "Narrative chứa số 12 chữ số và số điện thoại tổng hợp; lỗi validate trên field này",
+      "expected": "Error không echo giá trị; log/outbox/Kafka/Temporal/search/export/cache config không chứa narrative/answers; narrative lưu mã hóa (OD-09) và chỉ gửi AI nội địa sau redaction",
+      "blockedBy": ["#17", "#30", "#55"]
+    },
+    {
+      "id": "DI21_AI_SUGGESTION_PROVENANCE",
+      "layer": "api-integration",
+      "given": "Extraction đề xuất visitDate, totalRequested có evidence; một đề xuất không có evidence; benefit candidate không có clause trong policy version",
+      "expected": "Chỉ đề xuất có evidenceIds hợp lệ hiển thị; không evidence -> bị loại; candidate không clause không hiển thị là quyền lợi; giá trị chỉ vào answers khi user ACCEPT/EDIT; valueSource ghi AI_ACCEPTED/AI_EDITED",
+      "blockedBy": ["#30", "#32"]
+    },
+    {
+      "id": "DI22_AI_CONFLICT_QUESTIONS",
+      "layer": "api-integration",
+      "given": "Hai hóa đơn khác ngày khám; tổng OCR khác totalRequested user nhập",
+      "expected": "Questions CONFLICT cho visitDate và totalRequested; review bị chặn tới khi user chọn/nhập; AI không tự chọn",
+      "blockedBy": ["#30"]
+    },
+    {
+      "id": "DI23_AI_UNAVAILABLE_MANUAL_FALLBACK",
+      "layer": "browser-e2e",
+      "given": "AI worker timeout/503",
+      "expected": "Extraction run FAILED/TIMED_OUT; UI chuyển form thủ công cùng formVersion; submit vẫn được; không chặn nộp vì AI",
+      "blockedBy": []
+    },
+    {
+      "id": "DI24_WEB_ZALO_PARITY",
+      "layer": "browser-e2e + zalo-sdk",
+      "given": "Cùng config/answers trên web và Zalo; config dùng component không hỗ trợ trên kênh bind",
+      "expected": "Submission chuẩn hóa và reviewHash giống nhau; publish component không hỗ trợ -> 422 CHANNEL_UNSUPPORTED; Zalo bundle < 4MB đo được",
+      "blockedBy": ["#49", "#50"]
+    },
+    {
+      "id": "DI25_FUTURE_SCOPE_BLOCKED",
+      "layer": "api-integration",
+      "given": "Publish binding eventType DEATH hoặc CRITICAL_ILLNESS_DIAGNOSIS; benefitType HOSPITAL_INCOME",
+      "expected": "422 CONFIG_INVALID/SCOPE_NOT_APPROVED cho tới khi owner phê duyệt (OD-03) và có feature flag theo tenant",
+      "blockedBy": []
+    },
+    {
+      "id": "DI26_PAYLOAD_LIMITS",
+      "layer": "api-integration",
+      "given": "PATCH body 65 KiB; narrative 2001 ký tự; 51 documentIds; 81 answers",
+      "expected": "413/422 LIMIT_EXCEEDED trước khi parse sâu; không ghi DB",
+      "blockedBy": []
+    },
+    {
+      "id": "DI27_PERFORMANCE_WORKLOAD",
+      "layer": "load (k6 hoặc tương đương)",
+      "given": "Workload tham chiếu 11 §10 trên môi trường staging đã chốt",
+      "expected": "Báo cáo p50/p95/p99, throughput, error rate, CPU/RAM cho resolve/fetch/PATCH/review/submit, tách AI/upload; so với mục tiêu đề xuất, không tuyên bố SLA",
+      "blockedBy": ["OD-11", "#56"]
+    },
+    {
+      "id": "DI28_EXPORT_SEARCH_ALLOWLIST",
+      "layer": "api-integration",
+      "given": "Extension field searchable=false/exportable=false; export claim có answers",
+      "expected": "Search projection và export chỉ chứa field catalog đánh dấu cho phép và không PII; CSV formula injection được chặn",
+      "blockedBy": ["#47", "#52"]
+    }
+  ]
+}

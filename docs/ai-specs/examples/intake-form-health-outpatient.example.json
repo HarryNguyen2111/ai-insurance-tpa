@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "intake-form/1",
+  "formKey": "health_outpatient_v1",
+  "locale": "vi-VN",
+  "title": "Yêu cầu bồi thường khám ngoại trú",
+  "description": "Ví dụ tổng hợp cho spec #65. Không phải cấu hình của DNBH thật.",
+  "scope": {
+    "eventType": "OUTPATIENT_VISIT",
+    "benefitTypes": ["OUTPATIENT", "DENTAL"],
+    "channels": ["WEB", "ZALO"]
+  },
+  "steps": [
+    {
+      "stepKey": "evidence",
+      "title": "Chứng từ",
+      "help": "Tải hóa đơn và đơn thuốc; hệ thống sẽ đề xuất thông tin để bạn kiểm tra.",
+      "fieldKeys": ["insured_person", "invoice_docs", "prescription_docs", "narrative"]
+    },
+    {
+      "stepKey": "visit",
+      "title": "Thông tin khám",
+      "fieldKeys": ["visit_date", "provider", "diagnosis", "total_requested", "visit_reason", "referral_note"]
+    },
+    {
+      "stepKey": "extra",
+      "title": "Thông tin bổ sung",
+      "visibleWhen": { "field": "visit_reason", "op": "IN", "value": ["ACCIDENT", "FOLLOW_UP"] },
+      "fieldKeys": ["accident_date", "has_police_report"]
+    }
+  ],
+  "fields": [
+    {
+      "key": "insured_person",
+      "binding": { "kind": "CANONICAL", "path": "memberId" },
+      "component": "MEMBER_PICKER",
+      "label": "Người được bảo hiểm",
+      "requiredAt": "SUBMIT"
+    },
+    {
+      "key": "invoice_docs",
+      "binding": { "kind": "CANONICAL", "path": "documents" },
+      "component": "DOCUMENT_SLOT",
+      "label": "Hóa đơn",
+      "docTypes": ["INVOICE_PHOTO", "ITEMIZED_LIST"],
+      "constraints": { "minFiles": 1, "maxFiles": 10 },
+      "requiredAt": "SUBMIT"
+    },
+    {
+      "key": "prescription_docs",
+      "binding": { "kind": "CANONICAL", "path": "documents" },
+      "component": "DOCUMENT_SLOT",
+      "label": "Đơn thuốc / chỉ định",
+      "docTypes": ["PRESCRIPTION", "LAB_ORDER", "LAB_RESULT"],
+      "constraints": { "maxFiles": 10 },
+      "requiredAt": "NEVER"
+    },
+    {
+      "key": "narrative",
+      "binding": { "kind": "CANONICAL", "path": "narrative" },
+      "component": "TEXTAREA",
+      "label": "Mô tả ngắn sự kiện (không bắt buộc)",
+      "help": "Không nhập số CCCD, số điện thoại hoặc số tài khoản.",
+      "constraints": { "maxLength": 1000 },
+      "requiredAt": "NEVER",
+      "aiPrefill": false
+    },
+    {
+      "key": "visit_date",
+      "binding": { "kind": "CANONICAL", "path": "visitDate" },
+      "component": "DATE",
+      "label": "Ngày khám",
+      "constraints": { "dateRule": "NOT_FUTURE_AND_IN_COVERAGE", "maxAgeDays": 365 },
+      "requiredAt": "SUBMIT",
+      "aiPrefill": true,
+      "layout": { "webWidth": "HALF" }
+    },
+    {
+      "key": "provider",
+      "binding": { "kind": "CANONICAL", "path": "providerId" },
+      "component": "PROVIDER_PICKER",
+      "label": "Cơ sở y tế",
+      "requiredAt": "NEVER",
+      "aiPrefill": true,
+      "layout": { "webWidth": "HALF" }
+    },
+    {
+      "key": "diagnosis",
+      "binding": { "kind": "CANONICAL", "path": "icd10Code" },
+      "component": "ICD10_PICKER",
+      "label": "Chẩn đoán (ICD-10)",
+      "requiredAt": "NEVER",
+      "aiPrefill": true
+    },
+    {
+      "key": "total_requested",
+      "binding": { "kind": "CANONICAL", "path": "totalRequested" },
+      "component": "MONEY",
+      "label": "Tổng số tiền yêu cầu (VNĐ)",
+      "constraints": { "minMoney": "1000.00", "maxMoney": "200000000.00" },
+      "requiredAt": "SUBMIT",
+      "aiPrefill": true
+    },
+    {
+      "key": "visit_reason",
+      "binding": { "kind": "EXTENSION", "extensionKey": "x_visit_reason", "catalogVersion": 1 },
+      "component": "SINGLE_SELECT",
+      "label": "Lý do khám",
+      "options": [
+        { "value": "ILLNESS", "label": "Ốm bệnh" },
+        { "value": "ACCIDENT", "label": "Tai nạn" },
+        { "value": "FOLLOW_UP", "label": "Tái khám" }
+      ],
+      "requiredAt": "SUBMIT"
+    },
+    {
+      "key": "referral_note",
+      "binding": { "kind": "NONE" },
+      "component": "INFO",
+      "label": "Khám tai nạn cần thêm ngày xảy ra tai nạn ở bước tiếp theo.",
+      "requiredAt": "NEVER",
+      "visibleWhen": { "field": "visit_reason", "op": "EQ", "value": "ACCIDENT" }
+    },
+    {
+      "key": "accident_date",
+      "binding": { "kind": "EXTENSION", "extensionKey": "x_accident_date", "catalogVersion": 1 },
+      "component": "DATE",
+      "label": "Ngày xảy ra tai nạn",
+      "constraints": { "dateRule": "NOT_FUTURE" },
+      "requiredAt": "NEVER",
+      "requiredWhen": { "field": "visit_reason", "op": "EQ", "value": "ACCIDENT" },
+      "visibleWhen": { "field": "visit_reason", "op": "EQ", "value": "ACCIDENT" }
+    },
+    {
+      "key": "has_police_report",
+      "binding": { "kind": "EXTENSION", "extensionKey": "x_has_police_report", "catalogVersion": 1 },
+      "component": "BOOLEAN",
+      "label": "Có biên bản của cơ quan chức năng",
+      "requiredAt": "NEVER",
+      "visibleWhen": {
+        "all": [
+          { "field": "visit_reason", "op": "EQ", "value": "ACCIDENT" },
+          { "field": "accident_date", "op": "IS_SET" }
+        ]
+      }
+    }
+  ]
+}

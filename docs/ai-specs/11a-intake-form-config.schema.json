@@ -1,0 +1,798 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tpa.invalid/specs/11a-intake-form-config.schema.json",
+  "title": "IntakeFormConfigContent (PROPOSED, spec #65, NOT IMPLEMENTED)",
+  "description": "Immutable content of one published intake form version. Structural check only: the backend publish validator (11 §6.3) additionally enforces references, cycles, canonical tighten-only rules, channel support, catalog membership and the 64 KiB serialized limit. Contains no PII, no tenantId, no URLs, no HTML, no regex and no executable expressions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "formKey",
+    "locale",
+    "title",
+    "scope",
+    "steps",
+    "fields"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "intake-form/1"
+    },
+    "formKey": {
+      "$ref": "#/$defs/key"
+    },
+    "locale": {
+      "const": "vi-VN"
+    },
+    "title": {
+      "$ref": "#/$defs/plainText120"
+    },
+    "description": {
+      "$ref": "#/$defs/plainText500"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventType",
+        "benefitTypes",
+        "channels"
+      ],
+      "properties": {
+        "eventType": {
+          "$ref": "#/$defs/eventType"
+        },
+        "benefitTypes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/benefitType"
+          }
+        },
+        "channels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "WEB",
+              "ZALO"
+            ]
+          }
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 80,
+      "items": {
+        "$ref": "#/$defs/field"
+      }
+    }
+  },
+  "$defs": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,47}$"
+    },
+    "extensionKey": {
+      "type": "string",
+      "pattern": "^x_[a-z0-9_]{1,46}$"
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+    },
+    "plainText120": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[^<>{}`\\u0000-\\u001f\\u007f]+$"
+    },
+    "plainText500": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^[^<>{}`\\u0000-\\u0009\\u000b-\\u001f\\u007f]+$"
+    },
+    "money": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "eventType": {
+      "description": "Phase 1 implementable: OUTPATIENT_VISIT (OUTPATIENT|DENTAL), HOSPITALIZATION (INPATIENT). OPEN (OD-03): ACCIDENT_TREATMENT, MATERNITY. FUTURE (owner approval, publish blocked): CRITICAL_ILLNESS_DIAGNOSIS, DEATH, DISABILITY.",
+      "enum": [
+        "OUTPATIENT_VISIT",
+        "HOSPITALIZATION",
+        "ACCIDENT_TREATMENT",
+        "MATERNITY",
+        "CRITICAL_ILLNESS_DIAGNOSIS",
+        "DEATH",
+        "DISABILITY"
+      ]
+    },
+    "benefitType": {
+      "description": "Mirrors 02 BenefitType; not extended here.",
+      "enum": [
+        "OUTPATIENT",
+        "INPATIENT",
+        "DENTAL",
+        "MATERNITY",
+        "ACCIDENT",
+        "HOSPITAL_INCOME"
+      ]
+    },
+    "documentType": {
+      "description": "Mirrors 02 DocumentType; not extended here.",
+      "enum": [
+        "INVOICE_PHOTO",
+        "ITEMIZED_LIST",
+        "PRESCRIPTION",
+        "LAB_ORDER",
+        "LAB_RESULT",
+        "DISCHARGE_PAPER",
+        "VNEID_HISTORY"
+      ]
+    },
+    "canonicalPath": {
+      "description": "Closed allowlist of canonical intake fields (11 §5.1). Type/constraints come from the backend, config may only relabel, add help, reorder, require (never un-require a backend-required field) or tighten bounds.",
+      "enum": [
+        "memberId",
+        "visitDate",
+        "providerId",
+        "icd10Code",
+        "admitDatetime",
+        "dischargeDatetime",
+        "hasSurgeryCert",
+        "totalRequested",
+        "narrative",
+        "documents"
+      ]
+    },
+    "component": {
+      "enum": [
+        "INFO",
+        "BOOLEAN",
+        "SINGLE_SELECT",
+        "MULTI_SELECT",
+        "DATE",
+        "DATETIME",
+        "NUMBER_INT",
+        "MONEY",
+        "TEXTAREA",
+        "MEMBER_PICKER",
+        "PROVIDER_PICKER",
+        "ICD10_PICKER",
+        "DOCUMENT_SLOT"
+      ]
+    },
+    "binding": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "path"
+          ],
+          "properties": {
+            "kind": {
+              "const": "CANONICAL"
+            },
+            "path": {
+              "$ref": "#/$defs/canonicalPath"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "extensionKey",
+            "catalogVersion"
+          ],
+          "properties": {
+            "kind": {
+              "const": "EXTENSION"
+            },
+            "extensionKey": {
+              "$ref": "#/$defs/extensionKey"
+            },
+            "catalogVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "const": "NONE"
+            }
+          }
+        }
+      ]
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "label"
+      ],
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/code"
+        },
+        "label": {
+          "$ref": "#/$defs/plainText120"
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "minInt": {
+          "type": "integer",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "maxInt": {
+          "type": "integer",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "minMoney": {
+          "$ref": "#/$defs/money"
+        },
+        "maxMoney": {
+          "$ref": "#/$defs/money"
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2000
+        },
+        "minSelected": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "maxSelected": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "minFiles": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "maxFiles": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "dateRule": {
+          "enum": [
+            "NOT_FUTURE",
+            "NOT_BEFORE_COVERAGE_START",
+            "NOT_FUTURE_AND_IN_COVERAGE"
+          ]
+        },
+        "maxAgeDays": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3650
+        }
+      }
+    },
+    "leaf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "op"
+      ],
+      "properties": {
+        "field": {
+          "$ref": "#/$defs/key"
+        },
+        "op": {
+          "enum": [
+            "EQ",
+            "NEQ",
+            "IN",
+            "NOT_IN",
+            "GT",
+            "GTE",
+            "LT",
+            "LTE",
+            "IS_SET",
+            "IS_NOT_SET"
+          ]
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer",
+              "minimum": -1000000,
+              "maximum": 1000000
+            },
+            {
+              "$ref": "#/$defs/code"
+            },
+            {
+              "$ref": "#/$defs/money"
+            },
+            {
+              "$ref": "#/$defs/date"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/code"
+              }
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "enum": [
+                  "IS_SET",
+                  "IS_NOT_SET"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "then": {
+            "not": {
+              "required": [
+                "value"
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "value"
+            ]
+          }
+        }
+      ]
+    },
+    "cond1": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/leaf"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all"
+          ],
+          "properties": {
+            "all": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/leaf"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "any"
+          ],
+          "properties": {
+            "any": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/leaf"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "not"
+          ],
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/leaf"
+            }
+          }
+        }
+      ]
+    },
+    "cond2": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/leaf"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all"
+          ],
+          "properties": {
+            "all": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/cond1"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "any"
+          ],
+          "properties": {
+            "any": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/cond1"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "not"
+          ],
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/cond1"
+            }
+          }
+        }
+      ]
+    },
+    "condition": {
+      "description": "Max nesting depth 3 (cond3 > cond2 > cond1 > leaf). Leaf count per condition <= 10 and total per form <= 200 are enforced by the publish validator.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/leaf"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all"
+          ],
+          "properties": {
+            "all": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/cond2"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "any"
+          ],
+          "properties": {
+            "any": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/cond2"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "not"
+          ],
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/cond2"
+            }
+          }
+        }
+      ]
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "binding",
+        "component",
+        "label",
+        "requiredAt"
+      ],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/key"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "component": {
+          "$ref": "#/$defs/component"
+        },
+        "label": {
+          "$ref": "#/$defs/plainText120"
+        },
+        "help": {
+          "$ref": "#/$defs/plainText500"
+        },
+        "requiredAt": {
+          "enum": [
+            "NEVER",
+            "SUBMIT"
+          ]
+        },
+        "requiredWhen": {
+          "$ref": "#/$defs/condition"
+        },
+        "visibleWhen": {
+          "$ref": "#/$defs/condition"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/option"
+          }
+        },
+        "docTypes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/documentType"
+          }
+        },
+        "constraints": {
+          "$ref": "#/$defs/constraints"
+        },
+        "aiPrefill": {
+          "type": "boolean"
+        },
+        "layout": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "webWidth": {
+              "enum": [
+                "FULL",
+                "HALF"
+              ]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "component": {
+                "enum": [
+                  "SINGLE_SELECT",
+                  "MULTI_SELECT"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "then": {
+            "required": [
+              "options"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "options"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "component": {
+                "const": "DOCUMENT_SLOT"
+              }
+            },
+            "type": "object"
+          },
+          "then": {
+            "required": [
+              "docTypes"
+            ],
+            "properties": {
+              "binding": {
+                "properties": {
+                  "kind": {
+                    "const": "CANONICAL"
+                  },
+                  "path": {
+                    "const": "documents"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "else": {
+            "not": {
+              "required": [
+                "docTypes"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "component": {
+                "const": "INFO"
+              }
+            },
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "binding": {
+                "properties": {
+                  "kind": {
+                    "const": "NONE"
+                  }
+                },
+                "type": "object"
+              },
+              "requiredAt": {
+                "const": "NEVER"
+              }
+            },
+            "type": "object"
+          },
+          "else": {
+            "properties": {
+              "binding": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "CANONICAL",
+                      "EXTENSION"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "component": {
+                "const": "TEXTAREA"
+              }
+            },
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "binding": {
+                "properties": {
+                  "kind": {
+                    "const": "CANONICAL"
+                  },
+                  "path": {
+                    "const": "narrative"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        }
+      ]
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepKey",
+        "title",
+        "fieldKeys"
+      ],
+      "properties": {
+        "stepKey": {
+          "$ref": "#/$defs/key"
+        },
+        "title": {
+          "$ref": "#/$defs/plainText120"
+        },
+        "help": {
+          "$ref": "#/$defs/plainText500"
+        },
+        "visibleWhen": {
+          "$ref": "#/$defs/condition"
+        },
+        "fieldKeys": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/key"
+          }
+        }
+      }
+    }
+  }
+}
