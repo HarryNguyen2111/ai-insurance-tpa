@@ -3,6 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { BackendHealthReport } from '@/lib/core-api-health';
 import { describeHealth, type ClientHealth, type Tone } from '@/lib/backend-health-labels';
+import { Button } from '@/components/ui/button';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { RefreshCw } from 'lucide-react';
 
 const POLL_MS = 15000;
 
@@ -52,11 +55,15 @@ function useHealth(): Ctx {
 
 const DOT: Record<Tone, string> = { neutral: 'bg-slate-400', ok: 'bg-emerald-500', warn: 'bg-amber-500', bad: 'bg-rose-500' };
 const PILL: Record<Tone, string> = {
-  neutral: 'bg-slate-100 text-slate-700 ring-slate-300',
-  ok: 'bg-emerald-50 text-emerald-800 ring-emerald-300',
-  warn: 'bg-amber-50 text-amber-800 ring-amber-300',
-  bad: 'bg-rose-50 text-rose-800 ring-rose-300',
+  neutral: 'bg-muted text-muted-foreground ring-border',
+  ok: 'bg-emerald-50 text-emerald-800 ring-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-200 dark:ring-emerald-800',
+  warn: 'bg-amber-50 text-amber-800 ring-amber-300 dark:bg-amber-950/40 dark:text-amber-200 dark:ring-amber-800',
+  bad: 'bg-rose-50 text-rose-800 ring-rose-300 dark:bg-rose-950/40 dark:text-rose-200 dark:ring-rose-800',
 };
+
+export function useBackendHealthState(): string {
+  return describeHealth(useHealth().health).title;
+}
 
 export function BackendStatusPill() {
   const { health } = useHealth();
@@ -79,31 +86,30 @@ export function BackendStatusPanel() {
   const view = describeHealth(health);
   const report = health.kind === 'REPORT' ? health.report : null;
   return (
-    <section data-testid="backend-status-panel" data-state={view.state} className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-slate-900">Kết nối Web → Core API (NestJS)</h2>
-          <p className="mt-1 text-xs text-slate-500">Route cùng origin <code>/api/backend-health</code> → địa chỉ nội bộ cố định → <code>GET /health</code></p>
+    <Card data-testid="backend-status-panel" data-state={view.state}>
+      <CardHeader>
+        <CardTitle>Kết nối Web → Core API (NestJS)</CardTitle>
+        <CardDescription>Route cùng origin <code>/api/backend-health</code> → địa chỉ nội bộ cố định → <code>GET /health</code></CardDescription>
+        <CardAction>
+          <Button type="button" variant="outline" size="sm" onClick={refresh}><RefreshCw /> Kiểm tra lại</Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className={`flex items-start gap-3 rounded-lg p-4 ring-1 ${PILL[view.tone]}`}>
+          <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${DOT[view.tone]}`} aria-hidden />
+          <div>
+            <p data-testid="backend-status-title" className="font-semibold">{view.title}</p>
+            <p className="mt-1 text-sm">{view.explanation}</p>
+          </div>
         </div>
-        <button type="button" onClick={refresh}
-          className="rounded-xl bg-brand-700 px-3 py-2 text-sm font-medium text-white hover:bg-brand-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
-          Kiểm tra lại
-        </button>
-      </div>
-      <div className={`mt-4 flex items-start gap-3 rounded-2xl p-4 ring-1 ${PILL[view.tone]}`}>
-        <span className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ${DOT[view.tone]}`} aria-hidden />
-        <div>
-          <p data-testid="backend-status-title" className="font-semibold">{view.title}</p>
-          <p className="mt-1 text-sm">{view.explanation}</p>
-        </div>
-      </div>
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-        <div><dt className="text-slate-500">Phạm vi</dt><dd className="font-medium">Liveness tiến trình</dd></div>
-        <div><dt className="text-slate-500">HTTP</dt><dd data-testid="backend-http-status" className="font-medium">{report?.httpStatus ?? '—'}</dd></div>
-        <div><dt className="text-slate-500">Độ trễ</dt><dd className="font-medium">{report?.latencyMs != null ? `${report.latencyMs} ms` : '—'}</dd></div>
-        <div><dt className="text-slate-500">Kiểm tra lúc</dt><dd className="font-medium">{report ? formatTime(report.checkedAt) : '—'}</dd></div>
-      </dl>
-      {report && <p className="mt-3 text-xs text-slate-500">Mã chi tiết: <code data-testid="backend-detail">{report.detail}</code></p>}
-    </section>
+        <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+          <div><dt className="text-muted-foreground">Phạm vi</dt><dd className="font-medium">Liveness</dd></div>
+          <div><dt className="text-muted-foreground">HTTP</dt><dd data-testid="backend-http-status" className="font-medium">{report?.httpStatus ?? '—'}</dd></div>
+          <div><dt className="text-muted-foreground">Độ trễ</dt><dd className="font-medium">{report?.latencyMs != null ? `${report.latencyMs} ms` : '—'}</dd></div>
+          <div><dt className="text-muted-foreground">Kiểm tra lúc</dt><dd className="font-medium">{report ? formatTime(report.checkedAt) : '—'}</dd></div>
+        </dl>
+        {report && <p className="text-xs text-muted-foreground">Mã chi tiết: <code data-testid="backend-detail">{report.detail}</code></p>}
+      </CardContent>
+    </Card>
   );
 }

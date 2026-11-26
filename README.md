@@ -39,7 +39,9 @@ API, database adapter or custom workflow implementation is included.
 
 ## Local web + API preview (issue #68)
 
-`apps/workbench` is a Next.js App Router workspace shell (Vietnamese) with an honest
+`apps/workbench` is a Next.js App Router + shadcn/ui workspace (Vietnamese): a
+browser-only PROTOTYPE of organisation onboarding (create organisation, profile,
+logo, brand theme; backend proposal in `docs/ai-specs/13-…`), an honest
 claims-intake preview and a real same-origin connection to core-api `GET /health`.
 Start both compiled apps on loopback (no Docker needed):
 
