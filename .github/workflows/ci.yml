@@ -8,7 +8,7 @@ permissions:
 jobs:
   checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: pnpm/action-setup@f53f5227a9e83886ab598c617f3c170fab62f0d3 # v6
@@ -24,4 +24,16 @@ jobs:
           AO_SESSION_ID: ci-db-${{ github.run_id }}-${{ github.run_attempt }}
       - run: pnpm test:e2e
       - run: pnpm build
+      - name: Install Playwright Chromium for the FE+BE browser smoke
+        run: pnpm --filter @tpa/workbench exec playwright install --with-deps chromium
       - run: pnpm test:smoke
+      - name: Upload FE+BE smoke evidence (screenshots, Playwright report)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: workbench-smoke-evidence
+          path: |
+            apps/workbench/test-results/
+            apps/workbench/playwright-report/
+          if-no-files-found: warn
+          retention-days: 14

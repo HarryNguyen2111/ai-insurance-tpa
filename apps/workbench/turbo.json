@@ -1,0 +1,17 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ai-specs/examples/intake-form-health-outpatient.example.json"]
+    },
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ai-specs/examples/intake-form-health-outpatient.example.json"]
+    },
+    "test:smoke": {
+      "dependsOn": ["build", "@tpa/core-api#build"],
+      "cache": false,
+      "passThroughEnv": ["CI", "PLAYWRIGHT_BROWSERS_PATH"]
+    }
+  }
+}
