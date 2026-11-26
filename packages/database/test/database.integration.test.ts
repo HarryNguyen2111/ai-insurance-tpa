@@ -67,11 +67,11 @@ test('PG16: reproducible migrations, PT01 role subset and NUMERIC string roundtr
       await migrateDatabase(url('tpa_migrator'));
       await Promise.all([migrateDatabase(url('tpa_migrator')), migrateDatabase(url('tpa_migrator'))]);
       const { rows: [row] } = await migrator.query('SELECT count(*)::int AS count FROM drizzle.__drizzle_migrations');
-      assert.equal(row.count, 5);
+      assert.equal(row.count, 6);
       const { rows } = await admin.query("SELECT extname FROM pg_extension WHERE extname IN ('vector','pg_trgm','pgcrypto') ORDER BY extname");
       assert.deepEqual(rows.map(r => r.extname), ['pg_trgm', 'pgcrypto', 'vector']);
       const { rows: tables } = await migrator.query("SELECT tablename FROM pg_tables WHERE schemaname='tpa'");
-      assert.deepEqual(tables.map(r => r.tablename).sort(), ['audit_anchors', 'audit_chain_heads', 'audit_logs', 'idempotency_records']);
+      assert.deepEqual(tables.map(r => r.tablename).sort(), ['audit_anchors', 'audit_chain_heads', 'audit_logs', 'idempotency_records', 'outbox_events', 'outbox_relay_tenants']);
     });
     await t.test('incremental upgrade matches fresh database catalog/history', async () => {
       await admin.query('CREATE DATABASE tpa_upgrade');
@@ -105,12 +105,12 @@ test('PG16: reproducible migrations, PT01 role subset and NUMERIC string roundtr
       await cp(migrations, failed, { recursive: true });
       const journalPath = join(failed, 'meta/_journal.json');
       const journal = JSON.parse(await readFile(journalPath, 'utf8'));
-      journal.entries.push({ idx: 5, version: '7', when: journal.entries[4].when + 1, tag: '0005_failed', breakpoints: true });
+      journal.entries.push({ idx: 6, version: '7', when: journal.entries[5].when + 1, tag: '0006_failed', breakpoints: true });
       await writeFile(journalPath, JSON.stringify(journal));
-      await writeFile(join(failed, '0005_failed.sql'), 'CREATE TABLE tpa.must_rollback(id text);\n--> statement-breakpoint\nSELECT 1 / 0;');
+      await writeFile(join(failed, '0006_failed.sql'), 'CREATE TABLE tpa.must_rollback(id text);\n--> statement-breakpoint\nSELECT 1 / 0;');
       await assert.rejects(migrateDatabase(url('tpa_migrator'), failed));
       assert.equal((await migrator.query("SELECT to_regclass('tpa.must_rollback') AS name")).rows[0].name, null);
-      assert.equal((await migrator.query('SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations')).rows[0].n, 5);
+      assert.equal((await migrator.query('SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations')).rows[0].n, 6);
       await migrateDatabase(url('tpa_migrator')); // Lock/connection recovered.
     });
     await t.test('app role has no ownership, elevated attributes or role memberships', async () => {

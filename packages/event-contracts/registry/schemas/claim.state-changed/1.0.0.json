@@ -1,0 +1,109 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "tenantId",
+    "aggregateId",
+    "aggregateVersion",
+    "occurredAt",
+    "correlationId",
+    "causationId",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "claim.state-changed"
+      ]
+    },
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "tenantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fromStatus",
+        "toStatus"
+      ],
+      "properties": {
+        "fromStatus": {
+          "type": "string",
+          "enum": [
+            "PREFLIGHT",
+            "SUBMITTED",
+            "AI_PROCESSING",
+            "GREEN_STP",
+            "DOCTOR_REVIEW",
+            "FRAUD_HOLD",
+            "SUPPLEMENT_REQUIRED",
+            "WAITING_ORIGINAL_DOCS",
+            "EOB_READY",
+            "OTP_SIGNED",
+            "PAYOUT_PROCESSING",
+            "PAID",
+            "REJECTED",
+            "CLOSED_EXPIRED"
+          ]
+        },
+        "toStatus": {
+          "type": "string",
+          "enum": [
+            "PREFLIGHT",
+            "SUBMITTED",
+            "AI_PROCESSING",
+            "GREEN_STP",
+            "DOCTOR_REVIEW",
+            "FRAUD_HOLD",
+            "SUPPLEMENT_REQUIRED",
+            "WAITING_ORIGINAL_DOCS",
+            "EOB_READY",
+            "OTP_SIGNED",
+            "PAYOUT_PROCESSING",
+            "PAID",
+            "REJECTED",
+            "CLOSED_EXPIRED"
+          ]
+        }
+      }
+    }
+  },
+  "description": "Internal outbox envelope only (spec 06 minimal event), tenantId derived by trusted core. Payload carries only ClaimStatus codes (spec 03); no amounts, names, documents or free text. Partition by tenantId:aggregateId; consumer inbox dedup and aggregate version ordering required. No exactly-once promise.",
+  "$schema": "http://json-schema.org/draft-04/schema#"
+}
