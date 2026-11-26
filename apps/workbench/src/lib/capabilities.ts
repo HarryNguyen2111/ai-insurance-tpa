@@ -1,12 +1,14 @@
 // Truthful progress statement shown to the owner. Update only with merged, tested work.
 export const LIVE_CAPABILITIES = [
   { title: 'Kết nối Web → Core API', detail: 'Route cùng origin gọi GET /health của NestJS core-api đã build (liveness tiến trình).' },
-  { title: 'Khung workspace tiếng Việt', detail: 'Next.js App Router, điều hướng responsive, trạng thái lỗi/ngoại tuyến rõ ràng.' },
+  { title: 'Khung workspace tiếng Việt', detail: 'Next.js App Router + shadcn/ui, thanh điều hướng responsive, trạng thái lỗi/ngoại tuyến rõ ràng.' },
+  { title: 'Prototype tạo tổ chức', detail: 'Thông tin, logo, giao diện thương hiệu — chỉ lưu trong trình duyệt, chưa có máy chủ.' },
   { title: 'Xem trước biểu mẫu tiếp nhận', detail: 'Hiển thị cấu hình ví dụ tổng hợp từ spec 11; nháp chỉ trong bộ nhớ trang, không gửi đi.' },
 ] as const;
 
 export const PENDING_CAPABILITIES = [
   { title: 'Đăng nhập OIDC & membership workspace', ref: '#21', detail: 'Chưa có danh tính; trang này không xác thực ai và không chọn tenant.' },
+  { title: 'Lưu tổ chức, logo, giao diện phía máy chủ', ref: 'spec 13 · F3/F5', detail: 'Đề xuất API/DB trong docs/ai-specs/13; chờ chốt OD-01/02/05.' },
   { title: 'Tải chứng từ qua Pre-signed URL', ref: '#26', detail: 'Nút tải lên bị khóa cho tới khi có backend upload có phân quyền và quét file.' },
   { title: 'Tạo / nộp hồ sơ', ref: '#37 · F6', detail: 'Core API hiện trả 404 cho POST /v1/claims; giao diện không giả lập nộp thành công.' },
   { title: 'Trích xuất AI có bằng chứng', ref: '#30 · #31 · F7', detail: 'Chưa chạy AI; nhãn "AI có thể đề xuất" chỉ mô tả cấu hình.' },

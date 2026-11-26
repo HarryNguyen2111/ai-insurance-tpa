@@ -1,17 +1,35 @@
 {
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "build": {
-      "outputs": [".next/**", "!.next/cache/**"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ai-specs/examples/intake-form-health-outpatient.example.json"]
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/ai-specs/examples/intake-form-health-outpatient.example.json"
+      ]
     },
     "test": {
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ai-specs/examples/intake-form-health-outpatient.example.json"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/ai-specs/examples/intake-form-health-outpatient.example.json",
+        "$TURBO_ROOT$/docs/ai-specs/13-workspace-onboarding-and-branding-proposal.md"
+      ]
     },
     "test:smoke": {
-      "dependsOn": ["build", "@tpa/core-api#build"],
+      "dependsOn": [
+        "build",
+        "@tpa/core-api#build"
+      ],
       "cache": false,
-      "passThroughEnv": ["CI", "PLAYWRIGHT_BROWSERS_PATH"]
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BROWSERS_PATH"
+      ]
     }
   }
 }

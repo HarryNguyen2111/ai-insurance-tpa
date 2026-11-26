@@ -66,7 +66,7 @@ test('starts compiled API + production web on loopback, confirms READY, cleans u
 
     const page = await fetch(`${webUrl}/`);
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /Không gian làm việc TPA/);
+    assert.match(await page.text(), /<title>TPA Workspace — Bản xem trước<\/title>/);
     const link = await (await fetch(`${webUrl}/api/backend-health`)).json();
     assert.equal(link.state, 'ONLINE');
     const health = await fetch(`http://127.0.0.1:${env.TPA_PREVIEW_API_PORT}/health`);
