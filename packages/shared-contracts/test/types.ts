@@ -35,3 +35,22 @@ const slugEdit: components['schemas']['WorkspaceProfileUpdateRequest'] = {expect
 const badRadius: components['schemas']['WorkspaceTheme'] = {primaryColor: '#0f766e', radius: 'XL', mode: 'LIGHT', sidebarStyle: 'LIGHT'};
 const workspaceResult: paths['/v1/admin/workspaces/{workspaceId}/theme']['put']['responses']['200']['content']['application/json']['warnings'] = [];
 void noAdmin; void slugEdit; void badRadius; void workspaceResult;
+// VWF-01 (#78) workflow contract compile-time boundaries.
+const taskAction: paths['/v1/workflow/tasks/{taskId}/actions']['post']['requestBody']['content']['application/json'] = {
+  expectedTaskVersion: 2, actionId: 'REQUEST_SUPPLEMENT', requestedDocumentTypes: ['ITEMIZED_LIST'], reasonCodes: ['MISSING_DOCUMENT'],
+};
+validate('WorkflowTaskActionRequest', taskAction);
+// @ts-expect-error AI proposal actions are not task actions for bearer callers.
+const aiAction: components['schemas']['WorkflowTaskActionId'] = 'PROPOSE_EXTRACTION';
+// @ts-expect-error There is no approve/reject/pay action in the workflow vocabulary.
+const approve: components['schemas']['WorkflowActionId'] = 'APPROVE_CLAIM';
+// @ts-expect-error Publishing is bound to the reviewed content hash.
+const unboundPublish: components['schemas']['WorkflowPublishRequest'] = {expectedRevision: 1};
+// @ts-expect-error AI service actors are never task candidates.
+const aiCandidate: components['schemas']['WorkflowCandidateRole'] = 'AI_SERVICE_ACTOR';
+// @ts-expect-error Bearer actor scope is human only.
+const aiScope: components['schemas']['WorkflowActorScope']['actorKind'] = 'AI_SERVICE';
+const pinned: components['schemas']['WorkflowPinnedRef'] = {key: 'synthetic.vlm', version: 1, hash: 'a'.repeat(64)};
+// @ts-expect-error Pinned references need an exact numeric version.
+const latest: components['schemas']['WorkflowPinnedRef'] = {key: 'synthetic.vlm', version: 'latest', hash: 'a'.repeat(64)};
+void aiAction; void approve; void unboundPublish; void aiCandidate; void aiScope; void pinned; void latest;
