@@ -31,12 +31,27 @@ returned only after COMMIT. Nothing is published inline.
 | relay holding rows, before publish | PostgreSQL aborts the tx; row stays pending |
 | after broker ack, before mark COMMIT | **same eventId published again** on recovery |
 
-Consumers must dedup by `eventId` (header `tpa-event-id`) — inbox, ordering,
-DLQ and replay are EVT-02 (#24). No exactly-once claim is made.
+Consumers must dedup by `eventId` (header `tpa-event-id`); the inbox consumer
+runtime below does this. No exactly-once claim is made.
 
 `published_at` moves only NULL→now(); envelopes are immutable; pending rows
 cannot be deleted/truncated (guard trigger applies even to the table owner).
 Retention purge of published rows is a separately reviewed operator job (not here).
+
+## Inbox consumers (EVT-02 #24)
+`createInboxConsumer` (`src/consumers/consumer.ts`) runs one `InboxHandler` as the Kafka consumer
+group `consumerName`, with auto-commit OFF.
+- **Dedup and effect:** `processInboxEvent` (`@tpa/database/inbox`) performs the dedup check, the
+  aggregate-version ordering, the handler effect and the inbox row in **one**
+  `withTenantTransaction`. The offset is committed only after that commits.
+- **Ordering:** old versions are `STALE` and never roll the projection back. A gap is reconciled from
+  an authorized snapshot (`reconcile`) or parked as `VERSION_GAP`. Later versions park behind a parked
+  one (`BLOCKED_BY_PARKED`).
+- **Failures:** retries are bounded (`maxAttempts`, exponential backoff, heartbeats), then the event
+  is parked as `RETRY_EXHAUSTED`. Poison records are quarantined as hash plus coordinates only.
+- **Alerts and replay:** owner alerts go through `AlertSink`. Replay and discard are authorized and
+  audited. See `docs/runbooks/event-inbox-replay.md`.
+- No exactly-once claim: duplicates are detected and skipped.
 
 ## Run
 ```
@@ -52,7 +67,10 @@ fixed messages and counters only.
 
 ## Tests
 - `pnpm --filter @tpa/event-worker test` — relay loop, config, record mapping (no Docker).
-- `pnpm --filter @tpa/event-worker test:e2e` (run by CI `pnpm test:e2e`) — Docker
+- `test/inbox-consumer.e2e.test.ts`: the EVT-02 consumer on Docker PG16 plus Kafka. Covers
+  duplicates, out-of-order events, gaps, poison, bounded retry and parking, CLI replay, SIGKILL after
+  commit and mid-effect, rebalance, and PT17.
+- `pnpm --filter @tpa/event-worker test:e2e` (run by CI `pnpm test:e2e`): Docker
   PG16 + the Kafka image pinned in `infra/compose/compose.yaml`: PT05 crash after
   commit / before publish / after ack (SIGKILLed child), ordering per key, real
   `main.ts` process with graceful SIGTERM, and PT17 marker scan over Kafka

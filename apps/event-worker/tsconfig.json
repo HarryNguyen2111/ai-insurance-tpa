@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
-    "rootDir": ".",
+    "rootDir": "../..",
     "outDir": "dist",
     "resolveJsonModule": true,
     "erasableSyntaxOnly": true,
