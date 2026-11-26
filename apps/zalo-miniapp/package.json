@@ -1,0 +1,32 @@
+{
+  "name": "@tpa/zalo-miniapp",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "description": "SYNTHETIC browser-only prototype of the TPA customer Zalo Mini App (issue #74). No backend, auth, storage or real Zalo identity.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 3200",
+    "build": "vite build && node scripts/check-bundle-size.mjs",
+    "preview": "vite preview --host 127.0.0.1 --port 3201 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test src/lib/*.test.ts",
+    "test:smoke": "playwright test"
+  },
+  "dependencies": {
+    "decimal.js": "10.6.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zmp-sdk": "2.54.0",
+    "zmp-ui": "1.11.15-2"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "18.3.32",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "4.7.0",
+    "typescript": "6.0.3",
+    "vite": "5.4.21"
+  }
+}

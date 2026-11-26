@@ -37,3 +37,13 @@ jobs:
             apps/workbench/playwright-report/
           if-no-files-found: warn
           retention-days: 14
+      - name: Upload Zalo Mini App prototype evidence (bundle size, screenshots, Playwright report)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: zalo-miniapp-smoke-evidence
+          path: |
+            apps/zalo-miniapp/test-results/
+            apps/zalo-miniapp/playwright-report/
+          if-no-files-found: warn
+          retention-days: 14

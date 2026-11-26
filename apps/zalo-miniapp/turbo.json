@@ -1,0 +1,10 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "test:smoke": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "passThroughEnv": ["CI", "PLAYWRIGHT_BROWSERS_PATH"]
+    }
+  }
+}
