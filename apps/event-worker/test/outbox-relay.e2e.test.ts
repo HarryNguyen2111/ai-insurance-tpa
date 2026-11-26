@@ -117,10 +117,12 @@ test('PT05/PT17: outbox relay crash recovery and PII-free events on PG16 + Compo
     const logLines: string[] = [];
     const logger: RelayLogger = { info: (m, f) => logLines.push(JSON.stringify({ m, f })), error: (m, f) => logLines.push(JSON.stringify({ m, f })) };
     const relay = new OutboxRelay({ store, publisher, batchSize: 50, maxTenantsPerCycle: 100, logger });
+    const pendingCount = (tenant: string) => db.withTenantTransaction(tenant, async tx => (await tx.query(
+      'SELECT count(*)::int AS n FROM tpa.outbox_events WHERE published_at IS NULL')).rows[0].n as number);
     /** Recover until the tenant has nothing pending (another relay's lock may still be draining). */
     const recover = (tenant: string) => waitFor('relay recovery', async () => {
       await relay.runOnce();
-      return (await store.pendingTenants(1000)).includes(tenant) ? undefined : true;
+      return (await pendingCount(tenant)) === 0 ? true : undefined;
     }, 30_000);
 
     async function readAll(): Promise<Consumed[]> {

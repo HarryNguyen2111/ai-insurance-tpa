@@ -96,8 +96,10 @@ test('EVT-01 outbox: PG16 + PgBouncer atomic business/audit/outbox, RLS, immutab
       `SELECT (SELECT count(*)::int FROM tpa.isolation_parent WHERE id=$1) AS business,
               (SELECT count(*)::int FROM tpa.audit_logs WHERE entity_id=$1) AS audit,
               (SELECT count(*)::int FROM tpa.outbox_events WHERE aggregate_id=$1) AS outbox`, [aggregate])).rows[0]);
+    const pendingCount = (tenant: string) => direct.withTenantTransaction(tenant, async tx => (await tx.query(
+      'SELECT count(*)::int AS n FROM tpa.outbox_events WHERE published_at IS NULL')).rows[0].n as number);
     const drainAll = async (store: OutboxRelayStore, sink: PendingOutboxEvent[]) => {
-      for (const tenant of await store.pendingTenants(100)) {
+      for (const tenant of await store.relayTenants(null, 1000)) {
         while ((await store.relayTenantBatch(tenant, 50, async events => { sink.push(...events); })).published > 0) { /* drain */ }
       }
     };
@@ -179,10 +181,15 @@ test('EVT-01 outbox: PG16 + PgBouncer atomic business/audit/outbox, RLS, immutab
       const stamp = "UPDATE tpa.outbox_events SET published_at='2000-01-01' WHERE event_id=$1 RETURNING published_at > now() - interval '1 minute' AS server";
       assert.equal((await direct.withTenantTransaction(A, tx => tx.query(stamp, where))).rows[0].server, true, 'server clock stamps publication');
       await assert.rejects(direct.withTenantTransaction(A, tx => tx.query(stamp, where)), sqlCode('42501'), 'published rows are immutable');
-      // Discovery returns tenant UUIDs only and is the sole cross-tenant capability.
+      // Discovery returns tenant UUIDs only and is the sole cross-tenant capability;
+      // the registry itself is not readable or writable by the app role.
       const { rows: columns } = await admin.query(`SELECT proname, prosecdef, pg_get_function_result(oid) AS result FROM pg_proc
-        WHERE pronamespace='tpa'::regnamespace AND proname='outbox_pending_tenants'`);
-      assert.deepEqual(columns, [{ proname: 'outbox_pending_tenants', prosecdef: true, result: 'TABLE(tenant_id uuid)' }]);
+        WHERE pronamespace='tpa'::regnamespace AND proname='outbox_relay_tenant_ids'`);
+      assert.deepEqual(columns, [{ proname: 'outbox_relay_tenant_ids', prosecdef: true, result: 'TABLE(tenant_id uuid)' }]);
+      await assert.rejects(raw.query('SELECT * FROM tpa.outbox_relay_tenants'), sqlCode('42501'));
+      await assert.rejects(raw.query('INSERT INTO tpa.outbox_relay_tenants VALUES (gen_random_uuid())'), sqlCode('42501'));
+      assert.equal((await admin.query("SELECT count(*)::int AS n FROM pg_policies WHERE schemaname='tpa' AND tablename='outbox_events'")).rows[0].n, 1,
+        'single tenant_isolation policy; no non-tenant RLS policy'); 
       assert.deepEqual((await admin.query(`SELECT privilege_type FROM information_schema.role_table_grants
         WHERE grantee='tpa_app' AND table_name='outbox_events' ORDER BY 1`)).rows.map(r => r.privilege_type), ['INSERT', 'SELECT']);
       assert.deepEqual((await admin.query(`SELECT column_name, privilege_type FROM information_schema.column_privileges
@@ -192,7 +199,7 @@ test('EVT-01 outbox: PG16 + PgBouncer atomic business/audit/outbox, RLS, immutab
     await t.test('relay: discovery, ordered batches, mark only after publish resolves, failure leaves rows pending', async () => {
       const drained: PendingOutboxEvent[] = [];
       await drainAll(relayPooled, drained); // clear rows from earlier subtests
-      assert.deepEqual(await relayPooled.pendingTenants(10), []);
+      assert.deepEqual([await pendingCount(A), await pendingCount(B)], [0, 0]);
       const aggregate = randomUUID();
       const versions = [1, 2, 3];
       await submit(pooled, A, aggregate, [eventFor(aggregate, 1)]);
@@ -202,7 +209,10 @@ test('EVT-01 outbox: PG16 + PgBouncer atomic business/audit/outbox, RLS, immutab
       }
       const other = randomUUID();
       await submit(pooled, B, other);
-      assert.deepEqual(await relayPooled.pendingTenants(10), [A, B], 'oldest pending tenant first, ids only');
+      const registered = await relayPooled.relayTenants(null, 1000);
+      assert.deepEqual(registered, [A, B].sort(), 'registered tenant UUIDs only, keyset (UUID) order');
+      assert.deepEqual(await relayPooled.relayTenants(registered[0], 1), [registered[1]], 'keyset paging');
+      assert.deepEqual(await relayPooled.relayTenants(registered[1], 10), []);
 
       await assert.rejects(relayPooled.relayTenantBatch(A, 10, async () => { throw new Error('broker unavailable'); }), /broker unavailable/);
       const pending = await direct.withTenantTransaction(A, async tx => (await tx.query(
@@ -222,7 +232,7 @@ test('EVT-01 outbox: PG16 + PgBouncer atomic business/audit/outbox, RLS, immutab
       assert.deepEqual(seen.map(e => JSON.parse(e.value).aggregateVersion), versions, 'per-aggregate order preserved');
       assert.ok(seen.every(e => e.partitionKey === `${A}:${aggregate}` && e.topic === 'claim'));
       assert.ok(seen.every(e => !e.value.includes(MARKER) && !e.value.includes(' ')), 'compact envelope, no business PII');
-      assert.deepEqual(await relayPooled.pendingTenants(10), [B]);
+      assert.deepEqual([await pendingCount(A), await pendingCount(B)], [0, 1]);
       assert.deepEqual(await relayPooled.relayTenantBatch(A, 50, async () => { throw new Error('not called'); }), { locked: true, published: 0 });
     });
 
@@ -241,7 +251,7 @@ test('EVT-01 outbox: PG16 + PgBouncer atomic business/audit/outbox, RLS, immutab
       const sink: PendingOutboxEvent[] = [];
       await drainAll(relayB, sink);
       assert.ok(sink.every(e => JSON.parse(e.value).tenantId === B), 'only tenant B remained');
-      await assert.rejects(track(createOutboxRelayStore({ connectionString: url('tpa_migrator'), max: 1 })).pendingTenants(1), /tpa_app/);
+      await assert.rejects(track(createOutboxRelayStore({ connectionString: url('tpa_migrator'), max: 1 })).relayTenants(null, 1), /tpa_app/);
     });
   } finally {
     await Promise.allSettled(closers.map(c => c.close()));

@@ -15,9 +15,9 @@ function pending(tenant: string, n: number): PendingOutboxEvent[] {
   });
 }
 /** Mirrors the real store contract: mark only after publish resolves; throw leaves rows pending. */
-function fakeStore(rows: Map<string, PendingOutboxEvent[]>, busy = new Set<string>()): Pick<OutboxRelayStore, 'pendingTenants' | 'relayTenantBatch'> {
+function fakeStore(rows: Map<string, PendingOutboxEvent[]>, busy = new Set<string>()): Pick<OutboxRelayStore, 'relayTenants' | 'relayTenantBatch'> {
   return {
-    async pendingTenants(limit) { return [...rows].filter(([, r]) => r.length > 0).map(([t]) => t).slice(0, limit); },
+    async relayTenants(after, limit) { return [...rows.keys()].sort().filter(t => after === null || t > after).slice(0, limit); },
     async relayTenantBatch(tenant, limit, publish) {
       if (busy.has(tenant)) return { locked: false, published: 0 };
       const batch = (rows.get(tenant) ?? []).slice(0, limit);
@@ -37,13 +37,14 @@ const capture = () => {
 test('relay drains every tenant in batches and publishes in outbox order', async () => {
   const [A, B] = [randomUUID(), randomUUID()];
   const rows = new Map([[A, pending(A, 5)], [B, pending(B, 1)]]);
-  const expected = [...rows.get(A)!, ...rows.get(B)!].map(e => e.eventId);
+  // Tenants are visited in keyset (UUID) order; each tenant's rows in outbox order.
+  const expected = [A, B].sort().flatMap(t => rows.get(t)!.map(e => e.eventId));
   const published: string[] = [];
   const relay = new OutboxRelay({ store: fakeStore(rows), publisher: { async publish(events) { published.push(...events.map(e => e.eventId)); } },
     batchSize: 2, maxTenantsPerCycle: 10 });
   assert.deepEqual(await relay.runOnce(), { tenants: 2, published: 6, busyTenants: 0, failedTenants: 0 });
   assert.deepEqual(published, expected);
-  assert.deepEqual(await relay.runOnce(), { tenants: 0, published: 0, busyTenants: 0, failedTenants: 0 });
+  assert.deepEqual(await relay.runOnce(), { tenants: 2, published: 0, busyTenants: 0, failedTenants: 0 });
 });
 
 test('publish failure leaves rows pending, isolates the tenant, and logs no data', async () => {
@@ -61,6 +62,13 @@ test('publish failure leaves rows pending, isolates the tenant, and logs no data
   assert.ok(lines.length > 0 && lines.every(l => !l.includes(SECRET) && !l.includes(A)), 'logs carry counters only');
 });
 
+test('tenant discovery pages by keyset so no tenant is starved by the page size', async () => {
+  const tenants = Array.from({ length: 7 }, () => randomUUID());
+  const rows = new Map(tenants.map(t => [t, pending(t, 1)]));
+  const relay = new OutboxRelay({ store: fakeStore(rows), publisher: { async publish() {} }, batchSize: 10, maxTenantsPerCycle: 3 });
+  assert.deepEqual(await relay.runOnce(), { tenants: 7, published: 7, busyTenants: 0, failedTenants: 0 });
+});
+
 test('a tenant owned by another replica is skipped, not reordered', async () => {
   const A = randomUUID();
   const rows = new Map([[A, pending(A, 3)]]);
@@ -74,7 +82,7 @@ test('run() backs off on failure and stops promptly on abort', async () => {
   let discoveries = 0;
   const controller = new AbortController();
   const relay = new OutboxRelay({
-    store: { async pendingTenants() { discoveries++; if (discoveries === 3) controller.abort(); throw new Error('db down'); },
+    store: { async relayTenants() { discoveries++; if (discoveries === 3) controller.abort(); throw new Error('db down'); },
       async relayTenantBatch() { throw new Error('unreachable'); } },
     publisher: { async publish() {} }, batchSize: 1, maxTenantsPerCycle: 1, pollIntervalMs: 10, maxBackoffMs: 40,
   });

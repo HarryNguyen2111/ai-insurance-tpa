@@ -74,8 +74,11 @@ export interface PendingOutboxEvent {
 }
 export interface RelayBatchResult { locked: boolean; published: number }
 export interface OutboxRelayStore {
-  /** Tenant UUIDs with unpublished events, oldest first. Never returns envelopes. */
-  pendingTenants(limit: number): Promise<string[]>;
+  /**
+   * Keyset page (ascending UUID) of tenants that have ever emitted outbox events.
+   * Returns tenant UUIDs only, never envelopes or pending counts.
+   */
+  relayTenants(after: string | null, limit: number): Promise<string[]>;
   /**
    * In ONE tenant transaction: take the tenant's relay slot (advisory xact lock,
    * so per-aggregate order holds across relay replicas), lock its oldest
@@ -92,10 +95,11 @@ export function createOutboxRelayStore(config: pg.PoolConfig): OutboxRelayStore 
   const db = createTenantDatabase(config);
   const discovery = new pg.Pool({ ...config, max: 1 });
   const store: OutboxRelayStore = {
-    async pendingTenants(limit: number): Promise<string[]> {
+    async relayTenants(after: string | null, limit: number): Promise<string[]> {
       if (!Number.isInteger(limit) || limit < 1 || limit > 1000) throw new Error('Tenant discovery limit must be 1..1000');
       const { rows: [row] } = await discovery.query<{ role: string; tenants: string[] }>(
-        'SELECT current_user AS role, ARRAY(SELECT tenant_id::text FROM tpa.outbox_pending_tenants($1)) AS tenants', [limit]);
+        'SELECT current_user AS role, ARRAY(SELECT tenant_id::text FROM tpa.outbox_relay_tenant_ids($1::uuid, $2)) AS tenants',
+        [after, limit]);
       if (row.role !== 'tpa_app') throw new Error('Outbox relay requires the unprivileged tpa_app role');
       return row.tenants;
     },
@@ -108,8 +112,10 @@ export function createOutboxRelayStore(config: pg.PoolConfig): OutboxRelayStore 
         if (!slot.locked) return { locked: false, published: 0 };
         const { rows } = await tx.query<{ seq: string; event_id: string; event_type: string; schema_version: string;
           topic: string; partition_key: string; envelope: string }>(
-          `SELECT seq::text, event_id::text, event_type, schema_version, topic, partition_key, envelope::text AS envelope
-           FROM tpa.outbox_events WHERE published_at IS NULL ORDER BY seq LIMIT $1 FOR UPDATE`, [limit]);
+          // ORDER BY the table column: a bare `seq` would bind to the text output alias.
+          `SELECT o.seq::text AS seq, o.event_id::text AS event_id, o.event_type, o.schema_version, o.topic, o.partition_key,
+                  o.envelope::text AS envelope
+           FROM tpa.outbox_events o WHERE o.published_at IS NULL ORDER BY o.seq LIMIT $1 FOR UPDATE`, [limit]);
         if (rows.length === 0) return { locked: true, published: 0 };
         const events = rows.map(row => {
           const envelope = JSON.parse(row.envelope) as unknown;

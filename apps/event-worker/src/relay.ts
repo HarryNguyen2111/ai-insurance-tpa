@@ -8,7 +8,7 @@ export const silentLogger: RelayLogger = { info() {}, error() {} };
 
 export interface RelayCycle { tenants: number; published: number; busyTenants: number; failedTenants: number }
 export interface OutboxRelayOptions {
-  store: Pick<OutboxRelayStore, 'pendingTenants' | 'relayTenantBatch'>;
+  store: Pick<OutboxRelayStore, 'relayTenants' | 'relayTenantBatch'>;
   publisher: EventPublisher;
   batchSize: number;
   maxTenantsPerCycle: number;
@@ -32,26 +32,38 @@ export class OutboxRelay {
     this.options = { pollIntervalMs: 500, maxBackoffMs: 30_000, logger: silentLogger, ...options };
   }
 
-  /** One discovery + drain pass. Per-tenant failures are isolated and counted. */
+  /**
+   * One pass over every registered tenant (keyset pages of `maxTenantsPerCycle`,
+   * so no tenant is starved). Per-tenant failures are isolated and counted.
+   */
   async runOnce(): Promise<RelayCycle> {
-    const { store, publisher, batchSize, maxTenantsPerCycle, logger } = this.options;
-    const tenants = await store.pendingTenants(maxTenantsPerCycle);
-    const cycle: RelayCycle = { tenants: tenants.length, published: 0, busyTenants: 0, failedTenants: 0 };
-    for (const tenant of tenants) {
-      try {
-        while (true) {
-          const result = await store.relayTenantBatch(tenant, batchSize, events => publisher.publish(events));
-          if (!result.locked) { cycle.busyTenants++; break; } // another replica owns this tenant now
-          cycle.published += result.published;
-          if (result.published < batchSize) break;
-        }
-      } catch (error) {
-        cycle.failedTenants++;
-        logger.error('outbox relay tenant batch failed; rows stay pending', { errorName: error instanceof Error ? error.name : 'unknown' });
-      }
+    const { store, batchSize, maxTenantsPerCycle } = this.options;
+    const cycle: RelayCycle = { tenants: 0, published: 0, busyTenants: 0, failedTenants: 0 };
+    let after: string | null = null;
+    while (true) {
+      const page = await store.relayTenants(after, maxTenantsPerCycle);
+      for (const tenant of page) await this.drainTenant(tenant, batchSize, cycle);
+      cycle.tenants += page.length;
+      if (page.length < maxTenantsPerCycle) break;
+      after = page[page.length - 1];
     }
-    if (cycle.published > 0 || cycle.failedTenants > 0) logger.info('outbox relay cycle', { ...cycle });
+    if (cycle.published > 0 || cycle.failedTenants > 0) this.options.logger.info('outbox relay cycle', { ...cycle });
     return cycle;
+  }
+
+  private async drainTenant(tenant: string, batchSize: number, cycle: RelayCycle): Promise<void> {
+    const { store, publisher, logger } = this.options;
+    try {
+      while (true) {
+        const result = await store.relayTenantBatch(tenant, batchSize, events => publisher.publish(events));
+        if (!result.locked) { cycle.busyTenants++; break; } // another replica owns this tenant now
+        cycle.published += result.published;
+        if (result.published < batchSize) break;
+      }
+    } catch (error) {
+      cycle.failedTenants++;
+      logger.error('outbox relay tenant batch failed; rows stay pending', { errorName: error instanceof Error ? error.name : 'unknown' });
+    }
   }
 
   /** Poll until `signal` aborts. Backs off exponentially while failures persist. */

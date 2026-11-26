@@ -10,8 +10,12 @@ any failure rolls back business state, audit and outbox together. Success is
 returned only after COMMIT. Nothing is published inline.
 
 ## Relay
-1. `tpa.outbox_pending_tenants()` (SECURITY DEFINER) returns only tenant UUIDs
-   with unpublished rows. It is the relay's single cross-tenant capability.
+1. An AFTER INSERT trigger registers each emitting tenant in
+   `tpa.outbox_relay_tenants` (UUID only; no app grant). The relay pages through
+   it with `tpa.outbox_relay_tenant_ids(after, limit)` (SECURITY DEFINER, keyset)
+   — its single cross-tenant capability. No non-tenant RLS policy exists on the
+   outbox. Each cycle visits every registered tenant (one cheap tenant tx each);
+   a pending-tenant hint is a possible optimisation if tenant counts grow large.
 2. Per tenant, inside a tenant transaction: `pg_try_advisory_xact_lock` (one
    active relay per tenant, so replicas cannot reorder an aggregate), lock the
    oldest unpublished rows, re-validate each envelope, publish.

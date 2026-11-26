@@ -38,14 +38,8 @@ ALTER TABLE tpa.outbox_events ENABLE ROW LEVEL SECURITY;
 --> statement-breakpoint
 ALTER TABLE tpa.outbox_events FORCE ROW LEVEL SECURITY;
 --> statement-breakpoint
-CREATE POLICY tenant_isolation ON tpa.outbox_events TO tpa_app
+CREATE POLICY tenant_isolation ON tpa.outbox_events
   USING (tenant_id = tpa.current_tenant_id()) WITH CHECK (tenant_id = tpa.current_tenant_id());
---> statement-breakpoint
--- Relay discovery only: the owner (used solely by the SECURITY DEFINER function
--- below) sees which tenants have unpublished rows. Owner could disable RLS anyway;
--- this grants tpa_app nothing beyond the function's tenant-id result.
-CREATE POLICY relay_discovery ON tpa.outbox_events FOR SELECT TO tpa_migrator
-  USING (published_at IS NULL);
 --> statement-breakpoint
 -- No DELETE/TRUNCATE. The app may only stamp published_at (column grant).
 GRANT SELECT, INSERT ON tpa.outbox_events TO tpa_app;
@@ -91,15 +85,37 @@ FOR EACH ROW EXECUTE FUNCTION tpa.guard_outbox_event();
 CREATE TRIGGER trg_outbox_no_truncate BEFORE TRUNCATE ON tpa.outbox_events
 FOR EACH STATEMENT EXECUTE FUNCTION tpa.guard_outbox_event();
 --> statement-breakpoint
--- Returns only tenant UUIDs with pending events (oldest first), never envelopes.
--- The relay then reads/marks each tenant's rows inside withTenantTransaction.
-CREATE FUNCTION tpa.outbox_pending_tenants(p_limit integer) RETURNS TABLE (tenant_id uuid)
+-- Relay discovery without any non-tenant RLS policy: each tenant that ever
+-- emitted an event is registered here (tenant UUID + time only, no event data).
+-- No tpa_app grant; the relay pages through it via the function below and then
+-- reads/marks that tenant's rows inside withTenantTransaction (SET LOCAL + RLS).
+CREATE TABLE tpa.outbox_relay_tenants (
+  tenant_id uuid PRIMARY KEY,
+  registered_at timestamptz NOT NULL DEFAULT now()
+);
+--> statement-breakpoint
+CREATE FUNCTION tpa.register_outbox_tenant() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog AS $$
+BEGIN
+  -- NEW.tenant_id already passed the outbox WITH CHECK (= transaction tenant).
+  INSERT INTO tpa.outbox_relay_tenants (tenant_id) VALUES (NEW.tenant_id) ON CONFLICT DO NOTHING;
+  RETURN NULL;
+END $$;
+--> statement-breakpoint
+CREATE TRIGGER trg_outbox_register_tenant AFTER INSERT ON tpa.outbox_events
+FOR EACH ROW EXECUTE FUNCTION tpa.register_outbox_tenant();
+--> statement-breakpoint
+-- Keyset page of registered tenant UUIDs (never envelopes or pending counts).
+CREATE FUNCTION tpa.outbox_relay_tenant_ids(p_after uuid, p_limit integer) RETURNS TABLE (tenant_id uuid)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
-  SELECT o.tenant_id FROM tpa.outbox_events o WHERE o.published_at IS NULL
-  GROUP BY o.tenant_id ORDER BY pg_catalog.min(o.seq)
+  SELECT t.tenant_id FROM tpa.outbox_relay_tenants t
+  WHERE p_after IS NULL OR t.tenant_id > p_after
+  ORDER BY t.tenant_id
   LIMIT LEAST(GREATEST(COALESCE(p_limit, 1), 1), 1000)
 $$;
 --> statement-breakpoint
-REVOKE ALL ON FUNCTION tpa.outbox_pending_tenants(integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION tpa.register_outbox_tenant() FROM PUBLIC;
 --> statement-breakpoint
-GRANT EXECUTE ON FUNCTION tpa.outbox_pending_tenants(integer) TO tpa_app;
+REVOKE ALL ON FUNCTION tpa.outbox_relay_tenant_ids(uuid, integer) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION tpa.outbox_relay_tenant_ids(uuid, integer) TO tpa_app;

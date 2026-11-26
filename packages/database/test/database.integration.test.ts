@@ -71,7 +71,7 @@ test('PG16: reproducible migrations, PT01 role subset and NUMERIC string roundtr
       const { rows } = await admin.query("SELECT extname FROM pg_extension WHERE extname IN ('vector','pg_trgm','pgcrypto') ORDER BY extname");
       assert.deepEqual(rows.map(r => r.extname), ['pg_trgm', 'pgcrypto', 'vector']);
       const { rows: tables } = await migrator.query("SELECT tablename FROM pg_tables WHERE schemaname='tpa'");
-      assert.deepEqual(tables.map(r => r.tablename).sort(), ['audit_anchors', 'audit_chain_heads', 'audit_logs', 'idempotency_records', 'outbox_events']);
+      assert.deepEqual(tables.map(r => r.tablename).sort(), ['audit_anchors', 'audit_chain_heads', 'audit_logs', 'idempotency_records', 'outbox_events', 'outbox_relay_tenants']);
     });
     await t.test('incremental upgrade matches fresh database catalog/history', async () => {
       await admin.query('CREATE DATABASE tpa_upgrade');
