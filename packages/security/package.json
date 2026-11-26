@@ -1,0 +1,14 @@
+{
+  "name": "@tpa/security",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": { ".": { "types": "./dist/src/index.d.ts", "default": "./dist/src/index.js" } },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "test": "node --test test/crypto.test.ts"
+  },
+  "devDependencies": { "@types/node": "^24.0.0", "typescript": "6.0.3" }
+}

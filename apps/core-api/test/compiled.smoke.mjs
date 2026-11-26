@@ -46,3 +46,32 @@ test('compiled bootstrap serves process health and shuts down on SIGTERM', { tim
     }
   }
 });
+
+test('compiled bootstrap failure exits without leaking the supplied host in errors', { timeout: 15000 }, async () => {
+  const marker = 'SYNTHETIC_PII_BOOTSTRAP_FAILURE_MARKER';
+  const child = spawn(process.execPath, ['dist/main.js'], {
+    env: { ...process.env, PORT: '0', HOST: `${marker}/invalid`, NO_COLOR: '1' },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let output = '';
+  child.stdout.on('data', chunk => { output += chunk; });
+  child.stderr.on('data', chunk => { output += chunk; });
+  try {
+    const [code, signal] = await Promise.race([
+      once(child, 'exit'),
+      new Promise((_, reject) => {
+        const timer = setTimeout(() => reject(new Error('Failure shutdown timed out')), 10000);
+        timer.unref();
+      }),
+    ]);
+    assert.equal(code, 1);
+    assert.equal(signal, null);
+    assert.equal(output.includes(marker), false);
+    assert.match(output, /REDACTED_LOG/);
+  } finally {
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill('SIGKILL');
+      await once(child, 'exit');
+    }
+  }
+});
