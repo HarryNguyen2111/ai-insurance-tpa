@@ -171,9 +171,9 @@ test('EVT-01 outbox: PG16 + PgBouncer atomic business/audit/outbox, RLS, immutab
       }
       await assert.rejects(direct.withTenantTransaction(A, tx => tx.query('TRUNCATE tpa.outbox_events')), sqlCode('42501'));
       await assert.rejects(direct.withTenantTransaction(A, tx => tx.query('UPDATE tpa.outbox_events SET published_at=NULL WHERE event_id=$1', where)), sqlCode('42501'));
-      // FORCE RLS: the owner has no write policy, so its writes match nothing...
-      assert.equal((await owner.query("UPDATE tpa.outbox_events SET envelope='{}' WHERE event_id=$1", where)).rowCount, 0);
-      assert.equal((await owner.query('DELETE FROM tpa.outbox_events WHERE event_id=$1', where)).rowCount, 0);
+      // FORCE RLS: the table owner is bound by the tenant policy and fails closed without context...
+      await assert.rejects(owner.query("UPDATE tpa.outbox_events SET envelope='{}' WHERE event_id=$1", where), sqlCode('42501'));
+      await assert.rejects(owner.query('DELETE FROM tpa.outbox_events WHERE event_id=$1', where), sqlCode('42501'));
       // ...and even an RLS-bypassing superuser hits the guard trigger.
       await assert.rejects(admin.query("UPDATE tpa.outbox_events SET envelope='{}' WHERE event_id=$1", where), sqlCode('42501'));
       await assert.rejects(admin.query('DELETE FROM tpa.outbox_events WHERE event_id=$1', where), sqlCode('42501'));
