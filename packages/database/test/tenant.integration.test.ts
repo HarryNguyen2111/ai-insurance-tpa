@@ -98,7 +98,7 @@ test('PT01 foundation: PG16 app role through real PgBouncer transaction pool', a
       assert.equal(tables.length, 2);
       for (const table of tables) { assert.equal(table.owner, 'tpa_migrator'); assert.equal(table.relrowsecurity, true); assert.equal(table.relforcerowsecurity, true); }
       const policies = (await admin.query("SELECT qual, with_check FROM pg_policies WHERE schemaname='tpa'")).rows;
-      assert.equal(policies.length, 10); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02)
+      assert.equal(policies.length, 11); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01)
       for (const policy of policies) { assert.match(policy.qual, /tenant_id = tpa.current_tenant_id/); assert.equal(policy.qual, policy.with_check); }
       const fk = (await admin.query("SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE conrelid='tpa.isolation_child'::regclass AND contype='f'")).rows;
       assert.deepEqual(fk, [{ definition: 'FOREIGN KEY (tenant_id, parent_id) REFERENCES tpa.isolation_parent(tenant_id, id)' }]);
