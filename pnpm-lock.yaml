@@ -121,6 +121,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@tpa/event-contracts':
+        specifier: workspace:*
+        version: link:../event-contracts
       drizzle-orm:
         specifier: 0.45.4
         version: 0.45.4(@types/pg@8.23.1)(pg@8.23.1)
