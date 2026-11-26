@@ -1,0 +1,53 @@
+{
+  "registryVersion": 1,
+  "subjects": {
+    "claim.submitted": {
+      "topic": "claim",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": null,
+      "versions": {
+        "1.0.0": "7be50776a994827c274d327a15e6189f3998b9b323a5543a2f25a2eee786baf2"
+      }
+    },
+    "claim.state-changed": {
+      "topic": "claim",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": null,
+      "versions": {
+        "1.0.0": "a9f76fa394d487943f294fbf6286f655b04ce53ad934a9a81c82d7506f41ab5e"
+      }
+    },
+    "eob.published": {
+      "topic": "eob",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": "EobPublishedEvent",
+      "versions": {
+        "1.0.0": "d974524999ad2826d428f617d65fc416f46b9c477da9d22c335eaed1153e3302"
+      }
+    },
+    "payment.status-changed": {
+      "topic": "payment",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": "PaymentStatusChangedEvent",
+      "versions": {
+        "1.0.0": "96e3750a9db3ca7e1f502fe611c01620be80145bf8bb74d741628274aab8f7ec"
+      }
+    },
+    "catalog.proposal-reviewed": {
+      "topic": "catalog",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": "CatalogProposalReviewedEvent",
+      "versions": {
+        "1.0.0": "ecd62e7b5f1b00e3369e0947d9b5eb0b96dbe9cd7accfd45da614f0c7dc7c1a8"
+      }
+    },
+    "workspace.changed": {
+      "topic": "workspace",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": "WorkspaceChangedEvent",
+      "versions": {
+        "1.0.0": "d32ef4f0f05a1b4eb32c20adf4931667ae5252b1f5f13879bdf6497d36b3a1ae"
+      }
+    }
+  }
+}

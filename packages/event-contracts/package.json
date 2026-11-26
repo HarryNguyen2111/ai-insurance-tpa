@@ -1,0 +1,26 @@
+{
+  "name": "@tpa/event-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check:registry": "node scripts/check-registry.ts",
+    "test": "node scripts/check-registry.ts && node --test test/*.test.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-draft-04": "1.0.0",
+    "ajv-formats": "3.0.1"
+  },
+  "devDependencies": {
+    "@tpa/shared-contracts": "workspace:*",
+    "@types/node": "^24.0.0",
+    "typescript": "6.0.3"
+  }
+}
