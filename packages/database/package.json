@@ -7,7 +7,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-    "test": "node --test test/config.test.ts test/tenant.test.ts",
+    "test": "node --test test/config.test.ts test/tenant.test.ts test/audit.test.ts",
     "test:integration": "node --test --test-concurrency=1 --test-timeout=180000 test/*.integration.test.ts",
     "migrate": "node src/cli.ts",
     "generate": "drizzle-kit generate --config drizzle.config.ts"
@@ -23,6 +23,7 @@
     "typescript": "6.0.3"
   },
   "exports": {
-    "./tenant": "./src/tenant.ts"
+    "./tenant": "./src/tenant.ts",
+    "./audit": "./src/audit.ts"
   }
 }
