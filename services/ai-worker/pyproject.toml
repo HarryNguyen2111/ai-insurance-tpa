@@ -1,0 +1,57 @@
+[project]
+name = "tpa-ai-worker"
+version = "0.1.0"
+description = "TPA AI worker: image quality pre-filter and immutable preprocessing (AI-01). Proposes evidence only; never approves claims or mutates money."
+readme = "README.md"
+# AGENTS.md requires Python 3.10+. 3.12 is the floor because the maintained
+# FastAPI (>=3.11) and numpy (>=3.12) releases no longer support 3.10.
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+dependencies = [
+  "fastapi>=0.165,<0.166",
+  "pydantic>=2.14,<3",
+  "uvicorn>=0.54,<0.55",
+  "opencv-python-headless>=5.1,<5.2",
+  "numpy>=2.5,<3",
+  # QR decoding (pyzbar) and XML parsing (lxml) are bootstrapped here for the
+  # approved stack but are only exercised by a dependency smoke test; QR/XML
+  # behaviour is issue #29.
+  "pyzbar==0.1.9",
+  "lxml>=6.1,<7",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=9.2,<10",
+  "mypy>=2.4,<3",
+  "httpx2>=2.16,<3",
+  "lxml-stubs>=0.5",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tpa_ai_worker"]
+
+[tool.uv]
+package = true
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+plugins = ["pydantic.mypy"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["pyzbar", "pyzbar.*"]
+ignore_missing_imports = true
