@@ -783,6 +783,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/workspaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create organisation workspace (TPA ops)
+         * @description Decided OD-05: only a TPA operations principal with platform workspace-administration authority and verified MFA, acting through its own server-issued operator membership context, may create a workspace; authority is provisioned separately (#21) and never inferred from a tenant membership or request field. Decided OD-02: TPA assigns the slug here; it is globally unique, routing-only and never proof of access. Creates tenant workspace profile, default theme when omitted, and grants WORKSPACE_ADMIN to initialAdminPrincipalId (an existing verified principal) in one transaction with audit and outbox workspace.changed. Slug already used or reserved returns 422 DOMAIN_VIOLATION (concurrent creates with one slug: exactly one 201). Low colour contrast is a warning only (decided OD-WS1). No tenantId accepted or returned. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. No-store.
+         */
+        post: operations["createWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workspaces/{workspaceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read workspace profile, theme and active logo
+         * @description WORKSPACE_ADMIN of this workspace (membership context bound to it) or TPA operations authority. Other workspaces return 404 without revealing existence. Logo preview URL is private, signed and expires in at most 300 seconds; never logged. No-store.
+         */
+        get: operations["getWorkspace"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workspaces/{workspaceId}/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace workspace profile (not slug)
+         * @description WORKSPACE_ADMIN of this workspace with verified MFA. Full replacement of displayName, shortName, orgType and description (absent description clears it). The slug is not editable here (decided OD-02: TPA assigns slugs; a controlled slug change is a separate future operation pending OD-WS3). expectedVersion must equal the current version or 409 STALE_VERSION. Business state + audit + outbox workspace.changed atomic in withTenantTransaction using SET LOCAL/RLS. Idempotency as createWorkspace. No-store.
+         */
+        put: operations["updateWorkspaceProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workspaces/{workspaceId}/theme": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace workspace theme from the closed allowlist
+         * @description WORKSPACE_ADMIN with verified MFA. Theme accepts only the closed allowlist (hex colour, radius, mode, sidebar style); no CSS, fonts, HTML or URLs. Button text colour is derived server-side (white or black, always >= 4.5:1). Decided OD-WS1: primary colour contrast against the page surface below 3:1 is returned as a LOW_SURFACE_CONTRAST warning and never rejected. expectedVersion mismatch 409 STALE_VERSION. Audit + outbox atomic. Idempotency as createWorkspace. No-store.
+         */
+        put: operations["updateWorkspaceTheme"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workspaces/{workspaceId}/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Activate a processed logo asset or clear the logo
+         * @description WORKSPACE_ADMIN with verified MFA. Activation requires an asset of this workspace in state READY, otherwise 422 DOMAIN_VIOLATION (assets of other workspaces 404). Clearing keeps the immutable original asset for audit/retention. expectedVersion mismatch 409 STALE_VERSION. Audit + outbox atomic. Idempotency as createWorkspace. No-store.
+         */
+        put: operations["setWorkspaceLogo"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workspaces/{workspaceId}/logo-assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request a pre-signed upload for a new logo asset
+         * @description WORKSPACE_ADMIN with verified MFA. Pre-signed PUT into a private quarantine location bound to this workspace, declared type, size and checksum; core-api never receives file bytes. PNG, JPEG or WebP only (SVG never accepted); 2 MiB raw maximum. URL expires in at most 300 seconds and never enters logs, events or history. Does not change the workspace version. Idempotency as createWorkspace. No-store.
+         */
+        post: operations["createWorkspaceLogoUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workspaces/{workspaceId}/logo-assets/{assetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Poll logo asset processing state
+         * @description WORKSPACE_ADMIN of this workspace. Other workspaces' assets return 404. No-store.
+         */
+        get: operations["getWorkspaceLogoAsset"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workspaces/{workspaceId}/logo-assets/{assetId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish logo upload and start safe processing
+         * @description WORKSPACE_ADMIN with verified MFA. Server independently checks object owner, size and checksum, sniffs magic bytes (SVG and type mismatches rejected), enforces pixel/decompression limits, scans, then decodes and re-encodes (EXIF/GPS and other metadata dropped), producing 512px and 64px derivatives. The original object stays immutable. Returns 202 PROCESSING; poll the Location resource. A READY asset still needs setWorkspaceLogo to become active. Idempotency as createWorkspace. No-store.
+         */
+        post: operations["completeWorkspaceLogoUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1796,6 +1956,180 @@ export interface components {
             dualApprovalThreshold?: components["schemas"]["Money"];
             originalDocumentsThreshold?: components["schemas"]["Money"];
         };
+        /** @enum {string} */
+        WorkspaceOrgType: "INSURER" | "TPA_OPERATOR" | "CORPORATE_CLIENT";
+        /** @description Server trims and NFC-normalizes before validation; no markup characters or control characters. */
+        WorkspaceDisplayName: string;
+        WorkspaceShortName: string;
+        /** @description Assigned by TPA operations (decided OD-02); globally unique, routing-only, never proof of access. Uniqueness is enforced server-side (422 DOMAIN_VIOLATION). */
+        WorkspaceSlug: string;
+        /** @description Optional plain text; line breaks allowed. Organisation data only (P0), no personal data. */
+        WorkspaceDescription: string;
+        /** @description Closed allowlist only; no CSS, font, HTML or URL. Contrast never rejects (decided OD-WS1). */
+        WorkspaceTheme: {
+            primaryColor: string;
+            /** @enum {string} */
+            radius: "NONE" | "SM" | "MD" | "LG";
+            /** @enum {string} */
+            mode: "LIGHT" | "DARK";
+            /** @enum {string} */
+            sidebarStyle: "LIGHT" | "BRAND";
+        };
+        /** @description TPA operations only (decided OD-05). initialAdminPrincipalId must be an existing verified principal and receives WORKSPACE_ADMIN. Absent theme means the platform default theme. No tenant ID field. */
+        WorkspaceCreateRequest: {
+            displayName: components["schemas"]["WorkspaceDisplayName"];
+            shortName: components["schemas"]["WorkspaceShortName"];
+            slug: components["schemas"]["WorkspaceSlug"];
+            orgType: components["schemas"]["WorkspaceOrgType"];
+            description?: components["schemas"]["WorkspaceDescription"];
+            theme?: components["schemas"]["WorkspaceTheme"];
+            /** Format: uuid */
+            initialAdminPrincipalId: string;
+        };
+        /** @description Full replacement; absent description clears it. Slug is not editable here (decided OD-02). */
+        WorkspaceProfileUpdateRequest: {
+            expectedVersion: components["schemas"]["VersionNumber"];
+            displayName: components["schemas"]["WorkspaceDisplayName"];
+            shortName: components["schemas"]["WorkspaceShortName"];
+            orgType: components["schemas"]["WorkspaceOrgType"];
+            description?: components["schemas"]["WorkspaceDescription"];
+        };
+        WorkspaceThemeUpdateRequest: {
+            expectedVersion: components["schemas"]["VersionNumber"];
+            theme: components["schemas"]["WorkspaceTheme"];
+        };
+        WorkspaceLogoActivateRequest: {
+            expectedVersion: components["schemas"]["VersionNumber"];
+            /** Format: uuid */
+            logoAssetId: string;
+        };
+        WorkspaceLogoClearRequest: {
+            expectedVersion: components["schemas"]["VersionNumber"];
+            /** @enum {boolean} */
+            clear: true;
+        };
+        WorkspaceLogoSetRequest: components["schemas"]["WorkspaceLogoActivateRequest"] | components["schemas"]["WorkspaceLogoClearRequest"];
+        /**
+         * @description SVG is never accepted because it can carry executable content.
+         * @enum {string}
+         */
+        WorkspaceLogoMime: "image/png" | "image/jpeg" | "image/webp";
+        /** @description Active re-encoded derivative. Private signed preview URL expires in at most 300 seconds; never logged or put in events. */
+        WorkspaceLogo: {
+            /** Format: uuid */
+            assetId: string;
+            mime: components["schemas"]["WorkspaceLogoMime"];
+            width: number;
+            height: number;
+            /** Format: uri */
+            previewUrl: string;
+            /** Format: date-time */
+            previewUrlExpiresAt: string;
+        };
+        /** @description Absent description or logo means none. No tenant ID is exposed. */
+        Workspace: {
+            /** Format: uuid */
+            workspaceId: string;
+            slug: components["schemas"]["WorkspaceSlug"];
+            displayName: components["schemas"]["WorkspaceDisplayName"];
+            shortName: components["schemas"]["WorkspaceShortName"];
+            orgType: components["schemas"]["WorkspaceOrgType"];
+            description?: components["schemas"]["WorkspaceDescription"];
+            theme: components["schemas"]["WorkspaceTheme"];
+            logo?: components["schemas"]["WorkspaceLogo"];
+            version: components["schemas"]["VersionNumber"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description Advisory only (decided OD-WS1); the mutation is committed. */
+        WorkspaceWarning: {
+            /** @enum {string} */
+            code: "LOW_SURFACE_CONTRAST";
+            messageVi: string;
+            contrastRatio: number;
+        };
+        WorkspaceResult: {
+            workspace: components["schemas"]["Workspace"];
+            warnings: components["schemas"]["WorkspaceWarning"][];
+        };
+        /** @description 2 MiB raw technical maximum; no file name or object key accepted. */
+        WorkspaceLogoUploadRequest: {
+            contentType: components["schemas"]["WorkspaceLogoMime"];
+            sizeBytes: number;
+            sha256: components["schemas"]["Hash"];
+        };
+        WorkspaceLogoUploadHeaders: {
+            "Content-Type": components["schemas"]["WorkspaceLogoMime"];
+            "x-amz-checksum-sha256": string;
+        };
+        /** @description Expires in at most 300 seconds; private quarantine location; URL/header secrets never logged. */
+        WorkspaceLogoUploadGrant: {
+            /** Format: uuid */
+            assetId: string;
+            /** Format: uri */
+            uploadUrl: string;
+            /** @enum {string} */
+            method: "PUT";
+            /** Format: date-time */
+            expiresAt: string;
+            requiredHeaders: components["schemas"]["WorkspaceLogoUploadHeaders"];
+        };
+        WorkspaceLogoAssetPending: {
+            /** Format: uuid */
+            assetId: string;
+            /** @enum {string} */
+            state: "PENDING_UPLOAD" | "PROCESSING";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WorkspaceLogoAssetReady: {
+            /** Format: uuid */
+            assetId: string;
+            /** @enum {string} */
+            state: "READY";
+            mime: components["schemas"]["WorkspaceLogoMime"];
+            width: number;
+            height: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WorkspaceLogoAssetRejected: {
+            /** Format: uuid */
+            assetId: string;
+            /** @enum {string} */
+            state: "REJECTED";
+            /** @enum {string} */
+            rejectionCode: "SVG_NOT_ALLOWED" | "UNSUPPORTED_TYPE" | "TYPE_MISMATCH" | "CHECKSUM_MISMATCH" | "TOO_LARGE" | "DIMENSIONS_OUT_OF_RANGE" | "ASPECT_RATIO_OUT_OF_RANGE" | "DECODE_FAILED" | "SCAN_FAILED";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WorkspaceLogoAsset: components["schemas"]["WorkspaceLogoAssetPending"] | components["schemas"]["WorkspaceLogoAssetReady"] | components["schemas"]["WorkspaceLogoAssetRejected"];
+        /** @description Internal outbox envelope; tenantId derived by trusted core, aggregateId is the workspaceId. Payload carries no names, slugs, colours, images or URLs; consumers reload the authorized resource. Inbox dedup and aggregate version ordering required. */
+        WorkspaceChangedEvent: {
+            /** Format: uuid */
+            eventId: string;
+            /** @enum {string} */
+            eventType: "workspace.changed";
+            /** @enum {string} */
+            schemaVersion: "1.0.0";
+            /** Format: uuid */
+            tenantId: string;
+            /** Format: uuid */
+            aggregateId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: uuid */
+            correlationId: string;
+            /** Format: uuid */
+            causationId: string;
+            payload: {
+                /** @enum {string} */
+                changeKind: "CREATED" | "PROFILE" | "THEME" | "LOGO";
+            };
+        };
     };
     responses: {
         /** @description Missing/invalid/expired authentication or service signature */
@@ -1873,6 +2207,9 @@ export interface components {
         IdempotencyKey: components["schemas"]["IdempotencyKeyValue"];
         /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
         MembershipContext: string;
+        /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
+        WorkspaceId: string;
+        LogoAssetId: string;
     };
     requestBodies: never;
     headers: never;
@@ -3365,6 +3702,319 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CatalogReview"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createWorkspace: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Workspace committed with profile, theme and first administrator grant */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceResult"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getWorkspace: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
+                workspaceId: components["parameters"]["WorkspaceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current workspace */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Workspace"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    updateWorkspaceProfile: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
+                workspaceId: components["parameters"]["WorkspaceId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceProfileUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Profile committed with incremented version */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceResult"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    updateWorkspaceTheme: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
+                workspaceId: components["parameters"]["WorkspaceId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceThemeUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Theme committed; warnings are advisory */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceResult"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    setWorkspaceLogo: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
+                workspaceId: components["parameters"]["WorkspaceId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceLogoSetRequest"];
+            };
+        };
+        responses: {
+            /** @description Logo selection committed with incremented version */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceResult"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createWorkspaceLogoUpload: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
+                workspaceId: components["parameters"]["WorkspaceId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceLogoUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Upload grant for a PENDING_UPLOAD asset */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceLogoUploadGrant"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getWorkspaceLogoAsset: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
+                workspaceId: components["parameters"]["WorkspaceId"];
+                assetId: components["parameters"]["LogoAssetId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current asset state */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceLogoAsset"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    completeWorkspaceLogoUpload: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
+                workspaceId: components["parameters"]["WorkspaceId"];
+                assetId: components["parameters"]["LogoAssetId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted for asynchronous processing */
+            202: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    /** @description Logo asset status resource */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceLogoAsset"];
                 };
             };
             401: components["responses"]["Error401"];

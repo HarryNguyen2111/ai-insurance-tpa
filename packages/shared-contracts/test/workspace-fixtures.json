@@ -1,0 +1,1129 @@
+[
+  {
+    "name": "WorkspaceOrgType valid",
+    "schema": "WorkspaceOrgType",
+    "valid": true,
+    "value": "TPA_OPERATOR"
+  },
+  {
+    "name": "WorkspaceOrgType unknown type",
+    "schema": "WorkspaceOrgType",
+    "valid": false,
+    "value": "HACKER"
+  },
+  {
+    "name": "WorkspaceDisplayName valid Vietnamese",
+    "schema": "WorkspaceDisplayName",
+    "valid": true,
+    "value": "Bảo hiểm Mẫu Minh Họa"
+  },
+  {
+    "name": "WorkspaceDisplayName markup rejected",
+    "schema": "WorkspaceDisplayName",
+    "valid": false,
+    "value": "<img src=x onerror=alert(1)>"
+  },
+  {
+    "name": "WorkspaceDisplayName template braces rejected",
+    "schema": "WorkspaceDisplayName",
+    "valid": false,
+    "value": "Bảo hiểm {{x}}"
+  },
+  {
+    "name": "WorkspaceDisplayName too short",
+    "schema": "WorkspaceDisplayName",
+    "valid": false,
+    "value": "A"
+  },
+  {
+    "name": "WorkspaceDisplayName too long",
+    "schema": "WorkspaceDisplayName",
+    "valid": false,
+    "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "WorkspaceDisplayName newline rejected",
+    "schema": "WorkspaceDisplayName",
+    "valid": false,
+    "value": "Bảo hiểm\nMẫu"
+  },
+  {
+    "name": "WorkspaceShortName valid",
+    "schema": "WorkspaceShortName",
+    "valid": true,
+    "value": "BH-01"
+  },
+  {
+    "name": "WorkspaceShortName lowercase rejected",
+    "schema": "WorkspaceShortName",
+    "valid": false,
+    "value": "bhmh"
+  },
+  {
+    "name": "WorkspaceShortName too long",
+    "schema": "WorkspaceShortName",
+    "valid": false,
+    "value": "ABCDEFGHIJKLM"
+  },
+  {
+    "name": "WorkspaceSlug valid",
+    "schema": "WorkspaceSlug",
+    "valid": true,
+    "value": "bao-hiem-mau"
+  },
+  {
+    "name": "WorkspaceSlug admin rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "admin"
+  },
+  {
+    "name": "WorkspaceSlug api rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "api"
+  },
+  {
+    "name": "WorkspaceSlug tpa rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "tpa"
+  },
+  {
+    "name": "WorkspaceSlug ab rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "ab"
+  },
+  {
+    "name": "WorkspaceSlug 1abc rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "1abc"
+  },
+  {
+    "name": "WorkspaceSlug abc- rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "abc-"
+  },
+  {
+    "name": "WorkspaceSlug a--b rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "a--b"
+  },
+  {
+    "name": "WorkspaceSlug abc_d rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "abc_d"
+  },
+  {
+    "name": "WorkspaceSlug Bao-hiem rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "Bao-hiem"
+  },
+  {
+    "name": "WorkspaceSlug xxxxxxxxxxxx rejected",
+    "schema": "WorkspaceSlug",
+    "valid": false,
+    "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "WorkspaceDescription multi-line valid",
+    "schema": "WorkspaceDescription",
+    "valid": true,
+    "value": "Dòng 1\nDòng 2"
+  },
+  {
+    "name": "WorkspaceDescription too long",
+    "schema": "WorkspaceDescription",
+    "valid": false,
+    "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "WorkspaceDescription empty rejected (omit instead)",
+    "schema": "WorkspaceDescription",
+    "valid": false,
+    "value": ""
+  },
+  {
+    "name": "WorkspaceDescription markup rejected",
+    "schema": "WorkspaceDescription",
+    "valid": false,
+    "value": "<b>x</b>"
+  },
+  {
+    "name": "WorkspaceTheme valid",
+    "schema": "WorkspaceTheme",
+    "valid": true,
+    "value": {
+      "primaryColor": "#0f766e",
+      "radius": "LG",
+      "mode": "LIGHT",
+      "sidebarStyle": "BRAND"
+    }
+  },
+  {
+    "name": "WorkspaceTheme low contrast colour is accepted (OD-WS1 warn only)",
+    "schema": "WorkspaceTheme",
+    "valid": true,
+    "value": {
+      "primaryColor": "#f5f5f5",
+      "radius": "LG",
+      "mode": "LIGHT",
+      "sidebarStyle": "BRAND"
+    }
+  },
+  {
+    "name": "WorkspaceTheme uppercase hex",
+    "schema": "WorkspaceTheme",
+    "valid": false,
+    "value": {
+      "primaryColor": "#0F766E",
+      "radius": "LG",
+      "mode": "LIGHT",
+      "sidebarStyle": "BRAND"
+    }
+  },
+  {
+    "name": "WorkspaceTheme CSS injection",
+    "schema": "WorkspaceTheme",
+    "valid": false,
+    "value": {
+      "primaryColor": "#0f766e;}body{display:none",
+      "radius": "LG",
+      "mode": "LIGHT",
+      "sidebarStyle": "BRAND"
+    }
+  },
+  {
+    "name": "WorkspaceTheme unknown radius",
+    "schema": "WorkspaceTheme",
+    "valid": false,
+    "value": {
+      "primaryColor": "#0f766e",
+      "radius": "XL",
+      "mode": "LIGHT",
+      "sidebarStyle": "BRAND"
+    }
+  },
+  {
+    "name": "WorkspaceTheme arbitrary css field",
+    "schema": "WorkspaceTheme",
+    "valid": false,
+    "value": {
+      "primaryColor": "#0f766e",
+      "radius": "LG",
+      "mode": "LIGHT",
+      "sidebarStyle": "BRAND",
+      "css": "body{}"
+    }
+  },
+  {
+    "name": "WorkspaceTheme font url",
+    "schema": "WorkspaceTheme",
+    "valid": false,
+    "value": {
+      "primaryColor": "#0f766e",
+      "radius": "LG",
+      "mode": "LIGHT",
+      "sidebarStyle": "BRAND",
+      "fontUrl": "https://fonts.example.invalid/x.css"
+    }
+  },
+  {
+    "name": "WorkspaceTheme missing mode",
+    "schema": "WorkspaceTheme",
+    "valid": false,
+    "value": {
+      "primaryColor": "#0f766e",
+      "radius": "LG",
+      "sidebarStyle": "BRAND"
+    }
+  },
+  {
+    "name": "WorkspaceCreateRequest minimal valid",
+    "schema": "WorkspaceCreateRequest",
+    "valid": true,
+    "value": {
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "slug": "bao-hiem-mau",
+      "orgType": "INSURER",
+      "initialAdminPrincipalId": "00000000-0000-4000-8000-000000000030"
+    }
+  },
+  {
+    "name": "WorkspaceCreateRequest with description and theme",
+    "schema": "WorkspaceCreateRequest",
+    "valid": true,
+    "value": {
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "slug": "bao-hiem-mau",
+      "orgType": "INSURER",
+      "initialAdminPrincipalId": "00000000-0000-4000-8000-000000000030",
+      "description": "Mô tả",
+      "theme": {
+        "primaryColor": "#0f766e",
+        "radius": "LG",
+        "mode": "LIGHT",
+        "sidebarStyle": "BRAND"
+      }
+    }
+  },
+  {
+    "name": "WorkspaceCreateRequest client tenantId rejected",
+    "schema": "WorkspaceCreateRequest",
+    "valid": false,
+    "value": {
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "slug": "bao-hiem-mau",
+      "orgType": "INSURER",
+      "initialAdminPrincipalId": "00000000-0000-4000-8000-000000000030",
+      "tenantId": "00000000-0000-4000-8000-000000000099"
+    }
+  },
+  {
+    "name": "WorkspaceCreateRequest missing initial admin (OD-05)",
+    "schema": "WorkspaceCreateRequest",
+    "valid": false,
+    "value": {
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "slug": "bao-hiem-mau",
+      "orgType": "INSURER"
+    }
+  },
+  {
+    "name": "WorkspaceCreateRequest reserved slug",
+    "schema": "WorkspaceCreateRequest",
+    "valid": false,
+    "value": {
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "slug": "admin",
+      "orgType": "INSURER",
+      "initialAdminPrincipalId": "00000000-0000-4000-8000-000000000030"
+    }
+  },
+  {
+    "name": "WorkspaceCreateRequest invalid admin id",
+    "schema": "WorkspaceCreateRequest",
+    "valid": false,
+    "value": {
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "slug": "bao-hiem-mau",
+      "orgType": "INSURER",
+      "initialAdminPrincipalId": "not-a-uuid"
+    }
+  },
+  {
+    "name": "WorkspaceCreateRequest logo url not accepted",
+    "schema": "WorkspaceCreateRequest",
+    "valid": false,
+    "value": {
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "slug": "bao-hiem-mau",
+      "orgType": "INSURER",
+      "initialAdminPrincipalId": "00000000-0000-4000-8000-000000000030",
+      "logoUrl": "https://evil.example.invalid/x.svg"
+    }
+  },
+  {
+    "name": "WorkspaceProfileUpdateRequest valid",
+    "schema": "WorkspaceProfileUpdateRequest",
+    "valid": true,
+    "value": {
+      "expectedVersion": 3,
+      "displayName": "Bảo hiểm Mẫu Việt Nam",
+      "shortName": "BHMVN",
+      "orgType": "INSURER"
+    }
+  },
+  {
+    "name": "WorkspaceProfileUpdateRequest slug change not allowed (OD-02)",
+    "schema": "WorkspaceProfileUpdateRequest",
+    "valid": false,
+    "value": {
+      "expectedVersion": 3,
+      "displayName": "Bảo hiểm Mẫu Việt Nam",
+      "shortName": "BHMVN",
+      "orgType": "INSURER",
+      "slug": "slug-moi"
+    }
+  },
+  {
+    "name": "WorkspaceProfileUpdateRequest missing expectedVersion",
+    "schema": "WorkspaceProfileUpdateRequest",
+    "valid": false,
+    "value": {
+      "displayName": "Bảo hiểm Mẫu Việt Nam",
+      "shortName": "BHMVN",
+      "orgType": "INSURER"
+    }
+  },
+  {
+    "name": "WorkspaceProfileUpdateRequest zero version",
+    "schema": "WorkspaceProfileUpdateRequest",
+    "valid": false,
+    "value": {
+      "expectedVersion": 0,
+      "displayName": "Bảo hiểm Mẫu Việt Nam",
+      "shortName": "BHMVN",
+      "orgType": "INSURER"
+    }
+  },
+  {
+    "name": "WorkspaceThemeUpdateRequest valid",
+    "schema": "WorkspaceThemeUpdateRequest",
+    "valid": true,
+    "value": {
+      "expectedVersion": 3,
+      "theme": {
+        "primaryColor": "#0f766e",
+        "radius": "LG",
+        "mode": "LIGHT",
+        "sidebarStyle": "BRAND"
+      }
+    }
+  },
+  {
+    "name": "WorkspaceThemeUpdateRequest missing expectedVersion",
+    "schema": "WorkspaceThemeUpdateRequest",
+    "valid": false,
+    "value": {
+      "theme": {
+        "primaryColor": "#0f766e",
+        "radius": "LG",
+        "mode": "LIGHT",
+        "sidebarStyle": "BRAND"
+      }
+    }
+  },
+  {
+    "name": "WorkspaceThemeUpdateRequest partial theme",
+    "schema": "WorkspaceThemeUpdateRequest",
+    "valid": false,
+    "value": {
+      "expectedVersion": 3,
+      "theme": {
+        "primaryColor": "#0f766e"
+      }
+    }
+  },
+  {
+    "name": "WorkspaceLogoActivateRequest valid",
+    "schema": "WorkspaceLogoActivateRequest",
+    "valid": true,
+    "value": {
+      "expectedVersion": 3,
+      "logoAssetId": "00000000-0000-4000-8000-000000000020"
+    }
+  },
+  {
+    "name": "WorkspaceLogoActivateRequest missing asset",
+    "schema": "WorkspaceLogoActivateRequest",
+    "valid": false,
+    "value": {
+      "expectedVersion": 3
+    }
+  },
+  {
+    "name": "WorkspaceLogoClearRequest valid",
+    "schema": "WorkspaceLogoClearRequest",
+    "valid": true,
+    "value": {
+      "expectedVersion": 3,
+      "clear": true
+    }
+  },
+  {
+    "name": "WorkspaceLogoClearRequest clear false",
+    "schema": "WorkspaceLogoClearRequest",
+    "valid": false,
+    "value": {
+      "expectedVersion": 3,
+      "clear": false
+    }
+  },
+  {
+    "name": "WorkspaceLogoSetRequest activate",
+    "schema": "WorkspaceLogoSetRequest",
+    "valid": true,
+    "value": {
+      "expectedVersion": 3,
+      "logoAssetId": "00000000-0000-4000-8000-000000000020"
+    }
+  },
+  {
+    "name": "WorkspaceLogoSetRequest clear",
+    "schema": "WorkspaceLogoSetRequest",
+    "valid": true,
+    "value": {
+      "expectedVersion": 3,
+      "clear": true
+    }
+  },
+  {
+    "name": "WorkspaceLogoSetRequest activate and clear together ambiguous",
+    "schema": "WorkspaceLogoSetRequest",
+    "valid": false,
+    "value": {
+      "expectedVersion": 3,
+      "logoAssetId": "00000000-0000-4000-8000-000000000020",
+      "clear": true
+    }
+  },
+  {
+    "name": "WorkspaceLogoSetRequest url instead of asset",
+    "schema": "WorkspaceLogoSetRequest",
+    "valid": false,
+    "value": {
+      "expectedVersion": 3,
+      "logoUrl": "https://x.example.invalid/a.png"
+    }
+  },
+  {
+    "name": "WorkspaceLogoMime webp",
+    "schema": "WorkspaceLogoMime",
+    "valid": true,
+    "value": "image/webp"
+  },
+  {
+    "name": "WorkspaceLogoMime svg rejected",
+    "schema": "WorkspaceLogoMime",
+    "valid": false,
+    "value": "image/svg+xml"
+  },
+  {
+    "name": "WorkspaceLogo valid",
+    "schema": "WorkspaceLogo",
+    "valid": true,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "mime": "image/webp",
+      "width": 512,
+      "height": 512,
+      "previewUrl": "https://cdn.example.invalid/logo/signed",
+      "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogo http url",
+    "schema": "WorkspaceLogo",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "mime": "image/webp",
+      "width": 512,
+      "height": 512,
+      "previewUrl": "http://cdn.example.invalid/x",
+      "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogo oversized derivative",
+    "schema": "WorkspaceLogo",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "mime": "image/webp",
+      "width": 1024,
+      "height": 512,
+      "previewUrl": "https://cdn.example.invalid/logo/signed",
+      "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogo svg",
+    "schema": "WorkspaceLogo",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "mime": "image/svg+xml",
+      "width": 512,
+      "height": 512,
+      "previewUrl": "https://cdn.example.invalid/logo/signed",
+      "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "Workspace valid",
+    "schema": "Workspace",
+    "valid": true,
+    "value": {
+      "workspaceId": "00000000-0000-4000-8000-000000000010",
+      "slug": "bao-hiem-mau",
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "orgType": "INSURER",
+      "description": "Tổ chức mẫu tổng hợp.\nKhông phải dữ liệu thật.",
+      "theme": {
+        "primaryColor": "#0f766e",
+        "radius": "LG",
+        "mode": "LIGHT",
+        "sidebarStyle": "BRAND"
+      },
+      "logo": {
+        "assetId": "00000000-0000-4000-8000-000000000020",
+        "mime": "image/webp",
+        "width": 512,
+        "height": 512,
+        "previewUrl": "https://cdn.example.invalid/logo/signed",
+        "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+      },
+      "version": 3,
+      "createdAt": "2026-11-26T05:00:00Z",
+      "updatedAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "Workspace without description and logo",
+    "schema": "Workspace",
+    "valid": true,
+    "value": {
+      "workspaceId": "00000000-0000-4000-8000-000000000010",
+      "slug": "bao-hiem-mau",
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "orgType": "INSURER",
+      "theme": {
+        "primaryColor": "#0f766e",
+        "radius": "LG",
+        "mode": "LIGHT",
+        "sidebarStyle": "BRAND"
+      },
+      "version": 3,
+      "createdAt": "2026-11-26T05:00:00Z",
+      "updatedAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "Workspace tenantId not exposed",
+    "schema": "Workspace",
+    "valid": false,
+    "value": {
+      "workspaceId": "00000000-0000-4000-8000-000000000010",
+      "slug": "bao-hiem-mau",
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "orgType": "INSURER",
+      "description": "Tổ chức mẫu tổng hợp.\nKhông phải dữ liệu thật.",
+      "theme": {
+        "primaryColor": "#0f766e",
+        "radius": "LG",
+        "mode": "LIGHT",
+        "sidebarStyle": "BRAND"
+      },
+      "logo": {
+        "assetId": "00000000-0000-4000-8000-000000000020",
+        "mime": "image/webp",
+        "width": 512,
+        "height": 512,
+        "previewUrl": "https://cdn.example.invalid/logo/signed",
+        "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+      },
+      "version": 3,
+      "createdAt": "2026-11-26T05:00:00Z",
+      "updatedAt": "2026-11-26T05:00:00Z",
+      "tenantId": "00000000-0000-4000-8000-000000000099"
+    }
+  },
+  {
+    "name": "Workspace missing version",
+    "schema": "Workspace",
+    "valid": false,
+    "value": {
+      "workspaceId": "00000000-0000-4000-8000-000000000010",
+      "slug": "bao-hiem-mau",
+      "displayName": "Bảo hiểm Mẫu Minh Họa",
+      "shortName": "BHMH",
+      "orgType": "INSURER",
+      "description": "Tổ chức mẫu tổng hợp.\nKhông phải dữ liệu thật.",
+      "theme": {
+        "primaryColor": "#0f766e",
+        "radius": "LG",
+        "mode": "LIGHT",
+        "sidebarStyle": "BRAND"
+      },
+      "logo": {
+        "assetId": "00000000-0000-4000-8000-000000000020",
+        "mime": "image/webp",
+        "width": 512,
+        "height": 512,
+        "previewUrl": "https://cdn.example.invalid/logo/signed",
+        "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+      },
+      "createdAt": "2026-11-26T05:00:00Z",
+      "updatedAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceWarning valid",
+    "schema": "WorkspaceWarning",
+    "valid": true,
+    "value": {
+      "code": "LOW_SURFACE_CONTRAST",
+      "messageVi": "Màu chính trên nền sáng chỉ đạt 1.09:1; viền/biểu tượng có thể khó nhận ra.",
+      "contrastRatio": 1.09
+    }
+  },
+  {
+    "name": "WorkspaceWarning unknown code",
+    "schema": "WorkspaceWarning",
+    "valid": false,
+    "value": {
+      "code": "LOW_TEXT_CONTRAST",
+      "messageVi": "Màu chính trên nền sáng chỉ đạt 1.09:1; viền/biểu tượng có thể khó nhận ra.",
+      "contrastRatio": 1.09
+    }
+  },
+  {
+    "name": "WorkspaceWarning ratio above 21",
+    "schema": "WorkspaceWarning",
+    "valid": false,
+    "value": {
+      "code": "LOW_SURFACE_CONTRAST",
+      "messageVi": "Màu chính trên nền sáng chỉ đạt 1.09:1; viền/biểu tượng có thể khó nhận ra.",
+      "contrastRatio": 22
+    }
+  },
+  {
+    "name": "WorkspaceResult valid with warning",
+    "schema": "WorkspaceResult",
+    "valid": true,
+    "value": {
+      "workspace": {
+        "workspaceId": "00000000-0000-4000-8000-000000000010",
+        "slug": "bao-hiem-mau",
+        "displayName": "Bảo hiểm Mẫu Minh Họa",
+        "shortName": "BHMH",
+        "orgType": "INSURER",
+        "description": "Tổ chức mẫu tổng hợp.\nKhông phải dữ liệu thật.",
+        "theme": {
+          "primaryColor": "#0f766e",
+          "radius": "LG",
+          "mode": "LIGHT",
+          "sidebarStyle": "BRAND"
+        },
+        "logo": {
+          "assetId": "00000000-0000-4000-8000-000000000020",
+          "mime": "image/webp",
+          "width": 512,
+          "height": 512,
+          "previewUrl": "https://cdn.example.invalid/logo/signed",
+          "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+        },
+        "version": 3,
+        "createdAt": "2026-11-26T05:00:00Z",
+        "updatedAt": "2026-11-26T05:00:00Z"
+      },
+      "warnings": [
+        {
+          "code": "LOW_SURFACE_CONTRAST",
+          "messageVi": "Màu chính trên nền sáng chỉ đạt 1.09:1; viền/biểu tượng có thể khó nhận ra.",
+          "contrastRatio": 1.09
+        }
+      ]
+    }
+  },
+  {
+    "name": "WorkspaceResult no warnings",
+    "schema": "WorkspaceResult",
+    "valid": true,
+    "value": {
+      "workspace": {
+        "workspaceId": "00000000-0000-4000-8000-000000000010",
+        "slug": "bao-hiem-mau",
+        "displayName": "Bảo hiểm Mẫu Minh Họa",
+        "shortName": "BHMH",
+        "orgType": "INSURER",
+        "description": "Tổ chức mẫu tổng hợp.\nKhông phải dữ liệu thật.",
+        "theme": {
+          "primaryColor": "#0f766e",
+          "radius": "LG",
+          "mode": "LIGHT",
+          "sidebarStyle": "BRAND"
+        },
+        "logo": {
+          "assetId": "00000000-0000-4000-8000-000000000020",
+          "mime": "image/webp",
+          "width": 512,
+          "height": 512,
+          "previewUrl": "https://cdn.example.invalid/logo/signed",
+          "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+        },
+        "version": 3,
+        "createdAt": "2026-11-26T05:00:00Z",
+        "updatedAt": "2026-11-26T05:00:00Z"
+      },
+      "warnings": []
+    }
+  },
+  {
+    "name": "WorkspaceResult missing warnings array",
+    "schema": "WorkspaceResult",
+    "valid": false,
+    "value": {
+      "workspace": {
+        "workspaceId": "00000000-0000-4000-8000-000000000010",
+        "slug": "bao-hiem-mau",
+        "displayName": "Bảo hiểm Mẫu Minh Họa",
+        "shortName": "BHMH",
+        "orgType": "INSURER",
+        "description": "Tổ chức mẫu tổng hợp.\nKhông phải dữ liệu thật.",
+        "theme": {
+          "primaryColor": "#0f766e",
+          "radius": "LG",
+          "mode": "LIGHT",
+          "sidebarStyle": "BRAND"
+        },
+        "logo": {
+          "assetId": "00000000-0000-4000-8000-000000000020",
+          "mime": "image/webp",
+          "width": 512,
+          "height": 512,
+          "previewUrl": "https://cdn.example.invalid/logo/signed",
+          "previewUrlExpiresAt": "2026-11-26T05:00:00Z"
+        },
+        "version": 3,
+        "createdAt": "2026-11-26T05:00:00Z",
+        "updatedAt": "2026-11-26T05:00:00Z"
+      }
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadRequest valid",
+    "schema": "WorkspaceLogoUploadRequest",
+    "valid": true,
+    "value": {
+      "contentType": "image/png",
+      "sizeBytes": 204800,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadRequest svg",
+    "schema": "WorkspaceLogoUploadRequest",
+    "valid": false,
+    "value": {
+      "contentType": "image/svg+xml",
+      "sizeBytes": 204800,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadRequest pdf",
+    "schema": "WorkspaceLogoUploadRequest",
+    "valid": false,
+    "value": {
+      "contentType": "application/pdf",
+      "sizeBytes": 204800,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadRequest over 2 MiB",
+    "schema": "WorkspaceLogoUploadRequest",
+    "valid": false,
+    "value": {
+      "contentType": "image/png",
+      "sizeBytes": 2097153,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadRequest caller object key",
+    "schema": "WorkspaceLogoUploadRequest",
+    "valid": false,
+    "value": {
+      "contentType": "image/png",
+      "sizeBytes": 204800,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "objectKey": "tenants/other/logo.png"
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadHeaders valid",
+    "schema": "WorkspaceLogoUploadHeaders",
+    "valid": true,
+    "value": {
+      "Content-Type": "image/png",
+      "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadHeaders svg header",
+    "schema": "WorkspaceLogoUploadHeaders",
+    "valid": false,
+    "value": {
+      "Content-Type": "image/svg+xml",
+      "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadGrant valid",
+    "schema": "WorkspaceLogoUploadGrant",
+    "valid": true,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "uploadUrl": "https://storage.example.invalid/quarantine/signed",
+      "method": "PUT",
+      "expiresAt": "2026-11-26T05:00:00Z",
+      "requiredHeaders": {
+        "Content-Type": "image/png",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadGrant http url",
+    "schema": "WorkspaceLogoUploadGrant",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "uploadUrl": "http://storage.example.invalid/x",
+      "method": "PUT",
+      "expiresAt": "2026-11-26T05:00:00Z",
+      "requiredHeaders": {
+        "Content-Type": "image/png",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    }
+  },
+  {
+    "name": "WorkspaceLogoUploadGrant POST method",
+    "schema": "WorkspaceLogoUploadGrant",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "uploadUrl": "https://storage.example.invalid/quarantine/signed",
+      "method": "POST",
+      "expiresAt": "2026-11-26T05:00:00Z",
+      "requiredHeaders": {
+        "Content-Type": "image/png",
+        "x-amz-checksum-sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    }
+  },
+  {
+    "name": "WorkspaceLogoAssetPending valid",
+    "schema": "WorkspaceLogoAssetPending",
+    "valid": true,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "PROCESSING",
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAssetPending ready state",
+    "schema": "WorkspaceLogoAssetPending",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "READY",
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAssetReady valid",
+    "schema": "WorkspaceLogoAssetReady",
+    "valid": true,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "READY",
+      "mime": "image/png",
+      "width": 512,
+      "height": 256,
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAssetReady missing dimensions",
+    "schema": "WorkspaceLogoAssetReady",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "READY",
+      "mime": "image/png",
+      "height": 256,
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAssetRejected valid",
+    "schema": "WorkspaceLogoAssetRejected",
+    "valid": true,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "REJECTED",
+      "rejectionCode": "SVG_NOT_ALLOWED",
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAssetRejected missing code",
+    "schema": "WorkspaceLogoAssetRejected",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "REJECTED",
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAsset pending",
+    "schema": "WorkspaceLogoAsset",
+    "valid": true,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "PROCESSING",
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAsset ready",
+    "schema": "WorkspaceLogoAsset",
+    "valid": true,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "READY",
+      "mime": "image/png",
+      "width": 512,
+      "height": 256,
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAsset rejected",
+    "schema": "WorkspaceLogoAsset",
+    "valid": true,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "REJECTED",
+      "rejectionCode": "SVG_NOT_ALLOWED",
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAsset processing with rejection code",
+    "schema": "WorkspaceLogoAsset",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "PROCESSING",
+      "createdAt": "2026-11-26T05:00:00Z",
+      "rejectionCode": "SCAN_FAILED"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAsset ready without dimensions",
+    "schema": "WorkspaceLogoAsset",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "READY",
+      "mime": "image/png",
+      "width": 512,
+      "createdAt": "2026-11-26T05:00:00Z"
+    }
+  },
+  {
+    "name": "WorkspaceLogoAsset rejected with free-text reason",
+    "schema": "WorkspaceLogoAsset",
+    "valid": false,
+    "value": {
+      "assetId": "00000000-0000-4000-8000-000000000020",
+      "state": "REJECTED",
+      "rejectionCode": "SVG_NOT_ALLOWED",
+      "createdAt": "2026-11-26T05:00:00Z",
+      "reason": "file contains <script>"
+    }
+  },
+  {
+    "name": "WorkspaceChangedEvent valid",
+    "schema": "WorkspaceChangedEvent",
+    "valid": true,
+    "value": {
+      "eventId": "00000000-0000-4000-8000-000000000040",
+      "eventType": "workspace.changed",
+      "schemaVersion": "1.0.0",
+      "tenantId": "00000000-0000-4000-8000-000000000041",
+      "aggregateId": "00000000-0000-4000-8000-000000000010",
+      "aggregateVersion": 3,
+      "occurredAt": "2026-11-26T05:00:00Z",
+      "correlationId": "00000000-0000-4000-8000-000000000042",
+      "causationId": "00000000-0000-4000-8000-000000000043",
+      "payload": {
+        "changeKind": "THEME"
+      }
+    }
+  },
+  {
+    "name": "WorkspaceChangedEvent payload with display name",
+    "schema": "WorkspaceChangedEvent",
+    "valid": false,
+    "value": {
+      "eventId": "00000000-0000-4000-8000-000000000040",
+      "eventType": "workspace.changed",
+      "schemaVersion": "1.0.0",
+      "tenantId": "00000000-0000-4000-8000-000000000041",
+      "aggregateId": "00000000-0000-4000-8000-000000000010",
+      "aggregateVersion": 3,
+      "occurredAt": "2026-11-26T05:00:00Z",
+      "correlationId": "00000000-0000-4000-8000-000000000042",
+      "causationId": "00000000-0000-4000-8000-000000000043",
+      "payload": {
+        "changeKind": "PROFILE",
+        "displayName": "Bảo hiểm"
+      }
+    }
+  },
+  {
+    "name": "WorkspaceChangedEvent payload with logo url",
+    "schema": "WorkspaceChangedEvent",
+    "valid": false,
+    "value": {
+      "eventId": "00000000-0000-4000-8000-000000000040",
+      "eventType": "workspace.changed",
+      "schemaVersion": "1.0.0",
+      "tenantId": "00000000-0000-4000-8000-000000000041",
+      "aggregateId": "00000000-0000-4000-8000-000000000010",
+      "aggregateVersion": 3,
+      "occurredAt": "2026-11-26T05:00:00Z",
+      "correlationId": "00000000-0000-4000-8000-000000000042",
+      "causationId": "00000000-0000-4000-8000-000000000043",
+      "payload": {
+        "changeKind": "LOGO",
+        "logoUrl": "https://x.example.invalid"
+      }
+    }
+  },
+  {
+    "name": "WorkspaceChangedEvent unknown change kind",
+    "schema": "WorkspaceChangedEvent",
+    "valid": false,
+    "value": {
+      "eventId": "00000000-0000-4000-8000-000000000040",
+      "eventType": "workspace.changed",
+      "schemaVersion": "1.0.0",
+      "tenantId": "00000000-0000-4000-8000-000000000041",
+      "aggregateId": "00000000-0000-4000-8000-000000000010",
+      "aggregateVersion": 3,
+      "occurredAt": "2026-11-26T05:00:00Z",
+      "correlationId": "00000000-0000-4000-8000-000000000042",
+      "causationId": "00000000-0000-4000-8000-000000000043",
+      "payload": {
+        "changeKind": "DELETED"
+      }
+    }
+  }
+]

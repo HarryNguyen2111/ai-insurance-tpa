@@ -122,7 +122,7 @@ export function CreateWorkspaceWizard() {
                 </dl>
                 <PrototypeNotice />
                 <p className="text-sm text-muted-foreground">
-                  Trong hệ thống thật, việc tạo tổ chức là thao tác của nhân sự được cấp quyền (mặc định TPA ops, quyết định mở OD-05), có MFA, audit và gắn với tenant phía máy chủ.
+                  Trong hệ thống thật, việc tạo tổ chức là thao tác của nhân sự được cấp quyền (đã chốt OD-05: nhân sự TPA ops tạo tổ chức và cấp quản trị viên đầu tiên), có MFA, audit và gắn với tenant phía máy chủ.
                 </p>
                 {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
               </div>

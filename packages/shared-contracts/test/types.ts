@@ -22,3 +22,16 @@ const floatPayment: components['schemas']['PaymentIntent']['amount'] = 100;
 // @ts-expect-error Tenant selectors cannot be supplied by clients.
 const unsafeSearch: components['schemas']['ClaimSearchQuery'] = {tenantId: 'untrusted'};
 void unbound; void floatPayment; void unsafeSearch;
+const createWorkspace: paths['/v1/admin/workspaces']['post']['requestBody']['content']['application/json'] = {
+  displayName: 'Bảo hiểm Mẫu', shortName: 'BHM', slug: 'bao-hiem-mau', orgType: 'INSURER',
+  initialAdminPrincipalId: '00000000-0000-4000-8000-000000000030',
+};
+validate('WorkspaceCreateRequest', createWorkspace);
+// @ts-expect-error The first administrator is mandatory (decided OD-05).
+const noAdmin: components['schemas']['WorkspaceCreateRequest'] = {displayName: 'X Y', shortName: 'XY', slug: 'x-y', orgType: 'INSURER'};
+// @ts-expect-error Slug cannot be changed through profile updates (decided OD-02).
+const slugEdit: components['schemas']['WorkspaceProfileUpdateRequest'] = {expectedVersion: 1, displayName: 'X Y', shortName: 'XY', orgType: 'INSURER', slug: 'moi'};
+// @ts-expect-error Theme radius is a closed allowlist.
+const badRadius: components['schemas']['WorkspaceTheme'] = {primaryColor: '#0f766e', radius: 'XL', mode: 'LIGHT', sidebarStyle: 'LIGHT'};
+const workspaceResult: paths['/v1/admin/workspaces/{workspaceId}/theme']['put']['responses']['200']['content']['application/json']['warnings'] = [];
+void noAdmin; void slugEdit; void badRadius; void workspaceResult;

@@ -71,7 +71,7 @@ function Welcome() {
         <Lock />
         <AlertTitle>Ai tạo tổ chức trong hệ thống thật?</AlertTitle>
         <AlertDescription>
-          Theo đặc tả, Phase 1 không có tự đăng ký. Mặc định đề xuất: nhân sự TPA ops tạo tổ chức và cấp vai trò (OD-05), slug do TPA cấp (OD-02).
+          Theo đặc tả, Phase 1 không có tự đăng ký. Đã chốt: nhân sự TPA ops tạo tổ chức và cấp quản trị viên đầu tiên (OD-05), slug do TPA cấp (OD-02). Hợp đồng API đã có trong OpenAPI (WSC1); backend chưa triển khai.
           Màn hình này là prototype để thống nhất trải nghiệm trước khi làm backend.
         </AlertDescription>
       </Alert>
