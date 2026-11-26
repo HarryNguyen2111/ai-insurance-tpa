@@ -13,8 +13,11 @@ export async function startTemporal(h: Harness) {
   if (!image) throw new Error('Temporal image pin missing');
   const name = `wf01-temporal-${randomBytes(6).toString('hex')}`;
   const password = randomBytes(24).toString('hex');
-  const { rows: [role] } = await h.pgAdmin.query("SELECT format('CREATE ROLE temporal LOGIN CREATEDB PASSWORD %L', $1::text) AS sql", [password]);
+  const { rows: [role] } = await h.pgAdmin.query("SELECT format('CREATE ROLE temporal LOGIN PASSWORD %L', $1::text) AS sql", [password]);
   await h.pgAdmin.query(role.sql);
+  // auto-setup deliberately skips DB creation when DBNAME == POSTGRES_USER.
+  await h.pgAdmin.query('CREATE DATABASE temporal OWNER temporal');
+  await h.pgAdmin.query('CREATE DATABASE temporal_visibility OWNER temporal');
   // Temporal has its own role/databases and no access to business tables.
   const port = new URL(h.url('postgres')).port;
   const cleanup = () => { execFileSync('docker', ['rm', '-f', '-v', name], { stdio: 'ignore', timeout: 30_000 }); };
@@ -23,7 +26,7 @@ export async function startTemporal(h: Harness) {
       '--network', 'host', '--memory', '768m', '--cpus', '1',
       '-e', 'DB=postgres12', '-e', `DB_PORT=${port}`, '-e', 'POSTGRES_SEEDS=127.0.0.1',
       '-e', 'POSTGRES_USER=temporal', '-e', `POSTGRES_PWD=${password}`, '-e', 'BIND_ON_IP=127.0.0.1',
-      '-e', 'TEMPORAL_ADDRESS=127.0.0.1:7233', '-e', 'SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true', image],
+      '-e', 'TEMPORAL_ADDRESS=127.0.0.1:7233', '-e', 'SKIP_DB_CREATE=true', '-e', 'SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true', image],
       { stdio: ['ignore', 'pipe', 'pipe'], timeout: 240_000 });
     await waitFor('Compose Temporal namespace', async () => {
       const c = await Connection.connect({ address: '127.0.0.1:7233', connectTimeout: 2000 });
