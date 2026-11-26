@@ -46,6 +46,9 @@ bằng `decimal.js` (`ROUND_HALF_UP`), không bao giờ dùng `number`.
 Router dùng `ZMPRouter memoryRouter` vì ở bản build production `ZMPRouter` mặc định đặt basename `/zapps/<APP_ID>`,
 không chạy được trên trình duyệt thường.
 
+`AnimationRoutes` của zmp-ui giữ màn hình cũ trong 400 ms chuyển cảnh; `src/components/screen-transition.ts` đặt màn hình đang
+thoát thành `inert` + `aria-hidden` để chỉ một màn hình được thao tác/đọc bởi trình đọc màn hình (và smoke test không bị lẫn).
+
 ## Cần ứng dụng Zalo thật (provider blocker — không khẳng định ở đây)
 
 - Zalo Mini App ID, tài khoản Zalo OA/nhà phát triển, quyền mini-app (camera, thông tin người dùng, số điện thoại).
