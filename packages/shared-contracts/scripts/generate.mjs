@@ -10,9 +10,14 @@ const dereferenced = await SwaggerParser.dereference(structuredClone(document));
 const headerParameters = dereferenced.paths['/internal/v1/webhooks/ai-result'].post.parameters;
 const headerSchema = { type: 'object', additionalProperties: false, required: headerParameters.filter(p => p.required).map(p => p.name), properties: Object.fromEntries(headerParameters.map(p => [p.name, p.schema])) };
 const schemas = Object.fromEntries(Object.entries(dereferenced.components.schemas)
-  .filter(([name]) => name !== 'ExplainableEOBResponse')
   .map(([name, schema]) => [name, openapiSchemaToJsonSchema(schema)]));
 schemas.AiCallbackHeaders = openapiSchemaToJsonSchema(headerSchema);
+const paymentHeaders = dereferenced.paths['/internal/v1/payments/callbacks'].post.parameters;
+schemas.PaymentCallbackHeaders = openapiSchemaToJsonSchema({
+  type: 'object', additionalProperties: false,
+  required: paymentHeaders.filter(p => p.required).map(p => p.name),
+  properties: Object.fromEntries(paymentHeaders.map(p => [p.name, p.schema])),
+});
 const files = {
   'src/generated.d.ts': astToString(await openapiTS(source)),
   'src/schemas.json': JSON.stringify(schemas, null, 2) + '\n',
