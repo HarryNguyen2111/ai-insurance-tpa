@@ -1,0 +1,294 @@
+{
+  "version": "1.0.0",
+  "status": "SPECIFICATION_ONLY_NOT_EXECUTED",
+  "description": "Acceptance scenarios cho VWF-01 (#78, 14-visual-claims-workflow.md). Dữ liệu tổng hợp; chưa có runtime. 'contractCoverage' chỉ mô tả phần contract đã kiểm ở PR này (SCHEMA_ONLY, SCHEMA_AND_ORACLE hoặc CONTRACT_ONLY = chỉ có operation/mô tả), không phải kết quả runtime. Không báo PASS khi chưa có bằng chứng.",
+  "test_cases": [
+    {
+      "id": "VW01_PUBLISH_VALID_SLICE",
+      "layer": "api-integration",
+      "given": "Designer tạo draft từ examples/visual-workflow-intake-review; publisher khác người sửa, có MFA, publish với đúng revision/contentHash",
+      "expected": "Version PUBLISHED bất biến; version cũ cùng key RETIRED; audit + outbox cùng transaction; validate trả valid=true, issues=[]",
+      "blockedBy": [
+        "#80",
+        "#21"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW02_UNSUPPORTED_BPMN_REJECTED",
+      "layer": "unit+browser-e2e",
+      "given": "Import BPMN có ParallelGateway, InclusiveGateway, ScriptTask, BoundaryEvent, FormalExpression",
+      "expected": "Từ chối với PARALLEL_NOT_SUPPORTED/UNSUPPORTED_BPMN_ELEMENT theo 14a; không bỏ qua âm thầm; designer không cho kéo phần tử ngoài palette",
+      "blockedBy": [
+        "#79",
+        "#80"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW03_REACHABILITY_AND_DEAD_END",
+      "layer": "unit",
+      "given": "Định nghĩa có node không đi tới từ START và node không đi tới END",
+      "expected": "validate trả UNREACHABLE_NODE và DEAD_END với nodeId; publish 422 DOMAIN_VIOLATION",
+      "blockedBy": [
+        "#80"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW04_BOUNDED_LOOP",
+      "layer": "unit+temporal-replay",
+      "given": "Chu trình bổ sung có loopBack maxIterations=3; biến thể không có loopBack; biến thể vòng chỉ AI/TIMER",
+      "expected": "Bản có giới hạn publish được và dừng đúng sau 3 vòng qua DEFAULT trong replay; bản không giới hạn UNBOUNDED_LOOP; vòng không có người/chờ LOOP_WITHOUT_HUMAN_OR_WAIT",
+      "blockedBy": [
+        "#80",
+        "#25"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW05_MISSING_BRANCHES",
+      "layer": "unit",
+      "given": "HUMAN_TASK thiếu cạnh cho một action; AI thiếu FAILED; CONDITION thiếu DEFAULT; priority trùng",
+      "expected": "MISSING_ACTION_ROUTE, MISSING_OUTCOME_ROUTE, MISSING_DEFAULT_BRANCH, DUPLICATE_PRIORITY",
+      "blockedBy": [
+        "#80"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW06_PUBLISH_MAKER_CHECKER",
+      "layer": "api-integration",
+      "given": "Người tạo/sửa draft cố publish; DESIGNER không có role publisher; publisher không MFA; AI service actor",
+      "expected": "403 cho mọi trường hợp; không đổi trạng thái; audit lần từ chối không chứa nội dung",
+      "blockedBy": [
+        "#21",
+        "#80",
+        "VWF-OD-01"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW07_DRAFT_REVISION_CONFLICT",
+      "layer": "api-integration",
+      "given": "Hai tab sửa cùng draft revision 3; publish với contentHash cũ",
+      "expected": "Ghi thứ hai 409 STALE_VERSION; publish hash cũ 409; sửa version PUBLISHED 409",
+      "blockedBy": [
+        "#80",
+        "#22"
+      ],
+      "contractCoverage": "SCHEMA_ONLY"
+    },
+    {
+      "id": "VW08_PUBLISHED_IMMUTABLE_AND_PINNED",
+      "layer": "api-integration+temporal",
+      "given": "Execution bắt đầu trên v1; publish v2 trong khi task v1 đang mở",
+      "expected": "Execution v1 tiếp tục đúng node/action/policy/model/prompt đã pin; claim mới dùng v2; nội dung v1 không đổi (trigger chặn UPDATE)",
+      "blockedBy": [
+        "#80",
+        "#25",
+        "#38"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW09_REVOKE_SUSPENDS_IN_FLIGHT",
+      "layer": "api-integration+temporal",
+      "given": "Revoke v1 khi còn execution v1 đang chờ người",
+      "expected": "Không migrate tự động; task SUSPENDED; chỉ supervisor ESCALATE_TO_MANUAL_REVIEW được; claim không đổi trạng thái tùy ý",
+      "blockedBy": [
+        "#80",
+        "#81",
+        "VWF-OD-02"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW10_TENANT_ISOLATION",
+      "layer": "api-integration",
+      "given": "Tenant A và B mỗi bên một workflow/task; token A gọi definitionId/taskId của B; gửi tenantId trong body/query",
+      "expected": "404 không lộ tồn tại; request có tenantId bị 422; inbox chỉ chứa task của tenant trong membership context",
+      "blockedBy": [
+        "#21",
+        "#80",
+        "#81"
+      ],
+      "contractCoverage": "SCHEMA_ONLY"
+    },
+    {
+      "id": "VW11_TASK_CLAIM_RACE",
+      "layer": "api-integration",
+      "given": "Hai reviewer claim cùng task cùng expectedTaskVersion",
+      "expected": "Đúng 1 thành công, còn lại 409 STALE_VERSION; một audit/outbox",
+      "blockedBy": [
+        "#81",
+        "#22"
+      ],
+      "contractCoverage": "SCHEMA_ONLY"
+    },
+    {
+      "id": "VW12_REASSIGN_SEPARATION_OF_DUTIES",
+      "layer": "api-integration",
+      "given": "Reassign tới claimant, tới người đã hoàn thành node trong distinctFromNodeIds, tới AI actor, vượt maxActiveTasksPerAssignee",
+      "expected": "Từ chối 403/422; accountable owner không đổi; audit có reasonCode",
+      "blockedBy": [
+        "#81",
+        "#21"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW13_ACTION_ONLY_ASSIGNEE_WITH_MFA",
+      "layer": "api-integration",
+      "given": "Candidate chưa claim, supervisor chưa reassign cho mình, observer, assignee không MFA gọi CONFIRM_EXTRACTION",
+      "expected": "403; chỉ assignee có MFA thành công; action ngoài allowedActionIds đã pin 422",
+      "blockedBy": [
+        "#81",
+        "#21"
+      ],
+      "contractCoverage": "SCHEMA_ONLY"
+    },
+    {
+      "id": "VW14_ACTION_IDEMPOTENCY",
+      "layer": "api-integration",
+      "given": "Retry cùng Idempotency-Key cùng body; cùng key khác body; key khác sau khi task COMPLETED",
+      "expected": "Trả response cũ; 409 IDEMPOTENCY_CONFLICT; 409 STALE_VERSION; chỉ một lệnh Temporal (commandId ổn định)",
+      "blockedBy": [
+        "#81",
+        "#22",
+        "#38"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW15_AI_SCOPE_DENIED",
+      "layer": "api-integration",
+      "given": "AI service actor gọi bearer API VWF; dùng scope của node khác/tenant khác; gửi CONFIRM_EXTRACTION hoặc APPROVE",
+      "expected": "Bị từ chối; không mutation; chỉ PROPOSE_* trong scope node đã pin được chấp nhận qua đường #39",
+      "blockedBy": [
+        "#83",
+        "#39",
+        "#21",
+        "VWF-OD-09"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW16_AI_FAILURE_HUMAN_FALLBACK",
+      "layer": "temporal",
+      "given": "AI timeout/hết retry/503",
+      "expected": "Đi cạnh FAILED tới HUMAN_TASK; task tạo đúng 1 lần; không tự hoàn tất",
+      "blockedBy": [
+        "#83",
+        "#80",
+        "#38"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW17_AI_CONFIDENCE_NOT_PERMISSION",
+      "layer": "api-integration",
+      "given": "Đề xuất AI confidence 0.99 không có người xác nhận",
+      "expected": "Không có giá trị nào vào dữ liệu xác nhận; task vẫn chờ người; đề xuất không evidence bị loại",
+      "blockedBy": [
+        "#83",
+        "#81",
+        "OD-08"
+      ],
+      "contractCoverage": "SCHEMA_ONLY"
+    },
+    {
+      "id": "VW18_SUPPLEMENT_REQUEST_AND_RESUME",
+      "layer": "api-integration+temporal",
+      "given": "Assignee REQUEST_SUPPLEMENT; khách nộp chứng từ qua POST /v1/claims/{claimId}/documents",
+      "expected": "Claim SUPPLEMENT_REQUIRED qua lệnh #38; RECEIVED đưa execution về ai_extract; SUPPLEMENT_ROUND tăng",
+      "blockedBy": [
+        "#81",
+        "#38",
+        "#26"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    },
+    {
+      "id": "VW19_SUPPLEMENT_TIMEOUT_BOUNDED",
+      "layer": "temporal-time-skipping",
+      "given": "Không bổ sung trong maxWaitSeconds; restart worker trong lúc chờ",
+      "expected": "Đúng một EXPIRED → END SUPPLEMENT_EXPIRED → lệnh CLOSED_EXPIRED; nhắc ≤ 3 lần, không trùng sau restart",
+      "blockedBy": [
+        "#38",
+        "#80",
+        "VWF-OD-06"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW20_SLA_ESCALATION_NO_DECISION",
+      "layer": "temporal-time-skipping",
+      "given": "Task quá sla.dueSeconds",
+      "expected": "slaState BREACHED; escalation tới SUPERVISOR_QUEUE/CASE_OWNER; không hoàn tất/duyệt/từ chối task hay claim",
+      "blockedBy": [
+        "#81",
+        "#38",
+        "VWF-OD-05"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW21_ANNOTATION_LABEL_NOT_STATE",
+      "layer": "api-integration",
+      "given": "Assignee gắn nhãn POSSIBLE_ALTERATION/MISSING_STAMP; gửi free text; tài liệu ngoài claim",
+      "expected": "Annotation append-only; claim/task/EOB/payment không đổi; free text/tài liệu ngoài scope 422",
+      "blockedBy": [
+        "#82",
+        "VWF-OD-04"
+      ],
+      "contractCoverage": "SCHEMA_ONLY"
+    },
+    {
+      "id": "VW22_NO_PII_IN_EVENTS_HISTORY",
+      "layer": "integration",
+      "given": "Chạy lát cắt đầy đủ; quét outbox/Kafka, Temporal history, search, log",
+      "expected": "Chỉ ID/version/hash/changeKind; không có giá trị trích xuất, tên, CCCD, SĐT, STK hay chứng từ",
+      "blockedBy": [
+        "#80",
+        "#81",
+        "#83"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW23_WORKER_RESTART_NO_DUPLICATE",
+      "layer": "integration",
+      "given": "Kill workflow/event worker khi đang chờ người và ngay sau commit action",
+      "expected": "Phục hồi; không task/lệnh/transition trùng; inbox dedup",
+      "blockedBy": [
+        "#84",
+        "#25",
+        "#24"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW24_UI_ACTIONS_MATCH_SERVER",
+      "layer": "browser-e2e",
+      "given": "Đăng nhập lần lượt designer, publisher, reviewer, supervisor, observer",
+      "expected": "Nút hiển thị theo actor-scope/allowedActions; gọi trực tiếp API vẫn bị server từ chối khi không đủ quyền",
+      "blockedBy": [
+        "#79",
+        "#82",
+        "#21"
+      ],
+      "contractCoverage": "CONTRACT_ONLY"
+    },
+    {
+      "id": "VW25_REFERENCE_NOT_PUBLISHED_FAIL_CLOSED",
+      "layer": "api-integration",
+      "given": "modelRef/promptRef/policyRef/formRef trỏ version DRAFT/không tồn tại/tenant khác; actionCatalogVersion lạ; scope trùng workflow PUBLISHED khác",
+      "expected": "Publish 422 với REFERENCE_NOT_PUBLISHED/CATALOG_VERSION_UNKNOWN/AMBIGUOUS_BINDING; không có giá trị latest",
+      "blockedBy": [
+        "#80"
+      ],
+      "contractCoverage": "SCHEMA_AND_ORACLE"
+    }
+  ]
+}
