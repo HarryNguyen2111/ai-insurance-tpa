@@ -7,6 +7,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbS
 const TITLES: Record<string, string> = {
   '/': 'Tổng quan',
   '/tiep-nhan': 'Tiếp nhận hồ sơ',
+  '/quy-trinh': 'Thiết kế quy trình',
   '/to-chuc/cai-dat': 'Cài đặt tổ chức',
   '/he-thong': 'Kết nối hệ thống',
 };

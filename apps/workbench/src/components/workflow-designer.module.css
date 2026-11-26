@@ -1,0 +1,39 @@
+.editor { display: grid; gap: 1rem; color: var(--foreground); }
+.header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.header h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: -.035em; }
+.eyebrow { color: var(--muted-foreground); font-size: .7rem; font-weight: 700; letter-spacing: .12em; }
+.chip { border: 1px solid var(--border); border-radius: 999px; padding: .4rem .65rem; font-size: .75rem; white-space: nowrap; }
+.notice { border: 1px solid #bfdbfe; background: #eff6ff; color: #1e3a8a; border-radius: .75rem; padding: .9rem 1rem; font-size: .85rem; line-height: 1.6; }
+.empty { border: 1px dashed var(--border); border-radius: 1rem; padding: 3rem 1rem; text-align: center; display: grid; gap: 1rem; justify-items: center; }
+.empty h2, .panel h2, .validation h2 { font-weight: 650; }
+.hint { font-size: .75rem; color: var(--muted-foreground); line-height: 1.5; }
+.toolbar, .toolbox { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.toolbox { padding: .75rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--muted); }
+.toolbox button, .properties button { border: 1px solid var(--border); border-radius: .5rem; padding: .45rem .65rem; background: var(--background); font-size: .8rem; }
+.toolbox button:disabled, .properties button:disabled { opacity: .5; }
+.editor button:focus-visible, .editor input:focus-visible, .editor textarea:focus-visible, .editor select:focus-visible, .validation:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+.fields, .connections { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.editor label { display: grid; gap: .35rem; font-size: .75rem; font-weight: 600; min-width: 0; }
+.editor input:not([type=checkbox]):not([type=file]), .editor textarea, .editor select { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: .5rem; padding: .5rem .6rem; background: var(--background); color: var(--foreground); font-size: .8rem; font-weight: 400; }
+.editor textarea { font-family: ui-monospace, monospace; resize: vertical; }
+.inline { display: flex !important; align-items: center; margin-left: auto; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 1rem; }
+.canvas { height: 520px; position: relative; overflow: hidden; background: #fafbfc; border: 1px solid var(--border); border-radius: .75rem; color: #172033; }
+.canvas :global(.djs-palette) { display: none; }
+/* Keep upstream bpmn.io branding unobscured, per the pinned dependency's license. */
+.canvas :global(.bjs-powered-by) { z-index: 10; }
+.panel { border: 1px solid var(--border); border-radius: .75rem; padding: .8rem; display: flex; flex-direction: column; gap: .75rem; min-width: 0; }
+.properties { display: grid; gap: .75rem; }
+.connections { grid-template-columns: 1fr 1fr auto; padding-top: .75rem; align-items: end; }
+.policy { border: 1px solid var(--border); border-radius: .75rem; padding: .8rem; font-size: .8rem; }
+.policy summary { cursor: pointer; font-weight: 600; }
+.policy p { margin: .75rem 0; }
+.policy button { margin-top: .75rem; }
+.import { border: 1px dashed var(--border); border-radius: .5rem; padding: .5rem; }
+.preview { max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--muted); padding: 1rem; border-radius: .75rem; font-size: .7rem; }
+.validation { border: 1px solid #93c5fd; border-radius: .75rem; padding: 1rem; font-size: .8rem; }
+.validation ul { padding-left: 1rem; list-style: disc; margin: .5rem 0; }
+.error { border: 1px solid #fca5a5; background: #fef2f2; color: #991b1b; border-radius: .75rem; padding: .8rem; font-size: .85rem; }
+.license { white-space: pre-wrap; font-size: .75rem; line-height: 1.5; margin: .75rem 0; }
+@media (max-width: 1000px) { .workspace { grid-template-columns: 1fr; } .panel { max-height: none; } .canvas { height: 440px; } }
+@media (max-width: 600px) { .fields, .connections { grid-template-columns: 1fr; } .header { align-items: start; } .header h1 { font-size: 1.2rem; } .inline { margin-left: 0; } }
