@@ -68,7 +68,7 @@ test('PT02/PT17 audit: real PG first append, rollback, immutable and tenant boun
     const input: AuditInput = { entityType: 'SYNTHETIC', entityId: entity, actorType: 'SYSTEM', actorId: randomUUID(), action: 'CHANGE', payload: { after_hash: 'a'.repeat(64) } };
     const run = (fn: Parameters<TenantDatabase['withTenantTransaction']>[1]) => database.withTenantTransaction(tenant, fn);
     const read = () => database.withTenantTransaction(tenant, async tx => (await tx.query<AuditRecord>(
-      `SELECT tenant_id,entity_type,entity_id,actor_type,actor_id,action,payload_diff,sequence::text,version,occurred_at,prev_hash,curr_hash FROM tpa.audit_logs WHERE entity_id=$1 ORDER BY sequence`, [entity])).rows);
+      `SELECT tenant_id,entity_type,entity_id,actor_type,actor_id,action,payload_diff,sequence::text,version,occurred_at,prev_hash,curr_hash FROM tpa.audit_logs AS log WHERE entity_id=$1 ORDER BY log.sequence`, [entity])).rows);
     await t.test('SQL canonical bytes match fixed Unicode and escaping vector', async () => {
       const value = { z: 'Việt\n"', a: { b: '720000.00' } };
       const result = await admin.query('SELECT tpa.audit_canonical($1::jsonb) AS canonical', [JSON.stringify(value)]);
@@ -96,6 +96,8 @@ test('PT02/PT17 audit: real PG first append, rollback, immutable and tenant boun
       await Promise.all(Array.from({ length: 12 }, () => run(tx => appendAudit(tx, input))));
       const rows = await read();
       assert.equal(rows.length, 14);
+      assert.deepEqual(rows.map(row => row.sequence), Array.from({ length: 14 }, (_, index) => String(index + 1)),
+        'read bigint chain order numerically even though sequence is transported as a string');
       assert.equal(verifyAuditChain(rows, { sequence: '14', curr_hash: rows.at(-1)!.curr_hash }), true);
       await run(async tx => {
         const head = (await tx.query('SELECT sequence::text,curr_hash FROM tpa.audit_chain_heads WHERE entity_id=$1',[entity])).rows[0];
