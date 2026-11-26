@@ -13,6 +13,8 @@
     "build": "turbo run build",
     "test:smoke": "turbo run test:smoke",
     "dev": "turbo run dev",
+    "preview:local": "turbo run build --filter=@tpa/core-api --filter=@tpa/workbench && pnpm --filter @tpa/workbench preview:local",
+    "preview:stop": "pnpm --filter @tpa/workbench preview:stop",
     "infra:up": "docker compose -f infra/compose/compose.yaml up -d --wait --wait-timeout 300",
     "infra:down": "docker compose -f infra/compose/compose.yaml down",
     "infra:smoke": "docker compose -f infra/compose/compose.yaml --profile test run --build --rm smoke",

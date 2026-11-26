@@ -1,0 +1,31 @@
+{
+  "name": "@tpa/workbench",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev --hostname 127.0.0.1 --port 3100",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start --hostname 127.0.0.1 --port 3100",
+    "typecheck": "NEXT_TELEMETRY_DISABLED=1 next typegen && tsc --noEmit",
+    "test": "node --test src/lib/*.test.ts",
+    "test:smoke": "playwright test && node --test --test-timeout=120000 scripts/local-preview.test.mjs",
+    "preview:local": "node scripts/local-preview.mjs",
+    "preview:stop": "node scripts/local-preview.mjs --stop"
+  },
+  "dependencies": {
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "^24.0.0",
+    "@types/react": "19.3.3",
+    "@types/react-dom": "19.3.0",
+    "tailwindcss": "4.3.5",
+    "typescript": "6.0.3"
+  }
+}

@@ -34,8 +34,23 @@ Unit and HTTP tests use Jest; the smoke test boots `dist/main.js` in a child
 process on an ephemeral loopback port, checks HTTP, and sends SIGTERM.
 
 See [development notes](docs/development.md) for upstream provenance, compatibility,
-validation evidence and pending work. No frontend, identity server, claim/payment
+validation evidence and pending work. No identity server, claim/payment
 API, database adapter or custom workflow implementation is included.
+
+## Local web + API preview (issue #68)
+
+`apps/workbench` is a Next.js App Router workspace shell (Vietnamese) with an honest
+claims-intake preview and a real same-origin connection to core-api `GET /health`.
+Start both compiled apps on loopback (no Docker needed):
+
+```sh
+pnpm preview:local   # prints READY http://127.0.0.1:3100 once FE, BE and FE->BE respond
+pnpm preview:stop    # or Ctrl+C; stops only the processes the launcher started
+```
+
+This is process liveness and UI progress only, not claims workflow or platform
+readiness. Details, tests and remaining backend prerequisites:
+[docs/local-preview.md](docs/local-preview.md).
 
 ## Local infrastructure
 
