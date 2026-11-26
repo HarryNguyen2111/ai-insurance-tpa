@@ -15,6 +15,13 @@
       "when": 1795576602202,
       "tag": "0001_fail_closed_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795576603000,
+      "tag": "0002_tenant_context",
+      "breakpoints": true
     }
   ]
 }

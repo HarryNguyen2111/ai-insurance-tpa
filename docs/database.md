@@ -96,10 +96,9 @@ database or bypass this runner with `drizzle-kit migrate` (which lacks its
 history validation/serialization).
 
 Future grants must name specific tables/operations. Do not default-grant all
-future tables or grant TRUNCATE/ownership to app. No tenant queries are provided
-by this package yet. Domain tables and their grants must land with FORCE RLS,
-USING/WITH CHECK, composite constraints and `withTenantTransaction` using
-transaction-local tenant context in #16. #17 implements crypto; #18 implements
+future tables or grant TRUNCATE/ownership to app. The tenant helper added in #16 is described below. Future domain tables and
+their grants must land with FORCE RLS, USING/WITH CHECK, composite constraints
+and queries through `withTenantTransaction` using transaction-local context. #17 implements crypto; #18 implements
 immutable audit. Per spec 07, later domain migrations cover identity/membership,
 versioned contracts/EOB, reservations, OTP/approvals, payment/journal,
 outbox/inbox/idempotency, evidence/documents and governance. Each needs its own
@@ -130,8 +129,115 @@ pg + Drizzle `NUMERIC(15,2)` roundtrip/JSON strings including bounds/overflow.
 The numeric fixture is synthetic test-only; no money arithmetic is introduced.
 Future calculations must use Decimal ROUND_HALF_UP and JSON strings.
 
-This is **PT01 role subset only**. Tenant isolation, PgBouncer connection reuse
-and composite FK tests remain pending #16; PT01 as a whole is not passed.
+The #15 suite covers the **PT01 role subset only**. The #16 suite below adds
+representative tenant isolation, PgBouncer reuse and composite FK checks; actual
+domain/API PT01 coverage remains pending.
 Golden TC01–TC06 and all other PT cases remain pending their domain runners.
 No production acceptance, crypto/audit/payment correctness, staging/deployment,
 backup/restore or security compliance claim is made by these checks.
+
+## Tenant transaction foundation (#16)
+
+`@tpa/database/tenant` exports `createTenantDatabase(config)`. Keep its pool
+configuration at the trusted server composition root; it exposes only
+`withTenantTransaction(tenantId, async tx => ...)` and `close()`, never a raw pool
+or client. The callback receives a query-only `TenantTransaction`; it rejects use
+after callback completion or rollback. All callback queries must be awaited;
+the implementation also drains pending operations and rolls back if a query
+failure was swallowed. Query text is trusted repository code, values are bound
+parameters. This capability is not a SQL sandbox: do not pass request SQL, issue
+transaction-control/session-setting statements, or expose it to callers.
+
+The tenant UUID argument is a server-side interface **before identity
+integration**. UUID format validation is not membership verification. A future
+adapter must verify issuer/audience/expiry and active principal membership,
+then pass that granted tenant; never copy a body/header/query tenant ID. No
+identity endpoints or claim repositories are wired by this change.
+
+The helper checks the actual role is unprivileged `tpa_app`, acquires one client,
+starts `BEGIN`, executes parameterized
+`SELECT pg_catalog.set_config('app.current_tenant_id', $1, true)`, then commits or
+rolls back on that same client. `true` is PostgreSQL's transaction-local setting,
+equivalent to SET LOCAL; it is not a session SET. Failed rollback destroys the
+client. Application code must not use migration credentials. The role/bootstrap
+invariants from #15 remain required; runtime role validation supplements them.
+
+Migration `0002` adds only `tpa.current_tenant_id()`, a STABLE SECURITY INVOKER
+policy expression with a fixed `pg_catalog` search path. Missing/empty context
+raises 42501; malformed UUID raises 22P02. Only `tpa_app` is explicitly granted
+EXECUTE; PUBLIC is revoked. It changes no global table permissions and introduces
+no runtime tenant-owned/business tables. PostgreSQL may avoid evaluating a policy
+for an empty relation or an impossible predicate; the invariant is no rows read
+or changed without valid context, not that every possible SQL query must throw.
+
+### Pattern for future domain migrations
+
+Every future domain migration must introduce its real schema, grants, constraints
+and isolation tests together. Use `(tenant_id, id)` as a primary/unique key and
+reference parents via `FOREIGN KEY (tenant_id, parent_id) REFERENCES
+parent(tenant_id, id)`. Single-column UUID foreign keys are insufficient. Set
+ENABLE **and FORCE** ROW LEVEL SECURITY on every tenant-owned table, with both
+`USING (tenant_id = tpa.current_tenant_id())` and the same `WITH CHECK` expression.
+Grant only the specific required SELECT/INSERT/UPDATE/DELETE operations; never
+TRUNCATE, DDL, ownership or BYPASSRLS. Business state, audit and outbox must share
+the same callback/transaction when those domains land.
+
+Global tables require an explicit per-table boundary: a public reference catalog
+may get SELECT only; private cross-tenant registries remain inaccessible to the
+app. Any future invoice/allocation privileged operation requires a separately
+reviewed narrow interface and concurrency/authorization evidence. There is no
+global bypass grant, SECURITY DEFINER helper or generic elevated access here.
+
+### Real PgBouncer integration and provenance
+
+`pnpm db:test:integration` serially runs #15's PG suite and #16's real PgBouncer
+suite. No existing Compose runtime is changed. The latter builds the unmodified
+upstream **PgBouncer 1.26.1** release, dated 2026-10-14, from the official tarball:
+
+- [Upstream release and checksum](https://www.pgbouncer.org/downloads/)
+- [1.26.1 SHA-256](https://www.pgbouncer.org/downloads/files/1.26.1/pgbouncer-1.26.1.tar.gz.sha256):
+  `00886a2994b4844cd37110970df777772cfc42a74c400522c82fba509a3f42d9`
+- [Upstream ISC license](https://github.com/pgbouncer/pgbouncer/blob/pgbouncer_1_26_1/COPYRIGHT)
+  is retained inside the test image. No custom pooler implementation.
+- Official Alpine **3.23.2** base, manifest digest
+  `sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62`.
+  The source and base are pinned; Alpine build dependencies use that release's
+  maintained package repositories, so this is not a bit-reproducible image claim.
+- [PgBouncer feature compatibility](https://www.pgbouncer.org/features.html),
+  [configuration](https://www.pgbouncer.org/config.html), and
+  [PG16 transaction-local settings](https://www.postgresql.org/docs/16/functions-admin.html#FUNCTIONS-ADMIN-SET)
+  inform the test. It verifies the binary version and PG16 at runtime.
+
+The committed test config uses `pool_mode=transaction`, one backend connection,
+zero reserve pool and no forced reset after transactions (no DISCARD ALL masking
+context leaks). Multiple frontend connections reuse the same measured backend
+PID. SCRAM authenticates only the real `tpa_app` role. Admin/migrator connections
+are direct, for bootstrap/fixtures only, not for the isolation assertions.
+
+All `isolation_*` tables are **test-only representative synthetic relations** in
+`packages/database/test/fixtures/tenant.sql`; they are not migrations or fake
+business tables. Parent/child fixtures have FORCE RLS and composite tenant keys.
+Global fixtures demonstrate explicit read-only versus no-access boundaries.
+The runner creates a uniquely named network, two labeled containers, random
+loopback ports, ephemeral PostgreSQL tmpfs data and synthetic random passwords.
+PostgreSQL is limited to 384 MiB/1 CPU and PgBouncer to 128 MiB/0.5 CPU. Cleanup
+removes only its owned containers/network/image tag/temp configuration; no
+persistent volume, host configuration, unrelated container or production data
+is used. If externally interrupted, identify only this run's `tpa-db16-*`
+resources and their `ao.session` label before removing them.
+
+Automated assertions cover the PT01 **representative database foundation**:
+actual app role and ownership; FORCE RLS/USING/WITH CHECK; tenant A/B cross reads,
+inserts, updates, deletes and composite parent references; missing/malformed
+contexts; rollback and swallowed-query failure; expired callback capabilities;
+concurrent tenant requests; a single reused backend after commit/rollback; and
+DDL/TRUNCATE/elevation/global access negatives. The #15 NUMERIC string roundtrip
+suite remains unchanged in behavior. No money arithmetic is introduced.
+
+Actual claim/member/plan/document/EOB/payment migrations and API authorization
+boundaries do not exist here and remain pending their own child issues. PT01
+is not an all-domain or production tenant-isolation certification. Golden
+TC01–TC06 have no relevant business runner in this foundation change; their
+original expectations remain unchanged and pending domain implementation.
+Other platform cases, crypto/audit/idempotency/contract enforcement and production
+security/restore/load acceptance remain outside this verification.
