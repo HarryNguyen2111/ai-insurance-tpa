@@ -9,17 +9,21 @@
     "build": "tsc --noEmit",
     "start": "node src/main.ts",
     "test": "node --test test/*.unit.test.ts",
-    "test:e2e": "node --test --test-concurrency=1 --test-timeout=420000 test/*.e2e.test.ts"
+    "test:e2e": "node --test --test-concurrency=1 --test-timeout=420000 test/*.e2e.test.ts",
+    "start:workflow": "node src/consumers/workflow-main.ts"
   },
   "dependencies": {
     "@tpa/database": "workspace:*",
     "@tpa/event-contracts": "workspace:*",
-    "kafkajs": "2.2.4"
+    "kafkajs": "2.2.4",
+    "@tpa/workflow": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/pg": "8.23.1",
     "pg": "8.23.1",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "@temporalio/client": "1.27.0",
+    "@temporalio/worker": "1.27.0"
   }
 }
