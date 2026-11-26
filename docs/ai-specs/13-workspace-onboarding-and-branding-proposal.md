@@ -1,6 +1,6 @@
 # Tạo tổ chức (workspace), hồ sơ tổ chức, logo và giao diện thương hiệu — đề xuất backend
 
-Trạng thái: **ĐỀ XUẤT, CHƯA DUYỆT, CHƯA TRIỂN KHAI.** Owner yêu cầu ngày 2026-11-26 (phản hồi PR #69, issue #68): có hành trình người dùng "bắt đầu → tạo tổ chức → thông tin tổ chức → logo → chỉnh theme". Owner chọn: làm **prototype giao diện chỉ lưu trên trình duyệt** trước, kèm đề xuất backend này để chốt quyết định mở. Tài liệu bổ sung `10-tenant-workspaces-and-dynamic-intake.md` và `11-dynamic-intake-design.md` (§4 workspace, §11 `tenant_workspace_profiles`, S-W1). Không thay bất biến AGENTS.md hay specs 01–12. `02-openapi-contracts.yaml` và migrations **không** bị sửa ở đây.
+Trạng thái: **ĐỀ XUẤT; OD-02, OD-05, OD-WS1 ĐÃ CHỐT 2026-11-26; CONTRACT WSC1 ĐÃ THÊM VÀO 02; CHƯA TRIỂN KHAI BACKEND.** Owner yêu cầu ngày 2026-11-26 (phản hồi PR #69, issue #68): có hành trình người dùng "bắt đầu → tạo tổ chức → thông tin tổ chức → logo → chỉnh theme". Owner chọn: làm **prototype giao diện chỉ lưu trên trình duyệt** trước, kèm đề xuất backend này để chốt quyết định mở. Tài liệu bổ sung `10-tenant-workspaces-and-dynamic-intake.md` và `11-dynamic-intake-design.md` (§4 workspace, §11 `tenant_workspace_profiles`, S-W1). Không thay bất biến AGENTS.md hay specs 01–12. Contract §4 nằm trong `02-openapi-contracts.yaml` (API 1.3.0, WSC1). Migrations, endpoint, danh tính và phân quyền **chưa** được triển khai.
 
 Prototype hiện có: `apps/workbench` — `/to-chuc/tao-moi` (wizard 4 bước), `/to-chuc/cai-dat` (tab Thông tin chung / Logo / Giao diện / Thành viên / Nâng cao), bộ chuyển tổ chức ở thanh bên. Luật kiểm tra dùng chung nằm ở `apps/workbench/src/lib/workspace-profile.ts`; backend tương lai phải dùng **cùng giới hạn và thông điệp** (test parity `workspace-spec-parity.test.ts` giữ tài liệu này khớp với code).
 
@@ -17,7 +17,7 @@ Prototype hiện có: `apps/workbench` — `/to-chuc/tao-moi` (wizard 4 bước)
 | ID | Màn hình | Actor (đề xuất) | Prototype | API đề xuất | Trạng thái UI bắt buộc |
 | --- | --- | --- | --- | --- | --- |
 | S-W0 | Chào mừng / chưa có tổ chức | Mọi principal đã đăng nhập | `/` (welcome) | `GET /v1/me/memberships` (02) | loading, empty, error |
-| S-W5 | Wizard tạo tổ chức: thông tin → logo → giao diện → xem lại | TPA_OPS_ADMIN (MFA) | `/to-chuc/tao-moi` | `POST /v1/admin/workspaces`, logo §4.3, `PUT …/theme` | lỗi theo field, slug trùng/dành riêng (409/422), quyền (403), MFA-required, idempotent retry |
+| S-W5 | Wizard tạo tổ chức: thông tin → logo → giao diện → xem lại | TPA_OPS_ADMIN (MFA) | `/to-chuc/tao-moi` | `POST /v1/admin/workspaces`, logo §4.3, `PUT …/theme` | lỗi theo field, slug trùng/dành riêng (422 `DOMAIN_VIOLATION`), quyền (403), MFA-required, idempotent retry |
 | S-W6 | Cài đặt tổ chức (thông tin, logo, giao diện) | WORKSPACE_ADMIN (MFA) | `/to-chuc/cai-dat` | `GET/PUT …/profile`, logo §4.3, `PUT …/theme` | 409 `STALE_VERSION`, 422, forbidden, đã lưu |
 | S-W1 | Bộ chuyển workspace + branding | Mọi principal | thanh bên | 02 `POST /v1/me/membership`; `GET /v1/public/workspaces/{slug}/branding` | xóa cache/UI tenant cũ khi đổi (DI03) |
 | S-W2 | Thành viên | WORKSPACE_ADMIN | tab "Thành viên" (khóa) | phụ thuộc #21, OD-05 | forbidden, MFA-required |
@@ -46,31 +46,30 @@ Slug dành riêng: `admin, api, app, auth, login, logout, public, static, health
 
 Màu chữ trên màu chính được chọn tự động: trắng `#ffffff` hoặc đen `#000000`, lấy màu có tương phản cao hơn. Lựa chọn này luôn đạt ≥ 4.5:1 (WCAG AA) với mọi màu. Có cảnh báo (không chặn) khi màu chính so với nền trang < 3:1 (viền/biểu tượng khó thấy). Bảng màu gợi ý: Xanh đại dương `#1d4ed8`, Xanh ngọc `#0f766e`, Lục bảo `#047857`, Đỏ son `#b91c1c`, Cam đất `#c2410c`, Tím than `#6d28d9`, Than chì `#334155`. Việc chặn cứng màu có tương phản nền thấp là OD-WS1.
 
-## 4. API đề xuất (bổ sung vào 02 ở task contract sau khi duyệt)
+## 4. API (contract WSC1 trong `02-openapi-contracts.yaml`, API 1.3.0)
 
-Mọi endpoint quản trị: bearer đã xác minh, kiểm tra membership/role phía server, `Cache-Control: no-store`, lỗi theo `ApiError` (code, messageVi, correlationId, `fieldErrors[]`), không echo giá trị người dùng.
+Mọi endpoint quản trị:
+- dùng bearer đã xác minh và header `X-Membership-Context` (server kiểm tra membership/quyền);
+- mọi thao tác ghi cần `Idempotency-Key`, MFA và `expectedVersion` (sai → 409 `STALE_VERSION`);
+- phản hồi `Cache-Control: no-store`;
+- lỗi dùng nguyên `ApiError`/`Error4xx` của C1 (code, messageVi, correlationId) và không echo giá trị người dùng.
 
-1. `POST /v1/admin/workspaces`: tạo tenant + profile + theme mặc định + membership `WORKSPACE_ADMIN` cho principal được chỉ định.
-   - Điều kiện: `TPA_OPS_ADMIN`, MFA, `Idempotency-Key` (cùng key + khác body → 409 `IDEMPOTENCY_CONFLICT`).
-   - Body: `{displayName, shortName, slug, orgType, description?, theme?, initialAdminPrincipalId}`.
-   - Trả về 201 `{workspaceId, slug, version:1}`. Slug trùng → 409 `SLUG_TAKEN`; slug dành riêng → 422 `SLUG_RESERVED`.
-2. `GET /v1/admin/workspaces/{workspaceId}/profile`: `WORKSPACE_ADMIN` của chính tenant; tenant khác → 404.
-3. `PUT /v1/admin/workspaces/{workspaceId}/profile` `{expectedVersion, displayName, shortName, description, orgType}`.
-   - Sai version → 409 `STALE_VERSION`.
-   - Đổi slug là thao tác riêng của TPA ops (OD-02), có lịch sử redirect tạm.
-4. Logo theo mẫu presigned của #26:
-   - `POST …/logo/upload-url {contentType, contentLength, sha256}` → presigned PUT vào bucket quarantine. Giới hạn 2 MB thô.
-   - `POST …/logo/complete {uploadId, expectedVersion}`.
-     - Worker kiểm magic bytes và **từ chối SVG**, giới hạn pixel/decompression bomb, quét file.
-     - Ảnh được giải mã và mã hóa lại bằng Imgproxy/thư viện ảnh (loại EXIF/GPS), sinh bản 512px và 64px.
-     - Ghi `logo_asset_id` mới (bản gốc giữ bất biến). Trả 202 → trạng thái `PROCESSING|READY|REJECTED`.
-   - `DELETE …/logo {expectedVersion}`.
-5. `PUT /v1/admin/workspaces/{workspaceId}/theme {expectedVersion, primaryColor, radius, mode, sidebarStyle}`: validate tập đóng, trả cảnh báo tương phản.
-6. `GET /v1/public/workspaces/{slug}/branding` (spec 11 S-W1/DI19):
-   - Chỉ trả `{displayName, shortName, logoUrl (signed/CDN), theme}` và không có ID nội bộ.
-   - `Cache-Control: public, max-age=300`. Slug không tồn tại và workspace bị khóa đều trả cùng một 404.
+Contract **không** thêm mã lỗi hay vai trò mới vào các component C1 đã khóa (snapshot test). Ví dụ: slug trùng hoặc dành riêng trả 422 `DOMAIN_VIOLATION` kèm messageVi ở §3. Lỗi theo từng field (`fieldErrors`) chờ phần mở rộng `ApiError` của F1. `WORKSPACE_ADMIN` và quyền quản trị nền tảng của TPA ops được cấp qua #21; tên vai trò không được thêm vào enum `Membership.roles` của C1 ở bước này.
 
-Mỗi mutation ghi business state + `audit_logs` (prev/curr hash) + outbox `workspace.profile-changed` / `workspace.branding-changed` trong cùng `withTenantTransaction`. Event chỉ chứa ID + version, không chứa ảnh.
+| operationId | Method + path | Ai | Ghi chú |
+| --- | --- | --- | --- |
+| `createWorkspace` | `POST /v1/admin/workspaces` | TPA ops + MFA (OD-05) | Body `WorkspaceCreateRequest {displayName, shortName, slug, orgType, description?, theme?, initialAdminPrincipalId}`. 201 `WorkspaceResult`. Slug do TPA cấp tại đây (OD-02). Tạo profile + theme (mặc định nếu thiếu) + `WORKSPACE_ADMIN` đầu tiên trong một transaction. |
+| `getWorkspace` | `GET /v1/admin/workspaces/{workspaceId}` | WORKSPACE_ADMIN hoặc TPA ops | 200 `Workspace`. Workspace khác → 404. |
+| `updateWorkspaceProfile` | `PUT …/{workspaceId}/profile` | WORKSPACE_ADMIN + MFA | Thay toàn bộ tên/tên viết tắt/loại hình/mô tả; **không có slug** (OD-02). Đổi slug có kiểm soát là thao tác riêng sau OD-WS3. |
+| `updateWorkspaceTheme` | `PUT …/{workspaceId}/theme` | WORKSPACE_ADMIN + MFA | Tập đóng `WorkspaceTheme`; tương phản thấp **chỉ** trả `warnings[].code = LOW_SURFACE_CONTRAST` (OD-WS1). |
+| `createWorkspaceLogoUpload` | `POST …/{workspaceId}/logo-assets` | WORKSPACE_ADMIN + MFA | `{contentType: png/jpeg/webp, sizeBytes ≤ 2 MiB thô, sha256}` → presigned PUT ≤ 300 giây vào quarantine. core-api không nhận bytes. |
+| `completeWorkspaceLogoUpload` | `POST …/logo-assets/{assetId}/complete` | WORKSPACE_ADMIN + MFA | 202 + `Location`. Server kiểm tra lại checksum/kích thước, nhận diện magic bytes (từ chối SVG), giới hạn pixel, quét, mã hóa lại (bỏ EXIF/GPS), tạo bản 512px/64px; bản gốc bất biến. |
+| `getWorkspaceLogoAsset` | `GET …/logo-assets/{assetId}` | WORKSPACE_ADMIN | `PENDING_UPLOAD/PROCESSING`, `READY` (có mime/kích thước) hoặc `REJECTED` (mã lỗi cố định, không có văn bản tự do). |
+| `setWorkspaceLogo` | `PUT …/{workspaceId}/logo` | WORKSPACE_ADMIN + MFA | `{expectedVersion, logoAssetId}` để kích hoạt asset READY, hoặc `{expectedVersion, clear: true}` để bỏ logo. |
+
+Mỗi mutation ghi business state + `audit_logs` (prev/curr hash) + outbox `workspace.changed` (`WorkspaceChangedEvent`, payload chỉ có `changeKind`) trong cùng `withTenantTransaction`. Event không chứa tên, slug, màu, ảnh hay URL. Không request/response nào nhận hoặc trả `tenantId`; `workspaceId` là định danh riêng, nên OD-01 vẫn mở được.
+
+**Chưa thuộc WSC1:** `GET /v1/public/workspaces/{slug}/branding` (spec 11 S-W1/DI19; công khai, `public, max-age=300`, cần chốt cách phục vụ logo qua CDN/signed URL). Danh sách workspace cho TPA ops và thao tác đổi slug (OD-WS3) cũng chưa có. Ba mục này cần task contract tiếp theo.
 
 ## 5. Lưu trữ đề xuất (mở rộng spec 11 §11)
 
@@ -95,7 +94,7 @@ Mỗi mutation ghi business state + `audit_logs` (prev/curr hash) + outbox `work
 | --- | --- | --- |
 | WS01 | Chỉ `TPA_OPS_ADMIN` + MFA tạo được workspace; principal khác → 403 | không (cần #21) |
 | WS02 | Retry cùng `Idempotency-Key` không tạo 2 tenant; khác body → 409 | không |
-| WS03 | Slug trùng (kể cả đồng thời) → đúng 1 thành công, còn lại 409 `SLUG_TAKEN` | có (trùng cục bộ) |
+| WS03 | Slug trùng (kể cả đồng thời) → đúng 1 thành công, còn lại 422 `DOMAIN_VIOLATION` | có (trùng cục bộ) |
 | WS04 | Slug dành riêng/sai mẫu → 422 với messageVi §3 | có |
 | WS05 | Tên/mô tả chứa `< > { } \`` hoặc ký tự điều khiển → 422 | có (unit) |
 | WS06 | Logo SVG/đổi đuôi, file hỏng, ảnh quá nhỏ/lớn/dài, decompression bomb → REJECTED | có (SVG giả PNG, ảnh nhỏ) |
@@ -106,14 +105,14 @@ Mỗi mutation ghi business state + `audit_logs` (prev/curr hash) + outbox `work
 | WS11 | Branding công khai không chứa ID nội bộ; slug không tồn tại và bị khóa cho cùng 404 | không |
 | WS12 | Mỗi thay đổi có audit hash-chain + outbox trong cùng transaction | không |
 
-## 8. Quyết định mở
+## 8. Quyết định
 
 | ID | Câu hỏi | Đề xuất mặc định |
 | --- | --- | --- |
-| OD-01 | Nhiều workspace trong một tenant? | Không |
-| OD-02 | Ai cấp/đổi slug; custom domain? | TPA ops cấp slug; không custom domain Phase 1 |
-| OD-05 | Ai tạo workspace và cấp vai trò quản trị đầu tiên? | TPA ops (`TPA_OPS_ADMIN`, MFA) |
-| OD-WS1 | Màu có tương phản nền < 3:1: cảnh báo hay chặn? | Cảnh báo, không chặn |
+| OD-01 | Nhiều workspace trong một tenant? | Mặc định Không — **còn mở** |
+| OD-02 | Ai cấp/đổi slug; custom domain? | **ĐÃ CHỐT 2026-11-26 (owner):** TPA cấp slug; không custom domain Phase 1 |
+| OD-05 | Ai tạo workspace và cấp vai trò quản trị đầu tiên? | **ĐÃ CHỐT 2026-11-26 (owner):** TPA ops tạo tổ chức và cấp admin đầu tiên (MFA) |
+| OD-WS1 | Màu có tương phản nền < 3:1: cảnh báo hay chặn? | **ĐÃ CHỐT 2026-11-26 (owner):** chỉ cảnh báo, không chặn |
 | OD-WS2 | Zalo Mini App có áp dụng chế độ tối/kiểu thanh bên không? | Chỉ áp màu chính + logo; layout theo kênh |
 | OD-WS3 | Đổi tên pháp lý/slug có cần maker-checker? | Có, TPA ops duyệt |
 | OD-WS4 | Danh sách loại hình tổ chức chính thức | 3 loại ở §3 |
@@ -121,7 +120,7 @@ Mỗi mutation ghi business state + `audit_logs` (prev/curr hash) + outbox `work
 
 ## 9. Thứ tự triển khai đề xuất
 
-1. WSC1 — chốt các OD ở §8 và bổ sung contract §4 vào 02 kèm fixtures.
+1. WSC1 — OD-02/05/WS1 đã chốt; contract §4 đã thêm vào 02 kèm fixtures và test (`packages/shared-contracts/test/workspace-*`). Còn mở: OD-01, OD-WS2–WS5.
 2. WSC2 — migration §5 + RLS/trigger + integration tests WS10/WS12. Phụ thuộc #21 và #18.
 3. WSC3 — API admin/public + idempotency/audit/outbox (WS01–WS05, WS08, WS09, WS11).
 4. WSC4 — pipeline logo theo #26 + Imgproxy (WS06, WS07).

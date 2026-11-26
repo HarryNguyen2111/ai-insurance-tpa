@@ -1,8 +1,25 @@
 {
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
-    "build": { "outputs": [] },
-    "test": { "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ai-specs/02-openapi-contracts.yaml", "$TURBO_ROOT$/docs/ai-specs/04-golden-test-cases.json"] },
-    "typecheck": { "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ai-specs/02-openapi-contracts.yaml"] }
+    "build": {
+      "outputs": []
+    },
+    "test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/ai-specs/02-openapi-contracts.yaml",
+        "$TURBO_ROOT$/docs/ai-specs/04-golden-test-cases.json",
+        "$TURBO_ROOT$/docs/ai-specs/13-workspace-onboarding-and-branding-proposal.md",
+        "$TURBO_ROOT$/apps/workbench/src/lib/workspace-profile.ts"
+      ]
+    },
+    "typecheck": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/ai-specs/02-openapi-contracts.yaml"
+      ]
+    }
   }
 }

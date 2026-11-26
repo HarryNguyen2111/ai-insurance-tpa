@@ -82,7 +82,7 @@ function Editor({ ws }: { ws: PrototypeWorkspace }) {
         <TabsContent value="members">
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2"><Lock className="size-4" /> Thành viên & vai trò — chưa khả dụng</CardTitle>
-              <CardDescription>Mời thành viên cần danh tính OIDC và membership phía máy chủ (#21). Ai được cấp vai trò quản trị workspace là quyết định mở OD-05.</CardDescription></CardHeader>
+              <CardDescription>Mời thành viên cần danh tính OIDC và membership phía máy chủ (#21). Quản trị viên đầu tiên do TPA ops cấp khi tạo tổ chức (đã chốt OD-05).</CardDescription></CardHeader>
             <CardContent className="grid gap-2 text-sm text-muted-foreground">
               <p>Vai trò dự kiến (spec 11 §4): WORKSPACE_ADMIN, FORM_AUTHOR, FORM_PUBLISHER, CLAIM_REVIEWER, INSURER_REVIEWER.</p>
               <p>Prototype không giả lập lời mời, email hay đăng nhập.</p>

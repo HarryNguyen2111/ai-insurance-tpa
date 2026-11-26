@@ -7902,6 +7902,1342 @@
     "description": "Approved immutable configuration snapshot; no default thresholds/periods. Optional rules absent means unspecified, not zero/unlimited/waived. Server requires complete applicable contract terms before publication; missing terms require review. Rule order contains approved stable rule identifiers; shadow is deployment default until explicit tenant/plan approval.",
     "$schema": "http://json-schema.org/draft-04/schema#"
   },
+  "WorkspaceOrgType": {
+    "type": "string",
+    "enum": [
+      "INSURER",
+      "TPA_OPERATOR",
+      "CORPORATE_CLIENT"
+    ],
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceDisplayName": {
+    "type": "string",
+    "minLength": 2,
+    "maxLength": 120,
+    "pattern": "^[^<>{}`\\u0000-\\u001F\\u007F]+$",
+    "description": "Server trims and NFC-normalizes before validation; no markup characters or control characters.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceShortName": {
+    "type": "string",
+    "minLength": 2,
+    "maxLength": 12,
+    "pattern": "^[A-Z0-9][A-Z0-9-]*$",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceSlug": {
+    "type": "string",
+    "minLength": 3,
+    "maxLength": 32,
+    "pattern": "^(?!.*--)[a-z][a-z0-9-]*[a-z0-9]$",
+    "not": {
+      "enum": [
+        "admin",
+        "api",
+        "app",
+        "auth",
+        "login",
+        "logout",
+        "public",
+        "static",
+        "health",
+        "internal",
+        "www",
+        "mail",
+        "tpa",
+        "mps",
+        "support",
+        "help",
+        "status",
+        "docs",
+        "v1",
+        "next",
+        "assets"
+      ]
+    },
+    "description": "Assigned by TPA operations (decided OD-02); globally unique, routing-only, never proof of access. Uniqueness is enforced server-side (422 DOMAIN_VIOLATION).",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceDescription": {
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 300,
+    "pattern": "^[^<>{}`\\u0000-\\u0008\\u000B-\\u001F\\u007F]+$",
+    "description": "Optional plain text; line breaks allowed. Organisation data only (P0), no personal data.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceTheme": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "primaryColor",
+      "radius",
+      "mode",
+      "sidebarStyle"
+    ],
+    "properties": {
+      "primaryColor": {
+        "type": "string",
+        "pattern": "^#[0-9a-f]{6}$"
+      },
+      "radius": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "SM",
+          "MD",
+          "LG"
+        ]
+      },
+      "mode": {
+        "type": "string",
+        "enum": [
+          "LIGHT",
+          "DARK"
+        ]
+      },
+      "sidebarStyle": {
+        "type": "string",
+        "enum": [
+          "LIGHT",
+          "BRAND"
+        ]
+      }
+    },
+    "description": "Closed allowlist only; no CSS, font, HTML or URL. Contrast never rejects (decided OD-WS1).",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceCreateRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "displayName",
+      "shortName",
+      "slug",
+      "orgType",
+      "initialAdminPrincipalId"
+    ],
+    "properties": {
+      "displayName": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 120,
+        "pattern": "^[^<>{}`\\u0000-\\u001F\\u007F]+$",
+        "description": "Server trims and NFC-normalizes before validation; no markup characters or control characters."
+      },
+      "shortName": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 12,
+        "pattern": "^[A-Z0-9][A-Z0-9-]*$"
+      },
+      "slug": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 32,
+        "pattern": "^(?!.*--)[a-z][a-z0-9-]*[a-z0-9]$",
+        "not": {
+          "enum": [
+            "admin",
+            "api",
+            "app",
+            "auth",
+            "login",
+            "logout",
+            "public",
+            "static",
+            "health",
+            "internal",
+            "www",
+            "mail",
+            "tpa",
+            "mps",
+            "support",
+            "help",
+            "status",
+            "docs",
+            "v1",
+            "next",
+            "assets"
+          ]
+        },
+        "description": "Assigned by TPA operations (decided OD-02); globally unique, routing-only, never proof of access. Uniqueness is enforced server-side (422 DOMAIN_VIOLATION)."
+      },
+      "orgType": {
+        "type": "string",
+        "enum": [
+          "INSURER",
+          "TPA_OPERATOR",
+          "CORPORATE_CLIENT"
+        ]
+      },
+      "description": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300,
+        "pattern": "^[^<>{}`\\u0000-\\u0008\\u000B-\\u001F\\u007F]+$",
+        "description": "Optional plain text; line breaks allowed. Organisation data only (P0), no personal data."
+      },
+      "theme": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "primaryColor",
+          "radius",
+          "mode",
+          "sidebarStyle"
+        ],
+        "properties": {
+          "primaryColor": {
+            "type": "string",
+            "pattern": "^#[0-9a-f]{6}$"
+          },
+          "radius": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "SM",
+              "MD",
+              "LG"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "LIGHT",
+              "DARK"
+            ]
+          },
+          "sidebarStyle": {
+            "type": "string",
+            "enum": [
+              "LIGHT",
+              "BRAND"
+            ]
+          }
+        },
+        "description": "Closed allowlist only; no CSS, font, HTML or URL. Contrast never rejects (decided OD-WS1)."
+      },
+      "initialAdminPrincipalId": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "description": "TPA operations only (decided OD-05). initialAdminPrincipalId must be an existing verified principal and receives WORKSPACE_ADMIN. Absent theme means the platform default theme. No tenant ID field.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceProfileUpdateRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedVersion",
+      "displayName",
+      "shortName",
+      "orgType"
+    ],
+    "properties": {
+      "expectedVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "displayName": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 120,
+        "pattern": "^[^<>{}`\\u0000-\\u001F\\u007F]+$",
+        "description": "Server trims and NFC-normalizes before validation; no markup characters or control characters."
+      },
+      "shortName": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 12,
+        "pattern": "^[A-Z0-9][A-Z0-9-]*$"
+      },
+      "orgType": {
+        "type": "string",
+        "enum": [
+          "INSURER",
+          "TPA_OPERATOR",
+          "CORPORATE_CLIENT"
+        ]
+      },
+      "description": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300,
+        "pattern": "^[^<>{}`\\u0000-\\u0008\\u000B-\\u001F\\u007F]+$",
+        "description": "Optional plain text; line breaks allowed. Organisation data only (P0), no personal data."
+      }
+    },
+    "description": "Full replacement; absent description clears it. Slug is not editable here (decided OD-02).",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceThemeUpdateRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedVersion",
+      "theme"
+    ],
+    "properties": {
+      "expectedVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "theme": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "primaryColor",
+          "radius",
+          "mode",
+          "sidebarStyle"
+        ],
+        "properties": {
+          "primaryColor": {
+            "type": "string",
+            "pattern": "^#[0-9a-f]{6}$"
+          },
+          "radius": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "SM",
+              "MD",
+              "LG"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "LIGHT",
+              "DARK"
+            ]
+          },
+          "sidebarStyle": {
+            "type": "string",
+            "enum": [
+              "LIGHT",
+              "BRAND"
+            ]
+          }
+        },
+        "description": "Closed allowlist only; no CSS, font, HTML or URL. Contrast never rejects (decided OD-WS1)."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoActivateRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedVersion",
+      "logoAssetId"
+    ],
+    "properties": {
+      "expectedVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "logoAssetId": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoClearRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "expectedVersion",
+      "clear"
+    ],
+    "properties": {
+      "expectedVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "clear": {
+        "type": "boolean",
+        "enum": [
+          true
+        ]
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoSetRequest": {
+    "oneOf": [
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedVersion",
+          "logoAssetId"
+        ],
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "logoAssetId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedVersion",
+          "clear"
+        ],
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "clear": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        }
+      }
+    ],
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoMime": {
+    "type": "string",
+    "enum": [
+      "image/png",
+      "image/jpeg",
+      "image/webp"
+    ],
+    "description": "SVG is never accepted because it can carry executable content.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogo": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "assetId",
+      "mime",
+      "width",
+      "height",
+      "previewUrl",
+      "previewUrlExpiresAt"
+    ],
+    "properties": {
+      "assetId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "mime": {
+        "type": "string",
+        "enum": [
+          "image/png",
+          "image/jpeg",
+          "image/webp"
+        ],
+        "description": "SVG is never accepted because it can carry executable content."
+      },
+      "width": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 512
+      },
+      "height": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 512
+      },
+      "previewUrl": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      },
+      "previewUrlExpiresAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "description": "Active re-encoded derivative. Private signed preview URL expires in at most 300 seconds; never logged or put in events.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "Workspace": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "workspaceId",
+      "slug",
+      "displayName",
+      "shortName",
+      "orgType",
+      "theme",
+      "version",
+      "createdAt",
+      "updatedAt"
+    ],
+    "properties": {
+      "workspaceId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "slug": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 32,
+        "pattern": "^(?!.*--)[a-z][a-z0-9-]*[a-z0-9]$",
+        "not": {
+          "enum": [
+            "admin",
+            "api",
+            "app",
+            "auth",
+            "login",
+            "logout",
+            "public",
+            "static",
+            "health",
+            "internal",
+            "www",
+            "mail",
+            "tpa",
+            "mps",
+            "support",
+            "help",
+            "status",
+            "docs",
+            "v1",
+            "next",
+            "assets"
+          ]
+        },
+        "description": "Assigned by TPA operations (decided OD-02); globally unique, routing-only, never proof of access. Uniqueness is enforced server-side (422 DOMAIN_VIOLATION)."
+      },
+      "displayName": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 120,
+        "pattern": "^[^<>{}`\\u0000-\\u001F\\u007F]+$",
+        "description": "Server trims and NFC-normalizes before validation; no markup characters or control characters."
+      },
+      "shortName": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 12,
+        "pattern": "^[A-Z0-9][A-Z0-9-]*$"
+      },
+      "orgType": {
+        "type": "string",
+        "enum": [
+          "INSURER",
+          "TPA_OPERATOR",
+          "CORPORATE_CLIENT"
+        ]
+      },
+      "description": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300,
+        "pattern": "^[^<>{}`\\u0000-\\u0008\\u000B-\\u001F\\u007F]+$",
+        "description": "Optional plain text; line breaks allowed. Organisation data only (P0), no personal data."
+      },
+      "theme": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "primaryColor",
+          "radius",
+          "mode",
+          "sidebarStyle"
+        ],
+        "properties": {
+          "primaryColor": {
+            "type": "string",
+            "pattern": "^#[0-9a-f]{6}$"
+          },
+          "radius": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "SM",
+              "MD",
+              "LG"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "LIGHT",
+              "DARK"
+            ]
+          },
+          "sidebarStyle": {
+            "type": "string",
+            "enum": [
+              "LIGHT",
+              "BRAND"
+            ]
+          }
+        },
+        "description": "Closed allowlist only; no CSS, font, HTML or URL. Contrast never rejects (decided OD-WS1)."
+      },
+      "logo": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assetId",
+          "mime",
+          "width",
+          "height",
+          "previewUrl",
+          "previewUrlExpiresAt"
+        ],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mime": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ],
+            "description": "SVG is never accepted because it can carry executable content."
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 512
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 512
+          },
+          "previewUrl": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "previewUrlExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Active re-encoded derivative. Private signed preview URL expires in at most 300 seconds; never logged or put in events."
+      },
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updatedAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "description": "Absent description or logo means none. No tenant ID is exposed.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceWarning": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "code",
+      "messageVi",
+      "contrastRatio"
+    ],
+    "properties": {
+      "code": {
+        "type": "string",
+        "enum": [
+          "LOW_SURFACE_CONTRAST"
+        ]
+      },
+      "messageVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "contrastRatio": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 21
+      }
+    },
+    "description": "Advisory only (decided OD-WS1); the mutation is committed.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceResult": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "workspace",
+      "warnings"
+    ],
+    "properties": {
+      "workspace": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "workspaceId",
+          "slug",
+          "displayName",
+          "shortName",
+          "orgType",
+          "theme",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "workspaceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 32,
+            "pattern": "^(?!.*--)[a-z][a-z0-9-]*[a-z0-9]$",
+            "not": {
+              "enum": [
+                "admin",
+                "api",
+                "app",
+                "auth",
+                "login",
+                "logout",
+                "public",
+                "static",
+                "health",
+                "internal",
+                "www",
+                "mail",
+                "tpa",
+                "mps",
+                "support",
+                "help",
+                "status",
+                "docs",
+                "v1",
+                "next",
+                "assets"
+              ]
+            },
+            "description": "Assigned by TPA operations (decided OD-02); globally unique, routing-only, never proof of access. Uniqueness is enforced server-side (422 DOMAIN_VIOLATION)."
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120,
+            "pattern": "^[^<>{}`\\u0000-\\u001F\\u007F]+$",
+            "description": "Server trims and NFC-normalizes before validation; no markup characters or control characters."
+          },
+          "shortName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 12,
+            "pattern": "^[A-Z0-9][A-Z0-9-]*$"
+          },
+          "orgType": {
+            "type": "string",
+            "enum": [
+              "INSURER",
+              "TPA_OPERATOR",
+              "CORPORATE_CLIENT"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "pattern": "^[^<>{}`\\u0000-\\u0008\\u000B-\\u001F\\u007F]+$",
+            "description": "Optional plain text; line breaks allowed. Organisation data only (P0), no personal data."
+          },
+          "theme": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "primaryColor",
+              "radius",
+              "mode",
+              "sidebarStyle"
+            ],
+            "properties": {
+              "primaryColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-f]{6}$"
+              },
+              "radius": {
+                "type": "string",
+                "enum": [
+                  "NONE",
+                  "SM",
+                  "MD",
+                  "LG"
+                ]
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "LIGHT",
+                  "DARK"
+                ]
+              },
+              "sidebarStyle": {
+                "type": "string",
+                "enum": [
+                  "LIGHT",
+                  "BRAND"
+                ]
+              }
+            },
+            "description": "Closed allowlist only; no CSS, font, HTML or URL. Contrast never rejects (decided OD-WS1)."
+          },
+          "logo": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "assetId",
+              "mime",
+              "width",
+              "height",
+              "previewUrl",
+              "previewUrlExpiresAt"
+            ],
+            "properties": {
+              "assetId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "mime": {
+                "type": "string",
+                "enum": [
+                  "image/png",
+                  "image/jpeg",
+                  "image/webp"
+                ],
+                "description": "SVG is never accepted because it can carry executable content."
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 512
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 512
+              },
+              "previewUrl": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://"
+              },
+              "previewUrlExpiresAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "description": "Active re-encoded derivative. Private signed preview URL expires in at most 300 seconds; never logged or put in events."
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Absent description or logo means none. No tenant ID is exposed."
+      },
+      "warnings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "messageVi",
+            "contrastRatio"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "LOW_SURFACE_CONTRAST"
+              ]
+            },
+            "messageVi": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "contrastRatio": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 21
+            }
+          },
+          "description": "Advisory only (decided OD-WS1); the mutation is committed."
+        },
+        "minItems": 0,
+        "maxItems": 5
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoUploadRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "contentType",
+      "sizeBytes",
+      "sha256"
+    ],
+    "properties": {
+      "contentType": {
+        "type": "string",
+        "enum": [
+          "image/png",
+          "image/jpeg",
+          "image/webp"
+        ],
+        "description": "SVG is never accepted because it can carry executable content."
+      },
+      "sizeBytes": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2097152
+      },
+      "sha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "description": "2 MiB raw technical maximum; no file name or object key accepted.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoUploadHeaders": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "Content-Type",
+      "x-amz-checksum-sha256"
+    ],
+    "properties": {
+      "Content-Type": {
+        "type": "string",
+        "enum": [
+          "image/png",
+          "image/jpeg",
+          "image/webp"
+        ],
+        "description": "SVG is never accepted because it can carry executable content."
+      },
+      "x-amz-checksum-sha256": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9+/]{43}=$"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoUploadGrant": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "assetId",
+      "uploadUrl",
+      "method",
+      "expiresAt",
+      "requiredHeaders"
+    ],
+    "properties": {
+      "assetId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "uploadUrl": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      },
+      "method": {
+        "type": "string",
+        "enum": [
+          "PUT"
+        ]
+      },
+      "expiresAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "requiredHeaders": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Content-Type",
+          "x-amz-checksum-sha256"
+        ],
+        "properties": {
+          "Content-Type": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ],
+            "description": "SVG is never accepted because it can carry executable content."
+          },
+          "x-amz-checksum-sha256": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]{43}=$"
+          }
+        }
+      }
+    },
+    "description": "Expires in at most 300 seconds; private quarantine location; URL/header secrets never logged.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoAssetPending": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "assetId",
+      "state",
+      "createdAt"
+    ],
+    "properties": {
+      "assetId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "state": {
+        "type": "string",
+        "enum": [
+          "PENDING_UPLOAD",
+          "PROCESSING"
+        ]
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoAssetReady": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "assetId",
+      "state",
+      "mime",
+      "width",
+      "height",
+      "createdAt"
+    ],
+    "properties": {
+      "assetId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "state": {
+        "type": "string",
+        "enum": [
+          "READY"
+        ]
+      },
+      "mime": {
+        "type": "string",
+        "enum": [
+          "image/png",
+          "image/jpeg",
+          "image/webp"
+        ],
+        "description": "SVG is never accepted because it can carry executable content."
+      },
+      "width": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 512
+      },
+      "height": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 512
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoAssetRejected": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "assetId",
+      "state",
+      "rejectionCode",
+      "createdAt"
+    ],
+    "properties": {
+      "assetId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "state": {
+        "type": "string",
+        "enum": [
+          "REJECTED"
+        ]
+      },
+      "rejectionCode": {
+        "type": "string",
+        "enum": [
+          "SVG_NOT_ALLOWED",
+          "UNSUPPORTED_TYPE",
+          "TYPE_MISMATCH",
+          "CHECKSUM_MISMATCH",
+          "TOO_LARGE",
+          "DIMENSIONS_OUT_OF_RANGE",
+          "ASPECT_RATIO_OUT_OF_RANGE",
+          "DECODE_FAILED",
+          "SCAN_FAILED"
+        ]
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceLogoAsset": {
+    "oneOf": [
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assetId",
+          "state",
+          "createdAt"
+        ],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "PENDING_UPLOAD",
+              "PROCESSING"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assetId",
+          "state",
+          "mime",
+          "width",
+          "height",
+          "createdAt"
+        ],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "READY"
+            ]
+          },
+          "mime": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ],
+            "description": "SVG is never accepted because it can carry executable content."
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 512
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 512
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assetId",
+          "state",
+          "rejectionCode",
+          "createdAt"
+        ],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "REJECTED"
+            ]
+          },
+          "rejectionCode": {
+            "type": "string",
+            "enum": [
+              "SVG_NOT_ALLOWED",
+              "UNSUPPORTED_TYPE",
+              "TYPE_MISMATCH",
+              "CHECKSUM_MISMATCH",
+              "TOO_LARGE",
+              "DIMENSIONS_OUT_OF_RANGE",
+              "ASPECT_RATIO_OUT_OF_RANGE",
+              "DECODE_FAILED",
+              "SCAN_FAILED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    ],
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "WorkspaceChangedEvent": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "eventId",
+      "eventType",
+      "schemaVersion",
+      "tenantId",
+      "aggregateId",
+      "aggregateVersion",
+      "occurredAt",
+      "correlationId",
+      "causationId",
+      "payload"
+    ],
+    "properties": {
+      "eventId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "eventType": {
+        "type": "string",
+        "enum": [
+          "workspace.changed"
+        ]
+      },
+      "schemaVersion": {
+        "type": "string",
+        "enum": [
+          "1.0.0"
+        ]
+      },
+      "tenantId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "aggregateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "occurredAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "correlationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "causationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "payload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "changeKind"
+        ],
+        "properties": {
+          "changeKind": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PROFILE",
+              "THEME",
+              "LOGO"
+            ]
+          }
+        }
+      }
+    },
+    "description": "Internal outbox envelope; tenantId derived by trusted core, aggregateId is the workspaceId. Payload carries no names, slugs, colours, images or URLs; consumers reload the authorized resource. Inbox dedup and aggregate version ordering required.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
   "AiCallbackHeaders": {
     "type": "object",
     "additionalProperties": false,

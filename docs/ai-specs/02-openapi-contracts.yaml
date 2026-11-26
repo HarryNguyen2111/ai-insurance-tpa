@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: MPS TPA Core & AI Worker API Contracts
-  version: 1.2.0
+  version: 1.3.0
   description: Hop dong giao tiep chuan giua Zalo Mini App, Next.js Workbench, NestJS Core API va Python AI Worker.
 
 # Contract nền: endpoint mới liệt kê trong 07 phải được đặc tả đầy đủ trước implementation.
@@ -28,6 +28,8 @@ x-domain-events:
     $ref: '#/components/schemas/PaymentStatusChangedEvent'
   CatalogProposalReviewedEvent:
     $ref: '#/components/schemas/CatalogProposalReviewedEvent'
+  WorkspaceChangedEvent:
+    $ref: '#/components/schemas/WorkspaceChangedEvent'
 
 paths:
   /v1/auth/zalo/exchange:
@@ -2007,6 +2009,364 @@ paths:
             schema:
               $ref: '#/components/schemas/CatalogReviewRequest'
 
+  /v1/admin/workspaces:
+    post:
+      operationId: createWorkspace
+      summary: Create organisation workspace (TPA ops)
+      description: 'Decided OD-05: only a TPA operations principal with platform workspace-administration authority
+        and verified MFA, acting through its own server-issued operator membership context, may create a workspace;
+        authority is provisioned separately (#21) and never inferred from a tenant membership or request field.
+        Decided OD-02: TPA assigns the slug here; it is globally unique, routing-only and never proof of access. Creates
+        tenant workspace profile, default theme when omitted, and grants WORKSPACE_ADMIN to initialAdminPrincipalId
+        (an existing verified principal) in one transaction with audit and outbox workspace.changed. Slug already used
+        or reserved returns 422 DOMAIN_VIOLATION (concurrent creates with one slug: exactly one 201). Low colour contrast
+        is a warning only (decided OD-WS1). No tenantId accepted or returned. Durable tenant/actor/operation/key canonical
+        hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After.
+        No-store.'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/MembershipContext'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreateRequest'
+      responses:
+        '201':
+          description: Workspace committed with profile, theme and first administrator grant
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResult'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/admin/workspaces/{workspaceId}:
+    get:
+      operationId: getWorkspace
+      summary: Read workspace profile, theme and active logo
+      description: 'WORKSPACE_ADMIN of this workspace (membership context bound to it) or TPA operations authority.
+        Other workspaces return 404 without revealing existence. Logo preview URL is private, signed and expires in at
+        most 300 seconds; never logged. No-store.'
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MembershipContext'
+      responses:
+        '200':
+          description: Current workspace
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/admin/workspaces/{workspaceId}/profile:
+    put:
+      operationId: updateWorkspaceProfile
+      summary: Replace workspace profile (not slug)
+      description: 'WORKSPACE_ADMIN of this workspace with verified MFA. Full replacement of displayName, shortName,
+        orgType and description (absent description clears it). The slug is not editable here (decided OD-02: TPA
+        assigns slugs; a controlled slug change is a separate future operation pending OD-WS3). expectedVersion must equal
+        the current version or 409 STALE_VERSION. Business state + audit + outbox workspace.changed atomic in
+        withTenantTransaction using SET LOCAL/RLS. Idempotency as createWorkspace. No-store.'
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/MembershipContext'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceProfileUpdateRequest'
+      responses:
+        '200':
+          description: Profile committed with incremented version
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResult'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/admin/workspaces/{workspaceId}/theme:
+    put:
+      operationId: updateWorkspaceTheme
+      summary: Replace workspace theme from the closed allowlist
+      description: 'WORKSPACE_ADMIN with verified MFA. Theme accepts only the closed allowlist (hex colour, radius,
+        mode, sidebar style); no CSS, fonts, HTML or URLs. Button text colour is derived server-side (white or black,
+        always >= 4.5:1). Decided OD-WS1: primary colour contrast against the page surface below 3:1 is returned as a
+        LOW_SURFACE_CONTRAST warning and never rejected. expectedVersion mismatch 409 STALE_VERSION. Audit + outbox
+        atomic. Idempotency as createWorkspace. No-store.'
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/MembershipContext'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceThemeUpdateRequest'
+      responses:
+        '200':
+          description: Theme committed; warnings are advisory
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResult'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/admin/workspaces/{workspaceId}/logo:
+    put:
+      operationId: setWorkspaceLogo
+      summary: Activate a processed logo asset or clear the logo
+      description: 'WORKSPACE_ADMIN with verified MFA. Activation requires an asset of this workspace in state READY,
+        otherwise 422 DOMAIN_VIOLATION (assets of other workspaces 404). Clearing keeps the immutable original asset for
+        audit/retention. expectedVersion mismatch 409 STALE_VERSION. Audit + outbox atomic. Idempotency as
+        createWorkspace. No-store.'
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/MembershipContext'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceLogoSetRequest'
+      responses:
+        '200':
+          description: Logo selection committed with incremented version
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResult'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/admin/workspaces/{workspaceId}/logo-assets:
+    post:
+      operationId: createWorkspaceLogoUpload
+      summary: Request a pre-signed upload for a new logo asset
+      description: 'WORKSPACE_ADMIN with verified MFA. Pre-signed PUT into a private quarantine location bound to this
+        workspace, declared type, size and checksum; core-api never receives file bytes. PNG, JPEG or WebP only (SVG
+        never accepted); 2 MiB raw maximum. URL expires in at most 300 seconds and never enters logs, events or
+        history. Does not change the workspace version. Idempotency as createWorkspace. No-store.'
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/MembershipContext'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceLogoUploadRequest'
+      responses:
+        '201':
+          description: Upload grant for a PENDING_UPLOAD asset
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceLogoUploadGrant'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/admin/workspaces/{workspaceId}/logo-assets/{assetId}:
+    get:
+      operationId: getWorkspaceLogoAsset
+      summary: Poll logo asset processing state
+      description: 'WORKSPACE_ADMIN of this workspace. Other workspaces'' assets return 404. No-store.'
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/LogoAssetId'
+      - $ref: '#/components/parameters/MembershipContext'
+      responses:
+        '200':
+          description: Current asset state
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceLogoAsset'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/admin/workspaces/{workspaceId}/logo-assets/{assetId}/complete:
+    post:
+      operationId: completeWorkspaceLogoUpload
+      summary: Finish logo upload and start safe processing
+      description: 'WORKSPACE_ADMIN with verified MFA. Server independently checks object owner, size and checksum,
+        sniffs magic bytes (SVG and type mismatches rejected), enforces pixel/decompression limits, scans, then decodes
+        and re-encodes (EXIF/GPS and other metadata dropped), producing 512px and 64px derivatives. The original object
+        stays immutable. Returns 202 PROCESSING; poll the Location resource. A READY asset still needs setWorkspaceLogo
+        to become active. Idempotency as createWorkspace. No-store.'
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/LogoAssetId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/MembershipContext'
+      responses:
+        '202':
+          description: Accepted for asynchronous processing
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+            Location:
+              description: Logo asset status resource
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceLogoAsset'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
 
 components:
   securitySchemes:
@@ -2037,6 +2397,22 @@ components:
         maxLength: 8192
       description: Opaque server-issued context from membership selection. Verify binding to current principal,
         active grant and expiry; never accept tenant IDs.
+    WorkspaceId:
+      in: path
+      name: workspaceId
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified
+        membership context.
+    LogoAssetId:
+      in: path
+      name: assetId
+      required: true
+      schema:
+        type: string
+        format: uuid
   responses:
     Error401:
       description: Missing/invalid/expired authentication or service signature
@@ -5060,3 +5436,490 @@ components:
         means unspecified, not zero/unlimited/waived. Server requires complete applicable contract terms before
         publication; missing terms require review. Rule order contains approved stable rule identifiers; shadow
         is deployment default until explicit tenant/plan approval.
+    WorkspaceOrgType:
+      type: string
+      enum:
+      - INSURER
+      - TPA_OPERATOR
+      - CORPORATE_CLIENT
+    WorkspaceDisplayName:
+      type: string
+      minLength: 2
+      maxLength: 120
+      pattern: '^[^<>{}`\u0000-\u001F\u007F]+$'
+      description: Server trims and NFC-normalizes before validation; no markup characters or control characters.
+    WorkspaceShortName:
+      type: string
+      minLength: 2
+      maxLength: 12
+      pattern: '^[A-Z0-9][A-Z0-9-]*$'
+    WorkspaceSlug:
+      type: string
+      minLength: 3
+      maxLength: 32
+      pattern: '^(?!.*--)[a-z][a-z0-9-]*[a-z0-9]$'
+      not:
+        enum:
+        - admin
+        - api
+        - app
+        - auth
+        - login
+        - logout
+        - public
+        - static
+        - health
+        - internal
+        - www
+        - mail
+        - tpa
+        - mps
+        - support
+        - help
+        - status
+        - docs
+        - v1
+        - next
+        - assets
+      description: Assigned by TPA operations (decided OD-02); globally unique, routing-only, never proof of access.
+        Uniqueness is enforced server-side (422 DOMAIN_VIOLATION).
+    WorkspaceDescription:
+      type: string
+      minLength: 1
+      maxLength: 300
+      pattern: '^[^<>{}`\u0000-\u0008\u000B-\u001F\u007F]+$'
+      description: Optional plain text; line breaks allowed. Organisation data only (P0), no personal data.
+    WorkspaceTheme:
+      type: object
+      additionalProperties: false
+      required:
+      - primaryColor
+      - radius
+      - mode
+      - sidebarStyle
+      properties:
+        primaryColor:
+          type: string
+          pattern: ^#[0-9a-f]{6}$
+        radius:
+          type: string
+          enum:
+          - NONE
+          - SM
+          - MD
+          - LG
+        mode:
+          type: string
+          enum:
+          - LIGHT
+          - DARK
+        sidebarStyle:
+          type: string
+          enum:
+          - LIGHT
+          - BRAND
+      description: Closed allowlist only; no CSS, font, HTML or URL. Contrast never rejects (decided OD-WS1).
+    WorkspaceCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - displayName
+      - shortName
+      - slug
+      - orgType
+      - initialAdminPrincipalId
+      properties:
+        displayName:
+          $ref: '#/components/schemas/WorkspaceDisplayName'
+        shortName:
+          $ref: '#/components/schemas/WorkspaceShortName'
+        slug:
+          $ref: '#/components/schemas/WorkspaceSlug'
+        orgType:
+          $ref: '#/components/schemas/WorkspaceOrgType'
+        description:
+          $ref: '#/components/schemas/WorkspaceDescription'
+        theme:
+          $ref: '#/components/schemas/WorkspaceTheme'
+        initialAdminPrincipalId:
+          type: string
+          format: uuid
+      description: TPA operations only (decided OD-05). initialAdminPrincipalId must be an existing verified principal
+        and receives WORKSPACE_ADMIN. Absent theme means the platform default theme. No tenant ID field.
+    WorkspaceProfileUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedVersion
+      - displayName
+      - shortName
+      - orgType
+      properties:
+        expectedVersion:
+          $ref: '#/components/schemas/VersionNumber'
+        displayName:
+          $ref: '#/components/schemas/WorkspaceDisplayName'
+        shortName:
+          $ref: '#/components/schemas/WorkspaceShortName'
+        orgType:
+          $ref: '#/components/schemas/WorkspaceOrgType'
+        description:
+          $ref: '#/components/schemas/WorkspaceDescription'
+      description: Full replacement; absent description clears it. Slug is not editable here (decided OD-02).
+    WorkspaceThemeUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedVersion
+      - theme
+      properties:
+        expectedVersion:
+          $ref: '#/components/schemas/VersionNumber'
+        theme:
+          $ref: '#/components/schemas/WorkspaceTheme'
+    WorkspaceLogoActivateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedVersion
+      - logoAssetId
+      properties:
+        expectedVersion:
+          $ref: '#/components/schemas/VersionNumber'
+        logoAssetId:
+          type: string
+          format: uuid
+    WorkspaceLogoClearRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedVersion
+      - clear
+      properties:
+        expectedVersion:
+          $ref: '#/components/schemas/VersionNumber'
+        clear:
+          type: boolean
+          enum:
+          - true
+    WorkspaceLogoSetRequest:
+      oneOf:
+      - $ref: '#/components/schemas/WorkspaceLogoActivateRequest'
+      - $ref: '#/components/schemas/WorkspaceLogoClearRequest'
+    WorkspaceLogoMime:
+      type: string
+      enum:
+      - image/png
+      - image/jpeg
+      - image/webp
+      description: SVG is never accepted because it can carry executable content.
+    WorkspaceLogo:
+      type: object
+      additionalProperties: false
+      required:
+      - assetId
+      - mime
+      - width
+      - height
+      - previewUrl
+      - previewUrlExpiresAt
+      properties:
+        assetId:
+          type: string
+          format: uuid
+        mime:
+          $ref: '#/components/schemas/WorkspaceLogoMime'
+        width:
+          type: integer
+          minimum: 1
+          maximum: 512
+        height:
+          type: integer
+          minimum: 1
+          maximum: 512
+        previewUrl:
+          type: string
+          format: uri
+          pattern: ^https://
+        previewUrlExpiresAt:
+          type: string
+          format: date-time
+      description: Active re-encoded derivative. Private signed preview URL expires in at most 300 seconds; never
+        logged or put in events.
+    Workspace:
+      type: object
+      additionalProperties: false
+      required:
+      - workspaceId
+      - slug
+      - displayName
+      - shortName
+      - orgType
+      - theme
+      - version
+      - createdAt
+      - updatedAt
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        slug:
+          $ref: '#/components/schemas/WorkspaceSlug'
+        displayName:
+          $ref: '#/components/schemas/WorkspaceDisplayName'
+        shortName:
+          $ref: '#/components/schemas/WorkspaceShortName'
+        orgType:
+          $ref: '#/components/schemas/WorkspaceOrgType'
+        description:
+          $ref: '#/components/schemas/WorkspaceDescription'
+        theme:
+          $ref: '#/components/schemas/WorkspaceTheme'
+        logo:
+          $ref: '#/components/schemas/WorkspaceLogo'
+        version:
+          $ref: '#/components/schemas/VersionNumber'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      description: Absent description or logo means none. No tenant ID is exposed.
+    WorkspaceWarning:
+      type: object
+      additionalProperties: false
+      required:
+      - code
+      - messageVi
+      - contrastRatio
+      properties:
+        code:
+          type: string
+          enum:
+          - LOW_SURFACE_CONTRAST
+        messageVi:
+          type: string
+          minLength: 1
+          maxLength: 500
+        contrastRatio:
+          type: number
+          minimum: 1
+          maximum: 21
+      description: Advisory only (decided OD-WS1); the mutation is committed.
+    WorkspaceResult:
+      type: object
+      additionalProperties: false
+      required:
+      - workspace
+      - warnings
+      properties:
+        workspace:
+          $ref: '#/components/schemas/Workspace'
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceWarning'
+          minItems: 0
+          maxItems: 5
+    WorkspaceLogoUploadRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - contentType
+      - sizeBytes
+      - sha256
+      properties:
+        contentType:
+          $ref: '#/components/schemas/WorkspaceLogoMime'
+        sizeBytes:
+          type: integer
+          minimum: 1
+          maximum: 2097152
+        sha256:
+          $ref: '#/components/schemas/Hash'
+      description: 2 MiB raw technical maximum; no file name or object key accepted.
+    WorkspaceLogoUploadHeaders:
+      type: object
+      additionalProperties: false
+      required:
+      - Content-Type
+      - x-amz-checksum-sha256
+      properties:
+        Content-Type:
+          $ref: '#/components/schemas/WorkspaceLogoMime'
+        x-amz-checksum-sha256:
+          type: string
+          pattern: ^[A-Za-z0-9+/]{43}=$
+    WorkspaceLogoUploadGrant:
+      type: object
+      additionalProperties: false
+      required:
+      - assetId
+      - uploadUrl
+      - method
+      - expiresAt
+      - requiredHeaders
+      properties:
+        assetId:
+          type: string
+          format: uuid
+        uploadUrl:
+          type: string
+          format: uri
+          pattern: ^https://
+        method:
+          type: string
+          enum:
+          - PUT
+        expiresAt:
+          type: string
+          format: date-time
+        requiredHeaders:
+          $ref: '#/components/schemas/WorkspaceLogoUploadHeaders'
+      description: Expires in at most 300 seconds; private quarantine location; URL/header secrets never logged.
+    WorkspaceLogoAssetPending:
+      type: object
+      additionalProperties: false
+      required:
+      - assetId
+      - state
+      - createdAt
+      properties:
+        assetId:
+          type: string
+          format: uuid
+        state:
+          type: string
+          enum:
+          - PENDING_UPLOAD
+          - PROCESSING
+        createdAt:
+          type: string
+          format: date-time
+    WorkspaceLogoAssetReady:
+      type: object
+      additionalProperties: false
+      required:
+      - assetId
+      - state
+      - mime
+      - width
+      - height
+      - createdAt
+      properties:
+        assetId:
+          type: string
+          format: uuid
+        state:
+          type: string
+          enum:
+          - READY
+        mime:
+          $ref: '#/components/schemas/WorkspaceLogoMime'
+        width:
+          type: integer
+          minimum: 1
+          maximum: 512
+        height:
+          type: integer
+          minimum: 1
+          maximum: 512
+        createdAt:
+          type: string
+          format: date-time
+    WorkspaceLogoAssetRejected:
+      type: object
+      additionalProperties: false
+      required:
+      - assetId
+      - state
+      - rejectionCode
+      - createdAt
+      properties:
+        assetId:
+          type: string
+          format: uuid
+        state:
+          type: string
+          enum:
+          - REJECTED
+        rejectionCode:
+          type: string
+          enum:
+          - SVG_NOT_ALLOWED
+          - UNSUPPORTED_TYPE
+          - TYPE_MISMATCH
+          - CHECKSUM_MISMATCH
+          - TOO_LARGE
+          - DIMENSIONS_OUT_OF_RANGE
+          - ASPECT_RATIO_OUT_OF_RANGE
+          - DECODE_FAILED
+          - SCAN_FAILED
+        createdAt:
+          type: string
+          format: date-time
+    WorkspaceLogoAsset:
+      oneOf:
+      - $ref: '#/components/schemas/WorkspaceLogoAssetPending'
+      - $ref: '#/components/schemas/WorkspaceLogoAssetReady'
+      - $ref: '#/components/schemas/WorkspaceLogoAssetRejected'
+    WorkspaceChangedEvent:
+      type: object
+      additionalProperties: false
+      required:
+      - eventId
+      - eventType
+      - schemaVersion
+      - tenantId
+      - aggregateId
+      - aggregateVersion
+      - occurredAt
+      - correlationId
+      - causationId
+      - payload
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum:
+          - workspace.changed
+        schemaVersion:
+          type: string
+          enum:
+          - 1.0.0
+        tenantId:
+          type: string
+          format: uuid
+        aggregateId:
+          type: string
+          format: uuid
+        aggregateVersion:
+          $ref: '#/components/schemas/VersionNumber'
+        occurredAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+          format: uuid
+        causationId:
+          type: string
+          format: uuid
+        payload:
+          type: object
+          additionalProperties: false
+          required:
+          - changeKind
+          properties:
+            changeKind:
+              type: string
+              enum:
+              - CREATED
+              - PROFILE
+              - THEME
+              - LOGO
+      description: Internal outbox envelope; tenantId derived by trusted core, aggregateId is the workspaceId. Payload
+        carries no names, slugs, colours, images or URLs; consumers reload the authorized resource. Inbox dedup and
+        aggregate version ordering required.

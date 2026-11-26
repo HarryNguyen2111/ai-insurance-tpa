@@ -88,3 +88,42 @@ C2 event schemas are explicit `x-domain-events` roots in OpenAPI and use the sam
 
 
 Payment-attempt continuity: authorized `GET /v1/payments/{paymentId}` and intent creation share `PaymentIntent`. `attemptId` is a stable server-created non-PII UUID, optional only while CREATED and required in SUBMITTED/UNKNOWN/SUCCEEDED/FAILED responses. Finance copies the applicable attempt, payment ID, aggregate version and EOB binding from this authorized read into reconciliation, even if no callback arrives. Transport retries/timeout do not regenerate the attempt or submit again. Core must verify the attempt belongs to the payment and current obligation, reject stale/mismatched references with 409 STALE_VERSION, and independently verify evidence. Shape tests prove the read-to-reconciliation contract can be constructed and reject missing/malformed attempt references; they do not execute provider reconciliation or authorization.
+
+## WSC1 workspace administration contract (API 1.3.0)
+
+Contract only. Source of the design: `docs/ai-specs/13-workspace-onboarding-and-branding-proposal.md`. Owner decisions recorded 2026-11-26:
+
+- **OD-05:** TPA operations create workspaces and name the first `WORKSPACE_ADMIN`.
+- **OD-02:** TPA assigns the slug at creation; it cannot be edited via profile updates.
+- **OD-WS1:** low colour contrast is a `LOW_SURFACE_CONTRAST` warning, never a rejection.
+- **Still open:** OD-01 and OD-WS2–WS5.
+
+Eight bearer + `X-Membership-Context` operations under `/v1/admin/workspaces`:
+
+- **Create and read:** create, get.
+- **Updates:** profile, theme, logo selection.
+- **Logo assets:** presigned upload, complete (202), status.
+
+Every mutation requires `Idempotency-Key` and MFA; updates also require `expectedVersion`. All responses are no-store.
+
+The C1 error and role components are untouched (snapshot test): slug conflicts map to 422 `DOMAIN_VIOLATION`, and workspace roles are provisioned through #21. No schema accepts or returns `tenantId`. Only the internal `workspace.changed` outbox envelope carries the trusted tenant, and its payload is just `changeKind`.
+
+Logo handling:
+
+- Only PNG, JPEG or WebP, at most 2 MiB raw; SVG is never accepted.
+- Bytes go only through a presigned URL.
+- Processing re-encodes the image and returns fixed rejection codes.
+- A logo becomes active only after explicit activation of a READY asset.
+
+The public branding endpoint, the TPA ops workspace list and slug changes are not part of WSC1.
+
+`test/workspace-contracts.test.mjs` and 98 fixtures in `test/workspace-fixtures.json` cover:
+
+- the operation inventory;
+- how the decisions are encoded;
+- the absence of tenant selectors;
+- the logo flow;
+- parity with spec 13;
+- FE/BE parity: the same normalized inputs are accepted or rejected by the contract and by the workbench prototype validators.
+
+`types.ts` adds compile-time checks. The new event-only root adds one intentional `no-unused-components` lint warning (5 total). WS01–WS12 runtime cases (authorization, idempotency persistence, concurrency, logo pipeline, audit/outbox) are **not executed**: there is no endpoint, migration or identity yet.
