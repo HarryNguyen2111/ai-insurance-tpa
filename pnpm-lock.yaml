@@ -64,6 +64,31 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
+  apps/event-worker:
+    dependencies:
+      '@tpa/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@tpa/event-contracts':
+        specifier: workspace:*
+        version: link:../../packages/event-contracts
+      kafkajs:
+        specifier: 2.2.4
+        version: 2.2.4
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.10.1
+      '@types/pg':
+        specifier: 8.23.1
+        version: 8.23.1
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   apps/workbench:
     dependencies:
       '@fontsource/be-vietnam-pro':
@@ -3941,6 +3966,10 @@ packages:
 
   jsonfile@6.2.1:
     resolution: {integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==}
+
+  kafkajs@2.2.4:
+    resolution: {integrity: sha512-j/YeapB1vfPT2iOIUn/vxdyKEuhuY2PxMBvf5JWux6iSaukAccrMtXEY/Lb7OvavDhOWME589bpLrEdnVHjfjA==}
+    engines: {node: '>=14.0.0'}
 
   kleur@3.0.3:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
@@ -8891,6 +8920,8 @@ snapshots:
       universalify: 2.0.1
     optionalDependencies:
       graceful-fs: 4.2.12
+
+  kafkajs@2.2.4: {}
 
   kleur@3.0.3: {}
 

@@ -97,7 +97,7 @@ CREATE FUNCTION tpa.outbox_pending_tenants(p_limit integer) RETURNS TABLE (tenan
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
   SELECT o.tenant_id FROM tpa.outbox_events o WHERE o.published_at IS NULL
   GROUP BY o.tenant_id ORDER BY pg_catalog.min(o.seq)
-  LIMIT pg_catalog.least(pg_catalog.greatest(coalesce(p_limit, 1), 1), 1000)
+  LIMIT LEAST(GREATEST(COALESCE(p_limit, 1), 1), 1000)
 $$;
 --> statement-breakpoint
 REVOKE ALL ON FUNCTION tpa.outbox_pending_tenants(integer) FROM PUBLIC;
