@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import YAML from 'yaml';
 import { validate } from '../src/validate.cjs';
-const fixtures = ['fixtures.json', 'c2-fixtures.json', 'workspace-fixtures.json'].flatMap(name => JSON.parse(readFileSync(new URL(name, import.meta.url))));
+const fixtures = ['fixtures.json', 'c2-fixtures.json', 'workspace-fixtures.json', 'workflow-fixtures.json'].flatMap(name => JSON.parse(readFileSync(new URL(name, import.meta.url))));
 const spec = YAML.parse(readFileSync(new URL('../../../docs/ai-specs/02-openapi-contracts.yaml', import.meta.url), 'utf8'));
 for (const fixture of fixtures) test(fixture.name, () => {
   const before = structuredClone(fixture.value);

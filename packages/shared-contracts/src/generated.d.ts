@@ -943,6 +943,298 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/workflow-definitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List workflow definitions (latest version per key)
+         * @description VWF-01. WORKFLOW_DESIGNER, WORKFLOW_PUBLISHER or WORKFLOW_OBSERVER. Cursor pagination <= 50. Server verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+         */
+        get: operations["listWorkflowDefinitions"];
+        put?: never;
+        /**
+         * Create a workflow definition draft
+         * @description VWF-01. WORKFLOW_DESIGNER with verified MFA. Creates a new key or the next DRAFT version (basedOnVersionNo copies nothing implicitly; content is the full submitted body). Structural schema enforced here; semantic graph rules run on validate/publish. At most one open DRAFT per key: 409 STALE_VERSION. Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        post: operations["createWorkflowDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workflow-definitions/{definitionId}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List versions of one workflow definition
+         * @description VWF-01 version lookup. WORKFLOW_DESIGNER, WORKFLOW_PUBLISHER or WORKFLOW_OBSERVER. Server verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+         */
+        get: operations["listWorkflowDefinitionVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workflow-definitions/{definitionId}/versions/{versionNo}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read one immutable (or draft) workflow version
+         * @description VWF-01 version lookup, including RETIRED/REVOKED versions still pinned by in-flight executions. Server verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+         */
+        get: operations["getWorkflowDefinitionVersion"];
+        /**
+         * Replace draft content
+         * @description VWF-01. WORKFLOW_DESIGNER with verified MFA; DRAFT only (PUBLISHED/RETIRED/REVOKED are immutable: 409 STALE_VERSION). expectedRevision must equal current revision or 409 STALE_VERSION; success increments revision and invalidates prior validation reports. Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        put: operations["updateWorkflowDraft"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workflow-definitions/{definitionId}/versions/{versionNo}/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run structural and semantic validation
+         * @description VWF-01. WORKFLOW_DESIGNER or WORKFLOW_PUBLISHER with verified MFA. Pure check of the current draft revision; records a validation report hash for publish, no business state change. 200 with valid=false lists fixed detail codes (spec 14 section 4). Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        post: operations["validateWorkflowDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workflow-definitions/{definitionId}/versions/{versionNo}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publish a validated draft (maker-checker)
+         * @description VWF-01. WORKFLOW_PUBLISHER with verified MFA who did not create or edit this draft (fail-closed default, open VWF-OD-01). Re-runs full validation, requires contentHash of the reviewed revision, resolves every pinned form/model/prompt/policy ref to a PUBLISHED version and the action catalog version; invalid 422 DOMAIN_VIOLATION. Atomically marks the previous PUBLISHED version of the key RETIRED; in-flight executions keep their pinned version. Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        post: operations["publishWorkflowVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/workflow-definitions/{definitionId}/versions/{versionNo}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revoke a published or retired version
+         * @description VWF-01. WORKFLOW_PUBLISHER with verified MFA. New claims stop resolving to it immediately; in-flight executions are not migrated automatically: open human tasks become SUSPENDED and only ESCALATE_TO_MANUAL_REVIEW by a supervisor remains (fail closed, open VWF-OD-02). Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        post: operations["revokeWorkflowVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow/action-catalogs/{catalogVersion}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read an immutable action catalog version
+         * @description VWF-01. Any staff workflow role. Global read-only catalog (spec 14a); unknown version 404. Server verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+         */
+        get: operations["getWorkflowActionCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow/actor-scope": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read the calling actor workflow roles and capabilities
+         * @description VWF-01. Display hint derived from verified principal, MFA and membership context; every operation re-authorizes. Server verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+         */
+        get: operations["getWorkflowActorScope"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Task inbox
+         * @description VWF-01. MINE (assigned to caller), CANDIDATE (unclaimed tasks whose rule lists a caller role), TEAM (supervisor) or OBSERVED (observer, read-only). PostgreSQL-backed, cursor <= 50, minimal projection. Server verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+         */
+        get: operations["listWorkflowTasks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow/tasks/{taskId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Task detail with pinned versions and allowed actions
+         * @description VWF-01. Assignee, candidate, case owner, supervisor or observer of this task. allowedActions computed for the caller now. Server verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+         */
+        get: operations["getWorkflowTask"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow/tasks/{taskId}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim an OPEN task
+         * @description VWF-01. Human staff candidate with verified MFA, not the claimant/guardian, not excluded by separation of duties, under maxActiveTasksPerAssignee. Conditional update on expectedTaskVersion: concurrent claims yield exactly one success, others 409 STALE_VERSION. Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        post: operations["claimWorkflowTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow/tasks/{taskId}/reassign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reassign or release a task
+         * @description VWF-01. WORKFLOW_SUPERVISOR or case owner (any target), or the assignee releasing its own task (SELF_RELEASE), each with verified MFA. Target revalidated as for claim. Accountable owner unchanged. Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        post: operations["reassignWorkflowTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow/tasks/{taskId}/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Perform a task-completing human action
+         * @description VWF-01. Current assignee only, human, verified MFA; actionId must be in the node allowedActionIds of the pinned version and the pinned catalog. AI service actors and labels cannot call this. Evidence IDs must belong to the claim and allowedEvidence scope. Completes the task and enqueues a stable Temporal command (#38) via outbox; never approves, rejects, publishes EOB or pays. Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        post: operations["submitWorkflowTaskAction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workflow/tasks/{taskId}/annotations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List evidence annotations of a task
+         * @description VWF-01. Any actor that can read the task. Includes AI proposals as authorKind AI_SERVICE. Server verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+         */
+        get: operations["listWorkflowTaskAnnotations"];
+        put?: never;
+        /**
+         * Add an evidence annotation (label)
+         * @description VWF-01. Assignee (or supervisor) with verified MFA on a CLAIMED task. Append-only evidence aid; never changes claim/task/EOB/payment state. Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store.
+         */
+        post: operations["createWorkflowTaskAnnotation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2130,6 +2422,512 @@ export interface components {
                 changeKind: "CREATED" | "PROFILE" | "THEME" | "LOGO";
             };
         };
+        /** @description Tenant-local stable key of a workflow definition; not a tenant selector. */
+        WorkflowKey: string;
+        /** @description Stable node ID, unique within one definition version and kept across versions for in-flight mapping. */
+        WorkflowNodeId: string;
+        WorkflowEdgeId: string;
+        /** @description Plain display text; no markup, template braces, control characters or PII. Labels never substitute business state. */
+        WorkflowLabel: string;
+        WorkflowRefKey: string;
+        /** @description Exact immutable published version (form, model, prompt, AI-use policy). No "latest", ranges, URLs or inline code. Publish fails closed when the reference does not resolve to a PUBLISHED version for this tenant. */
+        WorkflowPinnedRef: {
+            key: components["schemas"]["WorkflowRefKey"];
+            version: components["schemas"]["VersionNumber"];
+            hash: components["schemas"]["Hash"];
+        };
+        /**
+         * @description Closed Phase 1 action vocabulary (catalog v1). No approve/reject/EOB/OTP/payment action exists here; those remain #40-#46 operations with their own maker-checker.
+         * @enum {string}
+         */
+        WorkflowActionId: "CLAIM_TASK" | "UNCLAIM_TASK" | "REASSIGN_TASK" | "ADD_ANNOTATION" | "CONFIRM_EXTRACTION" | "REQUEST_SUPPLEMENT" | "ESCALATE_TO_MANUAL_REVIEW" | "PROPOSE_EXTRACTION" | "PROPOSE_DOCUMENT_LABEL" | "PROPOSE_QUALITY_FLAG";
+        /**
+         * @description Task-completing human actions accepted by submitWorkflowTaskAction. Never accepted from an AI service actor.
+         * @enum {string}
+         */
+        WorkflowTaskActionId: "CONFIRM_EXTRACTION" | "REQUEST_SUPPLEMENT" | "ESCALATE_TO_MANUAL_REVIEW";
+        /**
+         * @description Evidence proposals an AI service actor may emit only through the authenticated internal result path (#39); never through bearer APIs.
+         * @enum {string}
+         */
+        WorkflowAiActionId: "PROPOSE_EXTRACTION" | "PROPOSE_DOCUMENT_LABEL" | "PROPOSE_QUALITY_FLAG";
+        /**
+         * @description Existing staff membership roles eligible as human task candidates. AI service actors are never candidates.
+         * @enum {string}
+         */
+        WorkflowCandidateRole: "CLAIM_REVIEWER" | "INSURER_REVIEWER";
+        /**
+         * @description Workflow roles provisioned by identity (#21); not added to the frozen C1 Membership.roles enum. Case owner and assignee are object relationships, not roles.
+         * @enum {string}
+         */
+        WorkflowStaffRole: "WORKFLOW_DESIGNER" | "WORKFLOW_PUBLISHER" | "WORKFLOW_SUPERVISOR" | "WORKFLOW_OBSERVER" | "CLAIM_REVIEWER" | "INSURER_REVIEWER";
+        /**
+         * @description Closed catalog of versioned internal data schemas exchanged between nodes. Values are references to PostgreSQL records, never raw documents/PII in workflow history.
+         * @enum {string}
+         */
+        WorkflowDataSchemaRef: "CLAIM_REF" | "DOCUMENT_SET" | "EXTRACTION_PROPOSAL" | "CONFIRMED_EXTRACTION" | "DOCUMENT_LABELS" | "QUALITY_FLAGS" | "SUPPLEMENT_REQUEST" | "SUPPLEMENT_DOCUMENTS";
+        /** @description Allowed evidence references for the node; server rejects evidence outside this scope or outside the claim. */
+        WorkflowEvidenceScope: {
+            documentTypes: components["schemas"]["DocumentType"][];
+            sources: ("XML" | "OCR" | "VLM" | "QR" | "IMAGE_ANALYSIS")[];
+        };
+        /** @description SLA breach escalates/notifies only; it never completes, approves or rejects a task or claim. */
+        WorkflowSla: {
+            /** @description Business-hours calendars are not modelled in Phase 1 (open VWF-OD-05). */
+            dueSeconds: number;
+            reminderOffsetsSeconds?: number[];
+            /** @enum {string} */
+            escalateTo: "SUPERVISOR_QUEUE" | "CASE_OWNER";
+        };
+        /** @description Bounded Temporal activity retry; exhaustion takes the FAILED outcome edge (human fallback). */
+        WorkflowRetryPolicy: {
+            maxAttempts: number;
+            initialIntervalSeconds: number;
+            backoffCoefficient: number;
+            maxIntervalSeconds: number;
+        };
+        WorkflowStartNode: {
+            nodeId: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            type: "START";
+            label: components["schemas"]["WorkflowLabel"];
+        };
+        WorkflowEndNode: {
+            nodeId: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            type: "END";
+            label: components["schemas"]["WorkflowLabel"];
+            /**
+             * @description Maps to one fixed claim command owned by #38; never an arbitrary claim status.
+             * @enum {string}
+             */
+            outcome: "REVIEW_COMPLETED" | "ROUTED_TO_MANUAL_REVIEW" | "SUPPLEMENT_EXPIRED";
+        };
+        WorkflowHumanTaskNode: {
+            nodeId: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            type: "HUMAN_TASK";
+            label: components["schemas"]["WorkflowLabel"];
+            /** @enum {string} */
+            taskKind: "EXTRACTION_CONFIRMATION" | "DOCUMENT_REVIEW";
+            inputSchemas: components["schemas"]["WorkflowDataSchemaRef"][];
+            outputSchemas: components["schemas"]["WorkflowDataSchemaRef"][];
+            allowedActionIds: components["schemas"]["WorkflowTaskActionId"][];
+            assignmentRuleKey: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            accountableOwner: "CASE_OWNER";
+            sla: components["schemas"]["WorkflowSla"];
+            allowedEvidence: components["schemas"]["WorkflowEvidenceScope"];
+            formRef?: components["schemas"]["WorkflowPinnedRef"];
+        };
+        /** @description Temporal activity executed by a scoped AI service actor. Output is evidence/proposals only; confidence is a signal, never permission. A human accountable owner is always assigned. */
+        WorkflowAiActivityNode: {
+            nodeId: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            type: "AI_ACTIVITY";
+            label: components["schemas"]["WorkflowLabel"];
+            /** @enum {string} */
+            activityKind: "DOCUMENT_EXTRACTION" | "DOCUMENT_CLASSIFICATION" | "QUALITY_CHECK";
+            inputSchemas: components["schemas"]["WorkflowDataSchemaRef"][];
+            outputSchemas: components["schemas"]["WorkflowDataSchemaRef"][];
+            allowedActionIds: components["schemas"]["WorkflowAiActionId"][];
+            serviceActorScopeKey: components["schemas"]["WorkflowRefKey"];
+            /** @enum {string} */
+            accountableOwner: "CASE_OWNER";
+            modelRef: components["schemas"]["WorkflowPinnedRef"];
+            promptRef: components["schemas"]["WorkflowPinnedRef"];
+            policyRef: components["schemas"]["WorkflowPinnedRef"];
+            allowedEvidence: components["schemas"]["WorkflowEvidenceScope"];
+            timeoutSeconds: number;
+            retry: components["schemas"]["WorkflowRetryPolicy"];
+        };
+        /** @description Exclusive gateway only: outgoing CONDITION guards evaluated by ascending priority, first match wins, exactly one DEFAULT edge. */
+        WorkflowConditionNode: {
+            nodeId: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            type: "CONDITION";
+            label: components["schemas"]["WorkflowLabel"];
+        };
+        WorkflowSupplementWaitNode: {
+            nodeId: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            type: "SUPPLEMENT_WAIT";
+            label: components["schemas"]["WorkflowLabel"];
+            /** @description Bounded wait; tenant/contract value must come from approved configuration (open VWF-OD-06). */
+            maxWaitSeconds: number;
+            reminderOffsetsSeconds?: number[];
+            /** @enum {string} */
+            accountableOwner: "CASE_OWNER";
+            inputSchemas: components["schemas"]["WorkflowDataSchemaRef"][];
+            outputSchemas: components["schemas"]["WorkflowDataSchemaRef"][];
+        };
+        /** @description Bounded durable Temporal timer; single NEXT edge. */
+        WorkflowTimerNode: {
+            nodeId: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            type: "TIMER";
+            label: components["schemas"]["WorkflowLabel"];
+            delaySeconds: number;
+        };
+        WorkflowNode: components["schemas"]["WorkflowStartNode"] | components["schemas"]["WorkflowEndNode"] | components["schemas"]["WorkflowHumanTaskNode"] | components["schemas"]["WorkflowAiActivityNode"] | components["schemas"]["WorkflowConditionNode"] | components["schemas"]["WorkflowSupplementWaitNode"] | components["schemas"]["WorkflowTimerNode"];
+        /**
+         * @description Closed, server-computed variables. Routing on AI signals only selects a human path; no variable can grant permission or decide money.
+         * @enum {string}
+         */
+        WorkflowConditionVariable: "EXTRACTION_LOW_CONFIDENCE_FIELD_COUNT" | "EXTRACTION_QUALITY_FLAG_COUNT" | "DOCUMENTS_MISSING_REQUIRED_SLOT_COUNT" | "SUPPLEMENT_ROUND" | "CLAIM_BENEFIT_TYPE";
+        /** @description No expressions, regex, functions, clock or arithmetic. Type compatibility of variable/op/value is a semantic publish check. */
+        WorkflowConditionLeaf: {
+            variable: components["schemas"]["WorkflowConditionVariable"];
+            /** @enum {string} */
+            op: "EQ" | "NEQ" | "GT" | "GTE" | "LT" | "LTE" | "IN";
+            value: number | components["schemas"]["BenefitType"] | components["schemas"]["BenefitType"][];
+        };
+        WorkflowConditionGroup: {
+            all: components["schemas"]["WorkflowConditionLeaf"][];
+        } | {
+            any: components["schemas"]["WorkflowConditionLeaf"][];
+        };
+        /** @description Depth <= 2 (leaf or one all/any group of <= 5 leaves). */
+        WorkflowCondition: components["schemas"]["WorkflowConditionLeaf"] | components["schemas"]["WorkflowConditionGroup"];
+        WorkflowEdgeGuard: {
+            /** @enum {string} */
+            kind: "NEXT";
+        } | {
+            /** @enum {string} */
+            kind: "ACTION";
+            actionId: components["schemas"]["WorkflowTaskActionId"];
+        } | {
+            /** @enum {string} */
+            kind: "OUTCOME";
+            /** @enum {string} */
+            outcome: "SUCCEEDED" | "FAILED" | "RECEIVED" | "EXPIRED";
+        } | {
+            /** @enum {string} */
+            kind: "CONDITION";
+            priority: number;
+            condition: components["schemas"]["WorkflowCondition"];
+        } | {
+            /** @enum {string} */
+            kind: "DEFAULT";
+        };
+        /** @description Sequence flow. Every cycle needs a CONDITION-sourced loopBack edge with maxIterations; after the bound the edge is treated as false. */
+        WorkflowEdge: {
+            edgeId: components["schemas"]["WorkflowEdgeId"];
+            source: components["schemas"]["WorkflowNodeId"];
+            target: components["schemas"]["WorkflowNodeId"];
+            guard: components["schemas"]["WorkflowEdgeGuard"];
+            loopBack?: {
+                maxIterations: number;
+            };
+        };
+        WorkflowAssignmentRule: {
+            ruleKey: components["schemas"]["WorkflowNodeId"];
+            candidateRoles: components["schemas"]["WorkflowCandidateRole"][];
+            /** @description Open VWF-OD-03: team/group directory is not decided; publish fails closed with GROUP_DIRECTORY_UNAVAILABLE while present. */
+            candidateGroupKeys?: components["schemas"]["WorkflowRefKey"][];
+            /** @enum {string} */
+            strategy: "QUEUE_CLAIM" | "CASE_OWNER_DIRECT";
+            /** @enum {string} */
+            accountableOwner: "CASE_OWNER";
+            /** @description Separation of duties: assignee must differ from the principals who completed these nodes in the same execution. */
+            distinctFromNodeIds: components["schemas"]["WorkflowNodeId"][];
+            maxActiveTasksPerAssignee: number;
+        };
+        /** @description Versioned with and pinned by the workflow definition version (same contentHash). The claimant member/guardian and AI service actors are never assignees. */
+        WorkflowAssignmentPolicy: {
+            /** @enum {string} */
+            schemaVersion: "1.0.0";
+            rules: components["schemas"]["WorkflowAssignmentRule"][];
+        };
+        /** @description Phase 1 publishes only OUTPATIENT, DENTAL, INPATIENT (SCOPE_NOT_APPROVED otherwise; OD-03 of spec 11). */
+        WorkflowScope: {
+            benefitTypes: components["schemas"]["BenefitType"][];
+        };
+        /** @description Bounded BPMN subset compiled by the server; no script, expression language, URL, CSS, tenantId or PII. Structural validity only: graph/reference rules are semantic (spec 14 section 4). Canonical JSON <= 64 KiB (same bound as intake forms, spec 11). */
+        WorkflowDefinitionContent: {
+            /** @enum {string} */
+            schemaVersion: "1.0.0";
+            workflowKey: components["schemas"]["WorkflowKey"];
+            title: components["schemas"]["WorkflowLabel"];
+            scope: components["schemas"]["WorkflowScope"];
+            actionCatalogVersion: components["schemas"]["VersionNumber"];
+            assignmentPolicy: components["schemas"]["WorkflowAssignmentPolicy"];
+            nodes: components["schemas"]["WorkflowNode"][];
+            edges: components["schemas"]["WorkflowEdge"][];
+        };
+        /** @description Authorization is evaluated server-side from verified membership, object relationship and this entry; the catalog never grants claim, EOB or payment authority. */
+        WorkflowActionCatalogEntry: {
+            actionId: components["schemas"]["WorkflowActionId"];
+            nodeTypes: ("HUMAN_TASK" | "AI_ACTIVITY")[];
+            /** @enum {string} */
+            actorKind: "HUMAN" | "AI_SERVICE";
+            allowedRelationships: ("ASSIGNEE" | "CANDIDATE" | "SUPERVISOR" | "CASE_OWNER" | "AI_SCOPE_BINDING")[];
+            requiresMfa: boolean;
+            completesTask: boolean;
+            requiresEvidence: boolean;
+            /** @enum {boolean} */
+            requiresIdempotencyKey: true;
+            /** @enum {string} */
+            businessEffect: "TASK_LIFECYCLE" | "EVIDENCE_ONLY" | "ROUTE_WORKFLOW";
+            auditAction: string;
+        };
+        /** @description Global immutable catalog version (spec 14a). Executions pin catalogVersion; a new catalog version never changes running executions. */
+        WorkflowActionCatalog: {
+            /** @enum {string} */
+            schemaVersion: "1.0.0";
+            catalogVersion: components["schemas"]["VersionNumber"];
+            actions: components["schemas"]["WorkflowActionCatalogEntry"][];
+        };
+        /** @enum {string} */
+        WorkflowVersionStatus: "DRAFT" | "PUBLISHED" | "RETIRED" | "REVOKED";
+        /** @description Creates the definition for a new workflowKey or the next DRAFT version of an existing key. At most one open DRAFT per key (409 otherwise). */
+        WorkflowDraftCreateRequest: {
+            content: components["schemas"]["WorkflowDefinitionContent"];
+            basedOnVersionNo?: components["schemas"]["VersionNumber"];
+        };
+        WorkflowDraftUpdateRequest: {
+            expectedRevision: components["schemas"]["VersionNumber"];
+            content: components["schemas"]["WorkflowDefinitionContent"];
+        };
+        /** @description Publishes exactly the validated content the publisher reviewed; hash mismatch is 409 STALE_VERSION. */
+        WorkflowPublishRequest: {
+            expectedRevision: components["schemas"]["VersionNumber"];
+            contentHash: components["schemas"]["Hash"];
+        };
+        WorkflowRevokeRequest: {
+            contentHash: components["schemas"]["Hash"];
+            /** @enum {string} */
+            reasonCode: "DEFECT" | "POLICY_CHANGE" | "SECURITY";
+        };
+        WorkflowVersionRef: {
+            /** Format: uuid */
+            definitionId: string;
+            versionNo: components["schemas"]["VersionNumber"];
+            contentHash: components["schemas"]["Hash"];
+        };
+        /** @description No author/editor identities are exposed; maker-checker is enforced server-side. */
+        WorkflowDefinitionVersion: {
+            /** Format: uuid */
+            definitionId: string;
+            workflowKey: components["schemas"]["WorkflowKey"];
+            versionNo: components["schemas"]["VersionNumber"];
+            status: components["schemas"]["WorkflowVersionStatus"];
+            revision: components["schemas"]["VersionNumber"];
+            contentHash: components["schemas"]["Hash"];
+            content: components["schemas"]["WorkflowDefinitionContent"];
+            /** @description UI hint only; publish re-checks role, MFA and maker-checker server-side. */
+            publishableByCurrentActor: boolean;
+            inFlightExecutionCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: date-time */
+            publishedAt?: string;
+            /** Format: date-time */
+            retiredAt?: string;
+            /** Format: date-time */
+            revokedAt?: string;
+            /** @enum {string} */
+            revokedReasonCode?: "DEFECT" | "POLICY_CHANGE" | "SECURITY";
+        };
+        WorkflowDefinitionSummary: {
+            /** Format: uuid */
+            definitionId: string;
+            workflowKey: components["schemas"]["WorkflowKey"];
+            versionNo: components["schemas"]["VersionNumber"];
+            status: components["schemas"]["WorkflowVersionStatus"];
+            title: components["schemas"]["WorkflowLabel"];
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        WorkflowDefinitionPage: {
+            items: components["schemas"]["WorkflowDefinitionSummary"][];
+            nextCursor?: string;
+        };
+        /** @enum {string} */
+        WorkflowValidationDetailCode: "SCHEMA_INVALID" | "DUPLICATE_ID" | "EXACTLY_ONE_START_REQUIRED" | "END_REQUIRED" | "START_HAS_INCOMING" | "END_HAS_OUTGOING" | "DANGLING_EDGE" | "SELF_LOOP" | "UNREACHABLE_NODE" | "DEAD_END" | "MISSING_DEFAULT_BRANCH" | "DUPLICATE_PRIORITY" | "GUARD_NOT_ALLOWED_FOR_SOURCE" | "MISSING_ACTION_ROUTE" | "DUPLICATE_ROUTE" | "MISSING_OUTCOME_ROUTE" | "UNBOUNDED_LOOP" | "LOOP_WITHOUT_HUMAN_OR_WAIT" | "CONDITION_TYPE_MISMATCH" | "ACTION_NOT_ALLOWED_FOR_NODE" | "UNKNOWN_ASSIGNMENT_RULE" | "INPUT_NOT_PRODUCED" | "AI_FAILURE_NOT_ROUTED_TO_HUMAN" | "SCOPE_NOT_APPROVED" | "UNSUPPORTED_BPMN_ELEMENT" | "PARALLEL_NOT_SUPPORTED" | "REFERENCE_NOT_PUBLISHED" | "GROUP_DIRECTORY_UNAVAILABLE" | "CATALOG_VERSION_UNKNOWN" | "AMBIGUOUS_BINDING" | "LIMIT_EXCEEDED";
+        /** @description Fixed codes and JSON-pointer paths only; never echoes submitted labels or values. */
+        WorkflowValidationIssue: {
+            detailCode: components["schemas"]["WorkflowValidationDetailCode"];
+            path: string;
+            nodeId?: components["schemas"]["WorkflowNodeId"];
+            edgeId?: components["schemas"]["WorkflowEdgeId"];
+        };
+        WorkflowValidationReport: {
+            valid: boolean;
+            revision: components["schemas"]["VersionNumber"];
+            contentHash: components["schemas"]["Hash"];
+            issues: components["schemas"]["WorkflowValidationIssue"][];
+        };
+        /**
+         * @description Task lifecycle only; never a claim status. SUSPENDED = revoked version, missing scope or failed binding (fail closed).
+         * @enum {string}
+         */
+        WorkflowTaskStatus: "OPEN" | "CLAIMED" | "COMPLETED" | "CANCELLED" | "SUSPENDED";
+        /** @description Projection contains no member names, CCCD, phone, bank, diagnosis or document content. */
+        WorkflowTaskSummary: {
+            /** Format: uuid */
+            taskId: string;
+            /** Format: uuid */
+            claimId: string;
+            nodeId: components["schemas"]["WorkflowNodeId"];
+            /** @enum {string} */
+            taskKind: "EXTRACTION_CONFIRMATION" | "DOCUMENT_REVIEW";
+            status: components["schemas"]["WorkflowTaskStatus"];
+            version: components["schemas"]["VersionNumber"];
+            /** Format: uuid */
+            assigneePrincipalId?: string;
+            /** Format: uuid */
+            accountableOwnerPrincipalId: string;
+            /** Format: date-time */
+            dueAt: string;
+            /** @enum {string} */
+            slaState: "ON_TRACK" | "DUE_SOON" | "BREACHED";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WorkflowTaskPage: {
+            items: components["schemas"]["WorkflowTaskSummary"][];
+            nextCursor?: string;
+        };
+        /** @description Authenticated no-store task view only; never placed in events, workflow history, search or logs. */
+        WorkflowProposal: {
+            /** Format: uuid */
+            proposalId: string;
+            fieldKey: components["schemas"]["WorkflowRefKey"];
+            value: string;
+            evidenceIds: string[];
+            /** @description Evidence signal only; never permission or decision. */
+            confidence: number;
+            /** @enum {string} */
+            source: "AI_SERVICE";
+        };
+        WorkflowTaskDetail: {
+            task: components["schemas"]["WorkflowTaskSummary"];
+            workflow: components["schemas"]["WorkflowVersionRef"];
+            actionCatalogVersion: components["schemas"]["VersionNumber"];
+            assignmentRuleKey: components["schemas"]["WorkflowNodeId"];
+            formRef?: components["schemas"]["WorkflowPinnedRef"];
+            /** @description Computed server-side for the calling actor now; UI hint only, every action is re-authorized. */
+            allowedActions: components["schemas"]["WorkflowActionId"][];
+            allowedEvidence: components["schemas"]["WorkflowEvidenceScope"];
+            proposals: components["schemas"]["WorkflowProposal"][];
+        };
+        WorkflowTaskClaimRequest: {
+            expectedTaskVersion: components["schemas"]["VersionNumber"];
+        };
+        /** @description Target must be an active staff candidate of the rule, not the claimant, not an AI actor and not excluded by distinctFromNodeIds. */
+        WorkflowTaskReassignRequest: {
+            expectedTaskVersion: components["schemas"]["VersionNumber"];
+            /** Format: uuid */
+            assigneePrincipalId: string;
+            /** @enum {string} */
+            reasonCode: "WORKLOAD" | "ABSENCE" | "CONFLICT_OF_INTEREST" | "SLA_ESCALATION" | "SELF_RELEASE";
+        } | {
+            expectedTaskVersion: components["schemas"]["VersionNumber"];
+            /** @enum {boolean} */
+            release: true;
+            /** @enum {string} */
+            reasonCode: "WORKLOAD" | "ABSENCE" | "CONFLICT_OF_INTEREST" | "SLA_ESCALATION" | "SELF_RELEASE";
+        };
+        WorkflowProposalDecision: {
+            /** Format: uuid */
+            proposalId: string;
+            /** @enum {string} */
+            decision: "ACCEPT" | "REJECT";
+            evidenceIds: string[];
+        } | {
+            /** Format: uuid */
+            proposalId: string;
+            /** @enum {string} */
+            decision: "EDIT";
+            editedValue: string;
+            evidenceIds: string[];
+        };
+        WorkflowConfirmExtractionAction: {
+            expectedTaskVersion: components["schemas"]["VersionNumber"];
+            /** @enum {string} */
+            actionId: "CONFIRM_EXTRACTION";
+            decisions: components["schemas"]["WorkflowProposalDecision"][];
+        };
+        /** @description Fixed reason codes rendered by approved templates; no free text (open VWF-OD-04). */
+        WorkflowRequestSupplementAction: {
+            expectedTaskVersion: components["schemas"]["VersionNumber"];
+            /** @enum {string} */
+            actionId: "REQUEST_SUPPLEMENT";
+            requestedDocumentTypes: components["schemas"]["DocumentType"][];
+            reasonCodes: ("MISSING_DOCUMENT" | "ILLEGIBLE" | "MISSING_STAMP" | "MISSING_PRESCRIPTION" | "MISMATCHED_DOCUMENT")[];
+        };
+        WorkflowEscalateAction: {
+            expectedTaskVersion: components["schemas"]["VersionNumber"];
+            /** @enum {string} */
+            actionId: "ESCALATE_TO_MANUAL_REVIEW";
+            /** @enum {string} */
+            reasonCode: "AI_UNAVAILABLE" | "COMPLEX_CASE" | "SUSPECTED_INCONSISTENCY";
+        };
+        WorkflowTaskActionRequest: components["schemas"]["WorkflowConfirmExtractionAction"] | components["schemas"]["WorkflowRequestSupplementAction"] | components["schemas"]["WorkflowEscalateAction"];
+        WorkflowTaskActionResult: {
+            /** Format: uuid */
+            taskId: string;
+            taskVersion: components["schemas"]["VersionNumber"];
+            /** @enum {string} */
+            status: "COMPLETED";
+            actionId: components["schemas"]["WorkflowTaskActionId"];
+            /** Format: uuid */
+            commandId: string;
+            /**
+             * @description Task completion, audit and outbox are committed; Temporal advancement is asynchronous (stable commandId).
+             * @enum {string}
+             */
+            workflowAdvance: "PENDING";
+        };
+        /**
+         * @description Evidence aid only. A label never changes claim, task, EOB or payment state and never substitutes a domain decision.
+         * @enum {string}
+         */
+        WorkflowAnnotationLabel: "MISSING_STAMP" | "ILLEGIBLE_AREA" | "AMOUNT_FIELD" | "DATE_FIELD" | "DIAGNOSIS_FIELD" | "PROVIDER_FIELD" | "POSSIBLE_ALTERATION" | "NEEDS_SECOND_LOOK";
+        /** @description Append-only; no free text (open VWF-OD-04). Document must belong to the task claim and allowedEvidence scope. */
+        WorkflowAnnotationCreateRequest: {
+            /** Format: uuid */
+            documentId: string;
+            documentVersion: components["schemas"]["VersionNumber"];
+            page: number;
+            region: components["schemas"]["Region"];
+            labelKey: components["schemas"]["WorkflowAnnotationLabel"];
+            fieldKey?: components["schemas"]["WorkflowRefKey"];
+        };
+        WorkflowAnnotation: {
+            /** Format: uuid */
+            annotationId: string;
+            /** Format: uuid */
+            taskId: string;
+            /** Format: uuid */
+            documentId: string;
+            documentVersion: components["schemas"]["VersionNumber"];
+            page: number;
+            region: components["schemas"]["Region"];
+            labelKey: components["schemas"]["WorkflowAnnotationLabel"];
+            fieldKey?: components["schemas"]["WorkflowRefKey"];
+            /** @enum {string} */
+            authorKind: "HUMAN" | "AI_SERVICE";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WorkflowAnnotationPage: {
+            items: components["schemas"]["WorkflowAnnotation"][];
+            nextCursor?: string;
+        };
+        /** @description Derived from verified principal + membership context; display hint only. No tenantId. AI service actors have no bearer actor scope. */
+        WorkflowActorScope: {
+            /** Format: uuid */
+            principalId: string;
+            /** @enum {string} */
+            actorKind: "HUMAN";
+            mfaVerified: boolean;
+            workflowRoles: components["schemas"]["WorkflowStaffRole"][];
+            capabilities: ("DESIGN_DRAFT" | "VALIDATE_DRAFT" | "PUBLISH_VERSION" | "REVOKE_VERSION" | "VIEW_TASKS" | "CLAIM_TASK" | "ACT_ON_TASK" | "REASSIGN_TASK" | "ANNOTATE" | "OBSERVE")[];
+        };
     };
     responses: {
         /** @description Missing/invalid/expired authentication or service signature */
@@ -2210,6 +3008,17 @@ export interface components {
         /** @description Opaque workspace identifier; never a tenant ID. Authorization is checked against the verified membership context. */
         WorkspaceId: string;
         LogoAssetId: string;
+        /** @description Opaque definition ID; authorization checked against the verified membership context. */
+        WorkflowDefinitionId: string;
+        WorkflowVersionNo: number;
+        WorkflowCatalogVersion: number;
+        WorkflowTaskId: string;
+        /** @description Opaque cursor bound to membership/filter/order. */
+        WorkflowCursor: string;
+        WorkflowLimit: number;
+        /** @description TEAM requires WORKFLOW_SUPERVISOR; OBSERVED requires WORKFLOW_OBSERVER. */
+        WorkflowTaskQueue: "MINE" | "CANDIDATE" | "TEAM" | "OBSERVED";
+        WorkflowTaskStatusFilter: components["schemas"]["WorkflowTaskStatus"];
     };
     requestBodies: never;
     headers: never;
@@ -4015,6 +4824,656 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WorkspaceLogoAsset"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    listWorkflowDefinitions: {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor bound to membership/filter/order. */
+                cursor?: components["parameters"]["WorkflowCursor"];
+                limit?: components["parameters"]["WorkflowLimit"];
+            };
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized definitions */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowDefinitionPage"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createWorkflowDraft: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowDraftCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Draft committed */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowDefinitionVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    listWorkflowDefinitionVersions: {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor bound to membership/filter/order. */
+                cursor?: components["parameters"]["WorkflowCursor"];
+                limit?: components["parameters"]["WorkflowLimit"];
+            };
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque definition ID; authorization checked against the verified membership context. */
+                definitionId: components["parameters"]["WorkflowDefinitionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized versions */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowDefinitionPage"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getWorkflowDefinitionVersion: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque definition ID; authorization checked against the verified membership context. */
+                definitionId: components["parameters"]["WorkflowDefinitionId"];
+                versionNo: components["parameters"]["WorkflowVersionNo"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Version with content and contentHash */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowDefinitionVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    updateWorkflowDraft: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque definition ID; authorization checked against the verified membership context. */
+                definitionId: components["parameters"]["WorkflowDefinitionId"];
+                versionNo: components["parameters"]["WorkflowVersionNo"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowDraftUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Draft committed with incremented revision */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowDefinitionVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    validateWorkflowDraft: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque definition ID; authorization checked against the verified membership context. */
+                definitionId: components["parameters"]["WorkflowDefinitionId"];
+                versionNo: components["parameters"]["WorkflowVersionNo"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deterministic validation report */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowValidationReport"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    publishWorkflowVersion: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque definition ID; authorization checked against the verified membership context. */
+                definitionId: components["parameters"]["WorkflowDefinitionId"];
+                versionNo: components["parameters"]["WorkflowVersionNo"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowPublishRequest"];
+            };
+        };
+        responses: {
+            /** @description Published immutable version */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowDefinitionVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    revokeWorkflowVersion: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                /** @description Opaque definition ID; authorization checked against the verified membership context. */
+                definitionId: components["parameters"]["WorkflowDefinitionId"];
+                versionNo: components["parameters"]["WorkflowVersionNo"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowRevokeRequest"];
+            };
+        };
+        responses: {
+            /** @description Revoked version */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowDefinitionVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getWorkflowActionCatalog: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                catalogVersion: components["parameters"]["WorkflowCatalogVersion"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Catalog version */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowActionCatalog"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getWorkflowActorScope: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Actor scope */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowActorScope"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    listWorkflowTasks: {
+        parameters: {
+            query: {
+                /** @description TEAM requires WORKFLOW_SUPERVISOR; OBSERVED requires WORKFLOW_OBSERVER. */
+                queue: components["parameters"]["WorkflowTaskQueue"];
+                status?: components["parameters"]["WorkflowTaskStatusFilter"];
+                /** @description Opaque cursor bound to membership/filter/order. */
+                cursor?: components["parameters"]["WorkflowCursor"];
+                limit?: components["parameters"]["WorkflowLimit"];
+            };
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized tasks */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowTaskPage"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getWorkflowTask: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                taskId: components["parameters"]["WorkflowTaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Task detail */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowTaskDetail"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    claimWorkflowTask: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                taskId: components["parameters"]["WorkflowTaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowTaskClaimRequest"];
+            };
+        };
+        responses: {
+            /** @description Task claimed */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowTaskSummary"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    reassignWorkflowTask: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                taskId: components["parameters"]["WorkflowTaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowTaskReassignRequest"];
+            };
+        };
+        responses: {
+            /** @description Task reassigned or released */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowTaskSummary"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    submitWorkflowTaskAction: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                taskId: components["parameters"]["WorkflowTaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowTaskActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Action committed; workflow advancement pending */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowTaskActionResult"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    listWorkflowTaskAnnotations: {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor bound to membership/filter/order. */
+                cursor?: components["parameters"]["WorkflowCursor"];
+                limit?: components["parameters"]["WorkflowLimit"];
+            };
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                taskId: components["parameters"]["WorkflowTaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Annotations */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowAnnotationPage"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createWorkflowTaskAnnotation: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                taskId: components["parameters"]["WorkflowTaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowAnnotationCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Annotation committed */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowAnnotation"];
                 };
             };
             401: components["responses"]["Error401"];

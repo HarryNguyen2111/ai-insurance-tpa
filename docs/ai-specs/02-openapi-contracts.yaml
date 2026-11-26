@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: MPS TPA Core & AI Worker API Contracts
-  version: 1.3.0
+  version: 1.4.0
   description: Hop dong giao tiep chuan giua Zalo Mini App, Next.js Workbench, NestJS Core API va Python AI Worker.
 
 # Contract nền: endpoint mới liệt kê trong 07 phải được đặc tả đầy đủ trước implementation.
@@ -2368,6 +2368,641 @@ paths:
         '503':
           $ref: '#/components/responses/Error503'
 
+  # VWF-01 (#78) additive workflow/task/actor contract; spec 14. Contract only, no runtime.
+  /v1/admin/workflow-definitions:
+    get:
+      operationId: listWorkflowDefinitions
+      summary: List workflow definitions (latest version per key)
+      description: VWF-01. WORKFLOW_DESIGNER, WORKFLOW_PUBLISHER or WORKFLOW_OBSERVER. Cursor pagination <= 50. Server
+        verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404
+        without revealing existence; no tenantId accepted. No-store.
+      parameters:
+      - &a8
+        $ref: "#/components/parameters/MembershipContext"
+      - $ref: "#/components/parameters/WorkflowCursor"
+      - $ref: "#/components/parameters/WorkflowLimit"
+      responses:
+        "200":
+          description: Authorized definitions
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowDefinitionPage"
+        "401": &a1
+          $ref: "#/components/responses/Error401"
+        "403": &a2
+          $ref: "#/components/responses/Error403"
+        "404": &a3
+          $ref: "#/components/responses/Error404"
+        "409": &a4
+          $ref: "#/components/responses/Error409"
+        "422": &a5
+          $ref: "#/components/responses/Error422"
+        "429": &a6
+          $ref: "#/components/responses/Error429"
+        "503": &a7
+          $ref: "#/components/responses/Error503"
+    post:
+      operationId: createWorkflowDraft
+      summary: Create a workflow definition draft
+      description: "VWF-01. WORKFLOW_DESIGNER with verified MFA. Creates a new key or the next DRAFT version (basedOnVersionNo
+        copies nothing implicitly; content is the full submitted body). Structural schema enforced here; semantic graph
+        rules run on validate/publish. At most one open DRAFT per key: 409 STALE_VERSION. Business state + audit_logs
+        (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key
+        request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After.
+        No tenantId accepted or returned; other-tenant objects 404. No-store."
+      parameters:
+      - &a11
+        $ref: "#/components/parameters/IdempotencyKey"
+      - &a12
+        $ref: "#/components/parameters/MembershipContext"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowDraftCreateRequest"
+      responses:
+        "201":
+          description: Draft committed
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowDefinitionVersion"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/admin/workflow-definitions/{definitionId}/versions:
+    get:
+      operationId: listWorkflowDefinitionVersions
+      summary: List versions of one workflow definition
+      description: VWF-01 version lookup. WORKFLOW_DESIGNER, WORKFLOW_PUBLISHER or WORKFLOW_OBSERVER. Server verifies
+        principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without
+        revealing existence; no tenantId accepted. No-store.
+      parameters:
+      - $ref: "#/components/parameters/WorkflowDefinitionId"
+      - *a8
+      - $ref: "#/components/parameters/WorkflowCursor"
+      - $ref: "#/components/parameters/WorkflowLimit"
+      responses:
+        "200":
+          description: Authorized versions
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowDefinitionPage"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/admin/workflow-definitions/{definitionId}/versions/{versionNo}:
+    get:
+      operationId: getWorkflowDefinitionVersion
+      summary: Read one immutable (or draft) workflow version
+      description: VWF-01 version lookup, including RETIRED/REVOKED versions still pinned by in-flight executions. Server
+        verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404
+        without revealing existence; no tenantId accepted. No-store.
+      parameters:
+      - &a9
+        $ref: "#/components/parameters/WorkflowDefinitionId"
+      - &a10
+        $ref: "#/components/parameters/WorkflowVersionNo"
+      - *a8
+      responses:
+        "200":
+          description: Version with content and contentHash
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowDefinitionVersion"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+    put:
+      operationId: updateWorkflowDraft
+      summary: Replace draft content
+      description: "VWF-01. WORKFLOW_DESIGNER with verified MFA; DRAFT only (PUBLISHED/RETIRED/REVOKED are immutable: 409
+        STALE_VERSION). expectedRevision must equal current revision or 409 STALE_VERSION; success increments revision and
+        invalidates prior validation reports. Business state + audit_logs (prev/curr hash) + outbox in one
+        withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays
+        original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or
+        returned; other-tenant objects 404. No-store."
+      parameters:
+      - *a9
+      - *a10
+      - *a11
+      - *a12
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowDraftUpdateRequest"
+      responses:
+        "200":
+          description: Draft committed with incremented revision
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowDefinitionVersion"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/admin/workflow-definitions/{definitionId}/versions/{versionNo}/validate:
+    post:
+      operationId: validateWorkflowDraft
+      summary: Run structural and semantic validation
+      description: "VWF-01. WORKFLOW_DESIGNER or WORKFLOW_PUBLISHER with verified MFA. Pure check of the current draft
+        revision; records a validation report hash for publish, no business state change. 200 with valid=false lists fixed
+        detail codes (spec 14 section 4). Business state + audit_logs (prev/curr hash) + outbox in one
+        withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays
+        original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or
+        returned; other-tenant objects 404. No-store."
+      parameters:
+      - *a9
+      - *a10
+      - *a11
+      - *a12
+      responses:
+        "200":
+          description: Deterministic validation report
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowValidationReport"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/admin/workflow-definitions/{definitionId}/versions/{versionNo}/publish:
+    post:
+      operationId: publishWorkflowVersion
+      summary: Publish a validated draft (maker-checker)
+      description: "VWF-01. WORKFLOW_PUBLISHER with verified MFA who did not create or edit this draft (fail-closed default,
+        open VWF-OD-01). Re-runs full validation, requires contentHash of the reviewed revision, resolves every pinned
+        form/model/prompt/policy ref to a PUBLISHED version and the action catalog version; invalid 422 DOMAIN_VIOLATION.
+        Atomically marks the previous PUBLISHED version of the key RETIRED; in-flight executions keep their pinned
+        version. Business state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE
+        RLS). Durable tenant/actor/operation/key request hash: same body replays original, changed body 409
+        IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects
+        404. No-store."
+      parameters:
+      - *a9
+      - *a10
+      - *a11
+      - *a12
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowPublishRequest"
+      responses:
+        "200":
+          description: Published immutable version
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowDefinitionVersion"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/admin/workflow-definitions/{definitionId}/versions/{versionNo}/revoke:
+    post:
+      operationId: revokeWorkflowVersion
+      summary: Revoke a published or retired version
+      description: "VWF-01. WORKFLOW_PUBLISHER with verified MFA. New claims stop resolving to it immediately; in-flight
+        executions are not migrated automatically: open human tasks become SUSPENDED and only ESCALATE_TO_MANUAL_REVIEW by
+        a supervisor remains (fail closed, open VWF-OD-02). Business state + audit_logs (prev/curr hash) + outbox in one
+        withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays
+        original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or
+        returned; other-tenant objects 404. No-store."
+      parameters:
+      - *a9
+      - *a10
+      - *a11
+      - *a12
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowRevokeRequest"
+      responses:
+        "200":
+          description: Revoked version
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowDefinitionVersion"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/workflow/action-catalogs/{catalogVersion}:
+    get:
+      operationId: getWorkflowActionCatalog
+      summary: Read an immutable action catalog version
+      description: VWF-01. Any staff workflow role. Global read-only catalog (spec 14a); unknown version 404. Server verifies
+        principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without
+        revealing existence; no tenantId accepted. No-store.
+      parameters:
+      - $ref: "#/components/parameters/WorkflowCatalogVersion"
+      - *a8
+      responses:
+        "200":
+          description: Catalog version
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowActionCatalog"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/workflow/actor-scope:
+    get:
+      operationId: getWorkflowActorScope
+      summary: Read the calling actor workflow roles and capabilities
+      description: VWF-01. Display hint derived from verified principal, MFA and membership context; every operation
+        re-authorizes. Server verifies principal, active membership context and object relationship; inaccessible or
+        other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+      parameters:
+      - *a8
+      responses:
+        "200":
+          description: Actor scope
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowActorScope"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/workflow/tasks:
+    get:
+      operationId: listWorkflowTasks
+      summary: Task inbox
+      description: VWF-01. MINE (assigned to caller), CANDIDATE (unclaimed tasks whose rule lists a caller role), TEAM
+        (supervisor) or OBSERVED (observer, read-only). PostgreSQL-backed, cursor <= 50, minimal projection. Server
+        verifies principal, active membership context and object relationship; inaccessible or other-tenant objects 404
+        without revealing existence; no tenantId accepted. No-store.
+      parameters:
+      - *a8
+      - $ref: "#/components/parameters/WorkflowTaskQueue"
+      - $ref: "#/components/parameters/WorkflowTaskStatusFilter"
+      - $ref: "#/components/parameters/WorkflowCursor"
+      - $ref: "#/components/parameters/WorkflowLimit"
+      responses:
+        "200":
+          description: Authorized tasks
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowTaskPage"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/workflow/tasks/{taskId}:
+    get:
+      operationId: getWorkflowTask
+      summary: Task detail with pinned versions and allowed actions
+      description: VWF-01. Assignee, candidate, case owner, supervisor or observer of this task. allowedActions computed for
+        the caller now. Server verifies principal, active membership context and object relationship; inaccessible or
+        other-tenant objects 404 without revealing existence; no tenantId accepted. No-store.
+      parameters:
+      - &a13
+        $ref: "#/components/parameters/WorkflowTaskId"
+      - *a8
+      responses:
+        "200":
+          description: Task detail
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowTaskDetail"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/workflow/tasks/{taskId}/claim:
+    post:
+      operationId: claimWorkflowTask
+      summary: Claim an OPEN task
+      description: "VWF-01. Human staff candidate with verified MFA, not the claimant/guardian, not excluded by separation of
+        duties, under maxActiveTasksPerAssignee. Conditional update on expectedTaskVersion: concurrent claims yield
+        exactly one success, others 409 STALE_VERSION. Business state + audit_logs (prev/curr hash) + outbox in one
+        withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays
+        original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or
+        returned; other-tenant objects 404. No-store."
+      parameters:
+      - *a13
+      - *a11
+      - *a12
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowTaskClaimRequest"
+      responses:
+        "200":
+          description: Task claimed
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowTaskSummary"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/workflow/tasks/{taskId}/reassign:
+    post:
+      operationId: reassignWorkflowTask
+      summary: Reassign or release a task
+      description: "VWF-01. WORKFLOW_SUPERVISOR or case owner (any target), or the assignee releasing its own task
+        (SELF_RELEASE), each with verified MFA. Target revalidated as for claim. Accountable owner unchanged. Business
+        state + audit_logs (prev/curr hash) + outbox in one withTenantTransaction (SET LOCAL, FORCE RLS). Durable
+        tenant/actor/operation/key request hash: same body replays original, changed body 409 IDEMPOTENCY_CONFLICT,
+        in-progress 409 with Retry-After. No tenantId accepted or returned; other-tenant objects 404. No-store."
+      parameters:
+      - *a13
+      - *a11
+      - *a12
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowTaskReassignRequest"
+      responses:
+        "200":
+          description: Task reassigned or released
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowTaskSummary"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/workflow/tasks/{taskId}/actions:
+    post:
+      operationId: submitWorkflowTaskAction
+      summary: Perform a task-completing human action
+      description: "VWF-01. Current assignee only, human, verified MFA; actionId must be in the node allowedActionIds of the
+        pinned version and the pinned catalog. AI service actors and labels cannot call this. Evidence IDs must belong to
+        the claim and allowedEvidence scope. Completes the task and enqueues a stable Temporal command (#38) via outbox;
+        never approves, rejects, publishes EOB or pays. Business state + audit_logs (prev/curr hash) + outbox in one
+        withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays
+        original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or
+        returned; other-tenant objects 404. No-store."
+      parameters:
+      - *a13
+      - *a11
+      - *a12
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowTaskActionRequest"
+      responses:
+        "200":
+          description: Action committed; workflow advancement pending
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowTaskActionResult"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+  /v1/workflow/tasks/{taskId}/annotations:
+    get:
+      operationId: listWorkflowTaskAnnotations
+      summary: List evidence annotations of a task
+      description: VWF-01. Any actor that can read the task. Includes AI proposals as authorKind AI_SERVICE. Server verifies
+        principal, active membership context and object relationship; inaccessible or other-tenant objects 404 without
+        revealing existence; no tenantId accepted. No-store.
+      parameters:
+      - *a13
+      - *a8
+      - $ref: "#/components/parameters/WorkflowCursor"
+      - $ref: "#/components/parameters/WorkflowLimit"
+      responses:
+        "200":
+          description: Annotations
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowAnnotationPage"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
+    post:
+      operationId: createWorkflowTaskAnnotation
+      summary: Add an evidence annotation (label)
+      description: "VWF-01. Assignee (or supervisor) with verified MFA on a CLAIMED task. Append-only evidence aid; never
+        changes claim/task/EOB/payment state. Business state + audit_logs (prev/curr hash) + outbox in one
+        withTenantTransaction (SET LOCAL, FORCE RLS). Durable tenant/actor/operation/key request hash: same body replays
+        original, changed body 409 IDEMPOTENCY_CONFLICT, in-progress 409 with Retry-After. No tenantId accepted or
+        returned; other-tenant objects 404. No-store."
+      parameters:
+      - *a13
+      - *a11
+      - *a12
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowAnnotationCreateRequest"
+      responses:
+        "201":
+          description: Annotation committed
+          headers:
+            Cache-Control:
+              description: Sensitive response
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowAnnotation"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "409": *a4
+        "422": *a5
+        "429": *a6
+        "503": *a7
 components:
   securitySchemes:
     bearerAuth:
@@ -2413,6 +3048,71 @@ components:
       schema:
         type: string
         format: uuid
+    WorkflowDefinitionId:
+      in: path
+      name: definitionId
+      required: true
+      schema: &a1
+        type: string
+        format: uuid
+      description: Opaque definition ID; authorization checked against the verified membership context.
+    WorkflowVersionNo:
+      in: path
+      name: versionNo
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 2147483647
+    WorkflowCatalogVersion:
+      in: path
+      name: catalogVersion
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 2147483647
+    WorkflowTaskId:
+      in: path
+      name: taskId
+      required: true
+      schema: *a1
+    WorkflowCursor:
+      in: query
+      name: cursor
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 2048
+      description: Opaque cursor bound to membership/filter/order.
+    WorkflowLimit:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+    WorkflowTaskQueue:
+      in: query
+      name: queue
+      required: true
+      schema:
+        type: string
+        enum:
+        - MINE
+        - CANDIDATE
+        - TEAM
+        - OBSERVED
+      description: TEAM requires WORKFLOW_SUPERVISOR; OBSERVED requires WORKFLOW_OBSERVER.
+    WorkflowTaskStatusFilter:
+      in: query
+      name: status
+      required: false
+      schema:
+        $ref: "#/components/schemas/WorkflowTaskStatus"
   responses:
     Error401:
       description: Missing/invalid/expired authentication or service signature
@@ -5923,3 +6623,1519 @@ components:
       description: Internal outbox envelope; tenantId derived by trusted core, aggregateId is the workspaceId. Payload
         carries no names, slugs, colours, images or URLs; consumers reload the authorized resource. Inbox dedup and
         aggregate version ordering required.
+    WorkflowKey:
+      type: string
+      minLength: 3
+      maxLength: 48
+      pattern: ^[a-z][a-z0-9_]{2,47}$
+      description: Tenant-local stable key of a workflow definition; not a tenant selector.
+    WorkflowNodeId:
+      type: string
+      minLength: 2
+      maxLength: 40
+      pattern: ^[a-z][a-z0-9_]{1,39}$
+      description: Stable node ID, unique within one definition version and kept across versions for in-flight mapping.
+    WorkflowEdgeId:
+      type: string
+      minLength: 2
+      maxLength: 40
+      pattern: ^[a-z][a-z0-9_]{1,39}$
+    WorkflowLabel:
+      type: string
+      minLength: 1
+      maxLength: 120
+      pattern: ^[^<>{}`\u0000-\u001F\u007F]+$
+      description: Plain display text; no markup, template braces, control characters or PII. Labels never substitute business state.
+    WorkflowRefKey:
+      type: string
+      minLength: 2
+      maxLength: 64
+      pattern: ^[a-z][a-z0-9_.-]{1,63}$
+    WorkflowPinnedRef:
+      type: object
+      additionalProperties: false
+      required:
+      - key
+      - version
+      - hash
+      properties:
+        key:
+          $ref: "#/components/schemas/WorkflowRefKey"
+        version:
+          $ref: "#/components/schemas/VersionNumber"
+        hash:
+          $ref: "#/components/schemas/Hash"
+      description: Exact immutable published version (form, model, prompt, AI-use policy). No "latest", ranges, URLs or inline
+        code. Publish fails closed when the reference does not resolve to a PUBLISHED version for this tenant.
+    WorkflowActionId:
+      type: string
+      enum:
+      - CLAIM_TASK
+      - UNCLAIM_TASK
+      - REASSIGN_TASK
+      - ADD_ANNOTATION
+      - CONFIRM_EXTRACTION
+      - REQUEST_SUPPLEMENT
+      - ESCALATE_TO_MANUAL_REVIEW
+      - PROPOSE_EXTRACTION
+      - PROPOSE_DOCUMENT_LABEL
+      - PROPOSE_QUALITY_FLAG
+      description: "Closed Phase 1 action vocabulary (catalog v1). No approve/reject/EOB/OTP/payment action exists here; those
+        remain #40-#46 operations with their own maker-checker."
+    WorkflowTaskActionId:
+      type: string
+      enum:
+      - CONFIRM_EXTRACTION
+      - REQUEST_SUPPLEMENT
+      - ESCALATE_TO_MANUAL_REVIEW
+      description: Task-completing human actions accepted by submitWorkflowTaskAction. Never accepted from an AI service actor.
+    WorkflowAiActionId:
+      type: string
+      enum:
+      - PROPOSE_EXTRACTION
+      - PROPOSE_DOCUMENT_LABEL
+      - PROPOSE_QUALITY_FLAG
+      description: Evidence proposals an AI service actor may emit only through the authenticated internal result path (#39);
+        never through bearer APIs.
+    WorkflowCandidateRole:
+      type: string
+      enum:
+      - CLAIM_REVIEWER
+      - INSURER_REVIEWER
+      description: Existing staff membership roles eligible as human task candidates. AI service actors are never candidates.
+    WorkflowStaffRole:
+      type: string
+      enum:
+      - WORKFLOW_DESIGNER
+      - WORKFLOW_PUBLISHER
+      - WORKFLOW_SUPERVISOR
+      - WORKFLOW_OBSERVER
+      - CLAIM_REVIEWER
+      - INSURER_REVIEWER
+      description: Workflow roles provisioned by identity (#21); not added to the frozen C1 Membership.roles enum. Case owner
+        and assignee are object relationships, not roles.
+    WorkflowDataSchemaRef:
+      type: string
+      enum:
+      - CLAIM_REF
+      - DOCUMENT_SET
+      - EXTRACTION_PROPOSAL
+      - CONFIRMED_EXTRACTION
+      - DOCUMENT_LABELS
+      - QUALITY_FLAGS
+      - SUPPLEMENT_REQUEST
+      - SUPPLEMENT_DOCUMENTS
+      description: Closed catalog of versioned internal data schemas exchanged between nodes. Values are references to
+        PostgreSQL records, never raw documents/PII in workflow history.
+    WorkflowEvidenceScope:
+      type: object
+      additionalProperties: false
+      required:
+      - documentTypes
+      - sources
+      properties:
+        documentTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentType"
+          minItems: 1
+          maxItems: 7
+          uniqueItems: true
+        sources:
+          type: array
+          items:
+            type: string
+            enum:
+            - XML
+            - OCR
+            - VLM
+            - QR
+            - IMAGE_ANALYSIS
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+      description: Allowed evidence references for the node; server rejects evidence outside this scope or outside the claim.
+    WorkflowSla:
+      type: object
+      additionalProperties: false
+      required:
+      - dueSeconds
+      - escalateTo
+      properties:
+        dueSeconds:
+          type: integer
+          minimum: 3600
+          maximum: 1209600
+          description: Business-hours calendars are not modelled in Phase 1 (open VWF-OD-05).
+        reminderOffsetsSeconds:
+          type: array
+          items:
+            type: integer
+            minimum: 600
+            maximum: 1209600
+          minItems: 0
+          maxItems: 3
+          uniqueItems: true
+        escalateTo:
+          type: string
+          enum:
+          - SUPERVISOR_QUEUE
+          - CASE_OWNER
+      description: SLA breach escalates/notifies only; it never completes, approves or rejects a task or claim.
+    WorkflowRetryPolicy:
+      type: object
+      additionalProperties: false
+      required:
+      - maxAttempts
+      - initialIntervalSeconds
+      - backoffCoefficient
+      - maxIntervalSeconds
+      properties:
+        maxAttempts:
+          type: integer
+          minimum: 1
+          maximum: 5
+        initialIntervalSeconds:
+          type: integer
+          minimum: 1
+          maximum: 60
+        backoffCoefficient:
+          type: integer
+          minimum: 1
+          maximum: 4
+        maxIntervalSeconds:
+          type: integer
+          minimum: 1
+          maximum: 600
+      description: Bounded Temporal activity retry; exhaustion takes the FAILED outcome edge (human fallback).
+    WorkflowStartNode:
+      type: object
+      additionalProperties: false
+      required:
+      - nodeId
+      - type
+      - label
+      properties:
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        type:
+          type: string
+          enum:
+          - START
+        label:
+          $ref: "#/components/schemas/WorkflowLabel"
+    WorkflowEndNode:
+      type: object
+      additionalProperties: false
+      required:
+      - nodeId
+      - type
+      - label
+      - outcome
+      properties:
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        type:
+          type: string
+          enum:
+          - END
+        label:
+          $ref: "#/components/schemas/WorkflowLabel"
+        outcome:
+          type: string
+          enum:
+          - REVIEW_COMPLETED
+          - ROUTED_TO_MANUAL_REVIEW
+          - SUPPLEMENT_EXPIRED
+          description: "Maps to one fixed claim command owned by #38; never an arbitrary claim status."
+    WorkflowHumanTaskNode:
+      type: object
+      additionalProperties: false
+      required:
+      - nodeId
+      - type
+      - label
+      - taskKind
+      - inputSchemas
+      - outputSchemas
+      - allowedActionIds
+      - assignmentRuleKey
+      - accountableOwner
+      - sla
+      - allowedEvidence
+      properties:
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        type:
+          type: string
+          enum:
+          - HUMAN_TASK
+        label:
+          $ref: "#/components/schemas/WorkflowLabel"
+        taskKind:
+          type: string
+          enum:
+          - EXTRACTION_CONFIRMATION
+          - DOCUMENT_REVIEW
+        inputSchemas: &a1
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowDataSchemaRef"
+          minItems: 0
+          maxItems: 8
+          uniqueItems: true
+        outputSchemas: &a2
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowDataSchemaRef"
+          minItems: 0
+          maxItems: 8
+          uniqueItems: true
+        allowedActionIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowTaskActionId"
+          minItems: 1
+          maxItems: 3
+          uniqueItems: true
+        assignmentRuleKey:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        accountableOwner:
+          type: string
+          enum:
+          - CASE_OWNER
+        sla:
+          $ref: "#/components/schemas/WorkflowSla"
+        allowedEvidence:
+          $ref: "#/components/schemas/WorkflowEvidenceScope"
+        formRef:
+          $ref: "#/components/schemas/WorkflowPinnedRef"
+    WorkflowAiActivityNode:
+      type: object
+      additionalProperties: false
+      required:
+      - nodeId
+      - type
+      - label
+      - activityKind
+      - inputSchemas
+      - outputSchemas
+      - allowedActionIds
+      - serviceActorScopeKey
+      - accountableOwner
+      - modelRef
+      - promptRef
+      - policyRef
+      - allowedEvidence
+      - timeoutSeconds
+      - retry
+      properties:
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        type:
+          type: string
+          enum:
+          - AI_ACTIVITY
+        label:
+          $ref: "#/components/schemas/WorkflowLabel"
+        activityKind:
+          type: string
+          enum:
+          - DOCUMENT_EXTRACTION
+          - DOCUMENT_CLASSIFICATION
+          - QUALITY_CHECK
+        inputSchemas: *a1
+        outputSchemas: *a2
+        allowedActionIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowAiActionId"
+          minItems: 1
+          maxItems: 3
+          uniqueItems: true
+        serviceActorScopeKey:
+          $ref: "#/components/schemas/WorkflowRefKey"
+        accountableOwner:
+          type: string
+          enum:
+          - CASE_OWNER
+        modelRef:
+          $ref: "#/components/schemas/WorkflowPinnedRef"
+        promptRef:
+          $ref: "#/components/schemas/WorkflowPinnedRef"
+        policyRef:
+          $ref: "#/components/schemas/WorkflowPinnedRef"
+        allowedEvidence:
+          $ref: "#/components/schemas/WorkflowEvidenceScope"
+        timeoutSeconds:
+          type: integer
+          minimum: 30
+          maximum: 600
+        retry:
+          $ref: "#/components/schemas/WorkflowRetryPolicy"
+      description: Temporal activity executed by a scoped AI service actor. Output is evidence/proposals only; confidence is a
+        signal, never permission. A human accountable owner is always assigned.
+    WorkflowConditionNode:
+      type: object
+      additionalProperties: false
+      required:
+      - nodeId
+      - type
+      - label
+      properties:
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        type:
+          type: string
+          enum:
+          - CONDITION
+        label:
+          $ref: "#/components/schemas/WorkflowLabel"
+      description: "Exclusive gateway only: outgoing CONDITION guards evaluated by ascending priority, first match wins,
+        exactly one DEFAULT edge."
+    WorkflowSupplementWaitNode:
+      type: object
+      additionalProperties: false
+      required:
+      - nodeId
+      - type
+      - label
+      - maxWaitSeconds
+      - accountableOwner
+      - inputSchemas
+      - outputSchemas
+      properties:
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        type:
+          type: string
+          enum:
+          - SUPPLEMENT_WAIT
+        label:
+          $ref: "#/components/schemas/WorkflowLabel"
+        maxWaitSeconds:
+          type: integer
+          minimum: 86400
+          maximum: 2592000
+          description: Bounded wait; tenant/contract value must come from approved configuration (open VWF-OD-06).
+        reminderOffsetsSeconds:
+          type: array
+          items:
+            type: integer
+            minimum: 3600
+            maximum: 2592000
+          minItems: 0
+          maxItems: 3
+          uniqueItems: true
+        accountableOwner:
+          type: string
+          enum:
+          - CASE_OWNER
+        inputSchemas: *a1
+        outputSchemas: *a2
+    WorkflowTimerNode:
+      type: object
+      additionalProperties: false
+      required:
+      - nodeId
+      - type
+      - label
+      - delaySeconds
+      properties:
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        type:
+          type: string
+          enum:
+          - TIMER
+        label:
+          $ref: "#/components/schemas/WorkflowLabel"
+        delaySeconds:
+          type: integer
+          minimum: 60
+          maximum: 604800
+      description: Bounded durable Temporal timer; single NEXT edge.
+    WorkflowNode:
+      oneOf:
+      - $ref: "#/components/schemas/WorkflowStartNode"
+      - $ref: "#/components/schemas/WorkflowEndNode"
+      - $ref: "#/components/schemas/WorkflowHumanTaskNode"
+      - $ref: "#/components/schemas/WorkflowAiActivityNode"
+      - $ref: "#/components/schemas/WorkflowConditionNode"
+      - $ref: "#/components/schemas/WorkflowSupplementWaitNode"
+      - $ref: "#/components/schemas/WorkflowTimerNode"
+    WorkflowConditionVariable:
+      type: string
+      enum:
+      - EXTRACTION_LOW_CONFIDENCE_FIELD_COUNT
+      - EXTRACTION_QUALITY_FLAG_COUNT
+      - DOCUMENTS_MISSING_REQUIRED_SLOT_COUNT
+      - SUPPLEMENT_ROUND
+      - CLAIM_BENEFIT_TYPE
+      description: Closed, server-computed variables. Routing on AI signals only selects a human path; no variable can grant
+        permission or decide money.
+    WorkflowConditionLeaf:
+      type: object
+      additionalProperties: false
+      required:
+      - variable
+      - op
+      - value
+      properties:
+        variable:
+          $ref: "#/components/schemas/WorkflowConditionVariable"
+        op:
+          type: string
+          enum:
+          - EQ
+          - NEQ
+          - GT
+          - GTE
+          - LT
+          - LTE
+          - IN
+        value:
+          oneOf:
+          - type: integer
+            minimum: 0
+            maximum: 1000
+          - $ref: "#/components/schemas/BenefitType"
+          - type: array
+            items:
+              $ref: "#/components/schemas/BenefitType"
+            minItems: 1
+            maxItems: 6
+            uniqueItems: true
+      description: No expressions, regex, functions, clock or arithmetic. Type compatibility of variable/op/value is a
+        semantic publish check.
+    WorkflowConditionGroup:
+      oneOf:
+      - type: object
+        additionalProperties: false
+        required:
+        - all
+        properties:
+          all:
+            type: array
+            items:
+              $ref: "#/components/schemas/WorkflowConditionLeaf"
+            minItems: 1
+            maxItems: 5
+      - type: object
+        additionalProperties: false
+        required:
+        - any
+        properties:
+          any:
+            type: array
+            items:
+              $ref: "#/components/schemas/WorkflowConditionLeaf"
+            minItems: 1
+            maxItems: 5
+    WorkflowCondition:
+      oneOf:
+      - $ref: "#/components/schemas/WorkflowConditionLeaf"
+      - $ref: "#/components/schemas/WorkflowConditionGroup"
+      description: Depth <= 2 (leaf or one all/any group of <= 5 leaves).
+    WorkflowEdgeGuard:
+      oneOf:
+      - type: object
+        additionalProperties: false
+        required:
+        - kind
+        properties:
+          kind:
+            type: string
+            enum:
+            - NEXT
+      - type: object
+        additionalProperties: false
+        required:
+        - kind
+        - actionId
+        properties:
+          kind:
+            type: string
+            enum:
+            - ACTION
+          actionId:
+            $ref: "#/components/schemas/WorkflowTaskActionId"
+      - type: object
+        additionalProperties: false
+        required:
+        - kind
+        - outcome
+        properties:
+          kind:
+            type: string
+            enum:
+            - OUTCOME
+          outcome:
+            type: string
+            enum:
+            - SUCCEEDED
+            - FAILED
+            - RECEIVED
+            - EXPIRED
+      - type: object
+        additionalProperties: false
+        required:
+        - kind
+        - priority
+        - condition
+        properties:
+          kind:
+            type: string
+            enum:
+            - CONDITION
+          priority:
+            type: integer
+            minimum: 1
+            maximum: 10
+          condition:
+            $ref: "#/components/schemas/WorkflowCondition"
+      - type: object
+        additionalProperties: false
+        required:
+        - kind
+        properties:
+          kind:
+            type: string
+            enum:
+            - DEFAULT
+    WorkflowEdge:
+      type: object
+      additionalProperties: false
+      required:
+      - edgeId
+      - source
+      - target
+      - guard
+      properties:
+        edgeId:
+          $ref: "#/components/schemas/WorkflowEdgeId"
+        source:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        target:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        guard:
+          $ref: "#/components/schemas/WorkflowEdgeGuard"
+        loopBack:
+          type: object
+          additionalProperties: false
+          required:
+          - maxIterations
+          properties:
+            maxIterations:
+              type: integer
+              minimum: 1
+              maximum: 5
+      description: Sequence flow. Every cycle needs a CONDITION-sourced loopBack edge with maxIterations; after the bound the
+        edge is treated as false.
+    WorkflowAssignmentRule:
+      type: object
+      additionalProperties: false
+      required:
+      - ruleKey
+      - candidateRoles
+      - strategy
+      - accountableOwner
+      - distinctFromNodeIds
+      - maxActiveTasksPerAssignee
+      properties:
+        ruleKey:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        candidateRoles:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowCandidateRole"
+          minItems: 1
+          maxItems: 2
+          uniqueItems: true
+        candidateGroupKeys:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowRefKey"
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+          description: "Open VWF-OD-03: team/group directory is not decided; publish fails closed with GROUP_DIRECTORY_UNAVAILABLE
+            while present."
+        strategy:
+          type: string
+          enum:
+          - QUEUE_CLAIM
+          - CASE_OWNER_DIRECT
+        accountableOwner:
+          type: string
+          enum:
+          - CASE_OWNER
+        distinctFromNodeIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowNodeId"
+          minItems: 0
+          maxItems: 10
+          uniqueItems: true
+          description: "Separation of duties: assignee must differ from the principals who completed these nodes in the same execution."
+        maxActiveTasksPerAssignee:
+          type: integer
+          minimum: 1
+          maximum: 200
+    WorkflowAssignmentPolicy:
+      type: object
+      additionalProperties: false
+      required:
+      - schemaVersion
+      - rules
+      properties:
+        schemaVersion:
+          type: string
+          enum:
+          - 1.0.0
+        rules:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowAssignmentRule"
+          minItems: 1
+          maxItems: 20
+      description: Versioned with and pinned by the workflow definition version (same contentHash). The claimant
+        member/guardian and AI service actors are never assignees.
+    WorkflowScope:
+      type: object
+      additionalProperties: false
+      required:
+      - benefitTypes
+      properties:
+        benefitTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/BenefitType"
+          minItems: 1
+          maxItems: 6
+          uniqueItems: true
+      description: Phase 1 publishes only OUTPATIENT, DENTAL, INPATIENT (SCOPE_NOT_APPROVED otherwise; OD-03 of spec 11).
+    WorkflowDefinitionContent:
+      type: object
+      additionalProperties: false
+      required:
+      - schemaVersion
+      - workflowKey
+      - title
+      - scope
+      - actionCatalogVersion
+      - assignmentPolicy
+      - nodes
+      - edges
+      properties:
+        schemaVersion:
+          type: string
+          enum:
+          - 1.0.0
+        workflowKey:
+          $ref: "#/components/schemas/WorkflowKey"
+        title:
+          $ref: "#/components/schemas/WorkflowLabel"
+        scope:
+          $ref: "#/components/schemas/WorkflowScope"
+        actionCatalogVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        assignmentPolicy:
+          $ref: "#/components/schemas/WorkflowAssignmentPolicy"
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowNode"
+          minItems: 2
+          maxItems: 50
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowEdge"
+          minItems: 1
+          maxItems: 100
+      description: "Bounded BPMN subset compiled by the server; no script, expression language, URL, CSS, tenantId or PII.
+        Structural validity only: graph/reference rules are semantic (spec 14 section 4). Canonical JSON <= 64 KiB (same
+        bound as intake forms, spec 11)."
+    WorkflowActionCatalogEntry:
+      type: object
+      additionalProperties: false
+      required:
+      - actionId
+      - nodeTypes
+      - actorKind
+      - allowedRelationships
+      - requiresMfa
+      - completesTask
+      - requiresEvidence
+      - requiresIdempotencyKey
+      - businessEffect
+      - auditAction
+      properties:
+        actionId:
+          $ref: "#/components/schemas/WorkflowActionId"
+        nodeTypes:
+          type: array
+          items:
+            type: string
+            enum:
+            - HUMAN_TASK
+            - AI_ACTIVITY
+          minItems: 1
+          maxItems: 1
+          uniqueItems: true
+        actorKind: &a6
+          type: string
+          enum:
+          - HUMAN
+          - AI_SERVICE
+        allowedRelationships:
+          type: array
+          items:
+            type: string
+            enum:
+            - ASSIGNEE
+            - CANDIDATE
+            - SUPERVISOR
+            - CASE_OWNER
+            - AI_SCOPE_BINDING
+          minItems: 1
+          maxItems: 4
+          uniqueItems: true
+        requiresMfa:
+          type: boolean
+        completesTask:
+          type: boolean
+        requiresEvidence:
+          type: boolean
+        requiresIdempotencyKey:
+          type: boolean
+          enum:
+          - true
+        businessEffect:
+          type: string
+          enum:
+          - TASK_LIFECYCLE
+          - EVIDENCE_ONLY
+          - ROUTE_WORKFLOW
+        auditAction:
+          type: string
+          minLength: 10
+          maxLength: 50
+          pattern: ^WORKFLOW_[A-Z_]{1,41}$
+      description: Authorization is evaluated server-side from verified membership, object relationship and this entry; the
+        catalog never grants claim, EOB or payment authority.
+    WorkflowActionCatalog:
+      type: object
+      additionalProperties: false
+      required:
+      - schemaVersion
+      - catalogVersion
+      - actions
+      properties:
+        schemaVersion:
+          type: string
+          enum:
+          - 1.0.0
+        catalogVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowActionCatalogEntry"
+          minItems: 1
+          maxItems: 30
+      description: Global immutable catalog version (spec 14a). Executions pin catalogVersion; a new catalog version never
+        changes running executions.
+    WorkflowVersionStatus:
+      type: string
+      enum:
+      - DRAFT
+      - PUBLISHED
+      - RETIRED
+      - REVOKED
+    WorkflowDraftCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - content
+      properties:
+        content:
+          $ref: "#/components/schemas/WorkflowDefinitionContent"
+        basedOnVersionNo:
+          $ref: "#/components/schemas/VersionNumber"
+      description: Creates the definition for a new workflowKey or the next DRAFT version of an existing key. At most one open
+        DRAFT per key (409 otherwise).
+    WorkflowDraftUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedRevision
+      - content
+      properties:
+        expectedRevision:
+          $ref: "#/components/schemas/VersionNumber"
+        content:
+          $ref: "#/components/schemas/WorkflowDefinitionContent"
+    WorkflowPublishRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedRevision
+      - contentHash
+      properties:
+        expectedRevision:
+          $ref: "#/components/schemas/VersionNumber"
+        contentHash:
+          $ref: "#/components/schemas/Hash"
+      description: Publishes exactly the validated content the publisher reviewed; hash mismatch is 409 STALE_VERSION.
+    WorkflowRevokeRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - contentHash
+      - reasonCode
+      properties:
+        contentHash:
+          $ref: "#/components/schemas/Hash"
+        reasonCode:
+          type: string
+          enum:
+          - DEFECT
+          - POLICY_CHANGE
+          - SECURITY
+    WorkflowVersionRef:
+      type: object
+      additionalProperties: false
+      required:
+      - definitionId
+      - versionNo
+      - contentHash
+      properties:
+        definitionId: &a3
+          type: string
+          format: uuid
+        versionNo:
+          $ref: "#/components/schemas/VersionNumber"
+        contentHash:
+          $ref: "#/components/schemas/Hash"
+    WorkflowDefinitionVersion:
+      type: object
+      additionalProperties: false
+      required:
+      - definitionId
+      - workflowKey
+      - versionNo
+      - status
+      - revision
+      - contentHash
+      - content
+      - publishableByCurrentActor
+      - inFlightExecutionCount
+      - createdAt
+      - updatedAt
+      properties:
+        definitionId: *a3
+        workflowKey:
+          $ref: "#/components/schemas/WorkflowKey"
+        versionNo:
+          $ref: "#/components/schemas/VersionNumber"
+        status:
+          $ref: "#/components/schemas/WorkflowVersionStatus"
+        revision:
+          $ref: "#/components/schemas/VersionNumber"
+        contentHash:
+          $ref: "#/components/schemas/Hash"
+        content:
+          $ref: "#/components/schemas/WorkflowDefinitionContent"
+        publishableByCurrentActor:
+          type: boolean
+          description: UI hint only; publish re-checks role, MFA and maker-checker server-side.
+        inFlightExecutionCount:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
+        createdAt: &a4
+          type: string
+          format: date-time
+        updatedAt: *a4
+        publishedAt: *a4
+        retiredAt: *a4
+        revokedAt: *a4
+        revokedReasonCode:
+          type: string
+          enum:
+          - DEFECT
+          - POLICY_CHANGE
+          - SECURITY
+      description: No author/editor identities are exposed; maker-checker is enforced server-side.
+    WorkflowDefinitionSummary:
+      type: object
+      additionalProperties: false
+      required:
+      - definitionId
+      - workflowKey
+      - versionNo
+      - status
+      - title
+      - updatedAt
+      properties:
+        definitionId: *a3
+        workflowKey:
+          $ref: "#/components/schemas/WorkflowKey"
+        versionNo:
+          $ref: "#/components/schemas/VersionNumber"
+        status:
+          $ref: "#/components/schemas/WorkflowVersionStatus"
+        title:
+          $ref: "#/components/schemas/WorkflowLabel"
+        updatedAt: *a4
+    WorkflowDefinitionPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowDefinitionSummary"
+          minItems: 0
+          maxItems: 50
+        nextCursor:
+          type: string
+          minLength: 1
+          maxLength: 2048
+    WorkflowValidationDetailCode:
+      type: string
+      enum:
+      - SCHEMA_INVALID
+      - DUPLICATE_ID
+      - EXACTLY_ONE_START_REQUIRED
+      - END_REQUIRED
+      - START_HAS_INCOMING
+      - END_HAS_OUTGOING
+      - DANGLING_EDGE
+      - SELF_LOOP
+      - UNREACHABLE_NODE
+      - DEAD_END
+      - MISSING_DEFAULT_BRANCH
+      - DUPLICATE_PRIORITY
+      - GUARD_NOT_ALLOWED_FOR_SOURCE
+      - MISSING_ACTION_ROUTE
+      - DUPLICATE_ROUTE
+      - MISSING_OUTCOME_ROUTE
+      - UNBOUNDED_LOOP
+      - LOOP_WITHOUT_HUMAN_OR_WAIT
+      - CONDITION_TYPE_MISMATCH
+      - ACTION_NOT_ALLOWED_FOR_NODE
+      - UNKNOWN_ASSIGNMENT_RULE
+      - INPUT_NOT_PRODUCED
+      - AI_FAILURE_NOT_ROUTED_TO_HUMAN
+      - SCOPE_NOT_APPROVED
+      - UNSUPPORTED_BPMN_ELEMENT
+      - PARALLEL_NOT_SUPPORTED
+      - REFERENCE_NOT_PUBLISHED
+      - GROUP_DIRECTORY_UNAVAILABLE
+      - CATALOG_VERSION_UNKNOWN
+      - AMBIGUOUS_BINDING
+      - LIMIT_EXCEEDED
+    WorkflowValidationIssue:
+      type: object
+      additionalProperties: false
+      required:
+      - detailCode
+      - path
+      properties:
+        detailCode:
+          $ref: "#/components/schemas/WorkflowValidationDetailCode"
+        path:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^/[A-Za-z0-9_/-]*$
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        edgeId:
+          $ref: "#/components/schemas/WorkflowEdgeId"
+      description: Fixed codes and JSON-pointer paths only; never echoes submitted labels or values.
+    WorkflowValidationReport:
+      type: object
+      additionalProperties: false
+      required:
+      - valid
+      - revision
+      - contentHash
+      - issues
+      properties:
+        valid:
+          type: boolean
+        revision:
+          $ref: "#/components/schemas/VersionNumber"
+        contentHash:
+          $ref: "#/components/schemas/Hash"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowValidationIssue"
+          minItems: 0
+          maxItems: 200
+    WorkflowTaskStatus:
+      type: string
+      enum:
+      - OPEN
+      - CLAIMED
+      - COMPLETED
+      - CANCELLED
+      - SUSPENDED
+      description: Task lifecycle only; never a claim status. SUSPENDED = revoked version, missing scope or failed binding
+        (fail closed).
+    WorkflowTaskSummary:
+      type: object
+      additionalProperties: false
+      required:
+      - taskId
+      - claimId
+      - nodeId
+      - taskKind
+      - status
+      - version
+      - accountableOwnerPrincipalId
+      - dueAt
+      - slaState
+      - createdAt
+      properties:
+        taskId: *a3
+        claimId: *a3
+        nodeId:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        taskKind:
+          type: string
+          enum:
+          - EXTRACTION_CONFIRMATION
+          - DOCUMENT_REVIEW
+        status:
+          $ref: "#/components/schemas/WorkflowTaskStatus"
+        version:
+          $ref: "#/components/schemas/VersionNumber"
+        assigneePrincipalId: *a3
+        accountableOwnerPrincipalId: *a3
+        dueAt: *a4
+        slaState:
+          type: string
+          enum:
+          - ON_TRACK
+          - DUE_SOON
+          - BREACHED
+        createdAt: *a4
+      description: Projection contains no member names, CCCD, phone, bank, diagnosis or document content.
+    WorkflowTaskPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowTaskSummary"
+          minItems: 0
+          maxItems: 50
+        nextCursor:
+          type: string
+          minLength: 1
+          maxLength: 2048
+    WorkflowProposal:
+      type: object
+      additionalProperties: false
+      required:
+      - proposalId
+      - fieldKey
+      - value
+      - evidenceIds
+      - confidence
+      - source
+      properties:
+        proposalId: *a3
+        fieldKey:
+          $ref: "#/components/schemas/WorkflowRefKey"
+        value:
+          type: string
+          minLength: 1
+          maxLength: 200
+        evidenceIds:
+          type: array
+          items: *a3
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Evidence signal only; never permission or decision.
+        source:
+          type: string
+          enum:
+          - AI_SERVICE
+      description: Authenticated no-store task view only; never placed in events, workflow history, search or logs.
+    WorkflowTaskDetail:
+      type: object
+      additionalProperties: false
+      required:
+      - task
+      - workflow
+      - actionCatalogVersion
+      - assignmentRuleKey
+      - allowedActions
+      - allowedEvidence
+      - proposals
+      properties:
+        task:
+          $ref: "#/components/schemas/WorkflowTaskSummary"
+        workflow:
+          $ref: "#/components/schemas/WorkflowVersionRef"
+        actionCatalogVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        assignmentRuleKey:
+          $ref: "#/components/schemas/WorkflowNodeId"
+        formRef:
+          $ref: "#/components/schemas/WorkflowPinnedRef"
+        allowedActions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowActionId"
+          minItems: 0
+          maxItems: 10
+          uniqueItems: true
+          description: Computed server-side for the calling actor now; UI hint only, every action is re-authorized.
+        allowedEvidence:
+          $ref: "#/components/schemas/WorkflowEvidenceScope"
+        proposals:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowProposal"
+          minItems: 0
+          maxItems: 80
+    WorkflowTaskClaimRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedTaskVersion
+      properties:
+        expectedTaskVersion:
+          $ref: "#/components/schemas/VersionNumber"
+    WorkflowTaskReassignRequest:
+      oneOf:
+      - type: object
+        additionalProperties: false
+        required:
+        - expectedTaskVersion
+        - assigneePrincipalId
+        - reasonCode
+        properties:
+          expectedTaskVersion:
+            $ref: "#/components/schemas/VersionNumber"
+          assigneePrincipalId: *a3
+          reasonCode: &a5
+            type: string
+            enum:
+            - WORKLOAD
+            - ABSENCE
+            - CONFLICT_OF_INTEREST
+            - SLA_ESCALATION
+            - SELF_RELEASE
+      - type: object
+        additionalProperties: false
+        required:
+        - expectedTaskVersion
+        - release
+        - reasonCode
+        properties:
+          expectedTaskVersion:
+            $ref: "#/components/schemas/VersionNumber"
+          release:
+            type: boolean
+            enum:
+            - true
+          reasonCode: *a5
+      description: Target must be an active staff candidate of the rule, not the claimant, not an AI actor and not excluded by
+        distinctFromNodeIds.
+    WorkflowProposalDecision:
+      oneOf:
+      - type: object
+        additionalProperties: false
+        required:
+        - proposalId
+        - decision
+        - evidenceIds
+        properties:
+          proposalId: *a3
+          decision:
+            type: string
+            enum:
+            - ACCEPT
+            - REJECT
+          evidenceIds:
+            type: array
+            items: *a3
+            minItems: 1
+            maxItems: 10
+            uniqueItems: true
+      - type: object
+        additionalProperties: false
+        required:
+        - proposalId
+        - decision
+        - editedValue
+        - evidenceIds
+        properties:
+          proposalId: *a3
+          decision:
+            type: string
+            enum:
+            - EDIT
+          editedValue:
+            type: string
+            minLength: 1
+            maxLength: 200
+          evidenceIds:
+            type: array
+            items: *a3
+            minItems: 1
+            maxItems: 10
+            uniqueItems: true
+    WorkflowConfirmExtractionAction:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedTaskVersion
+      - actionId
+      - decisions
+      properties:
+        expectedTaskVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        actionId:
+          type: string
+          enum:
+          - CONFIRM_EXTRACTION
+        decisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowProposalDecision"
+          minItems: 1
+          maxItems: 80
+    WorkflowRequestSupplementAction:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedTaskVersion
+      - actionId
+      - requestedDocumentTypes
+      - reasonCodes
+      properties:
+        expectedTaskVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        actionId:
+          type: string
+          enum:
+          - REQUEST_SUPPLEMENT
+        requestedDocumentTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentType"
+          minItems: 1
+          maxItems: 7
+          uniqueItems: true
+        reasonCodes:
+          type: array
+          items:
+            type: string
+            enum:
+            - MISSING_DOCUMENT
+            - ILLEGIBLE
+            - MISSING_STAMP
+            - MISSING_PRESCRIPTION
+            - MISMATCHED_DOCUMENT
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+      description: Fixed reason codes rendered by approved templates; no free text (open VWF-OD-04).
+    WorkflowEscalateAction:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedTaskVersion
+      - actionId
+      - reasonCode
+      properties:
+        expectedTaskVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        actionId:
+          type: string
+          enum:
+          - ESCALATE_TO_MANUAL_REVIEW
+        reasonCode:
+          type: string
+          enum:
+          - AI_UNAVAILABLE
+          - COMPLEX_CASE
+          - SUSPECTED_INCONSISTENCY
+    WorkflowTaskActionRequest:
+      oneOf:
+      - $ref: "#/components/schemas/WorkflowConfirmExtractionAction"
+      - $ref: "#/components/schemas/WorkflowRequestSupplementAction"
+      - $ref: "#/components/schemas/WorkflowEscalateAction"
+    WorkflowTaskActionResult:
+      type: object
+      additionalProperties: false
+      required:
+      - taskId
+      - taskVersion
+      - status
+      - actionId
+      - commandId
+      - workflowAdvance
+      properties:
+        taskId: *a3
+        taskVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        status:
+          type: string
+          enum:
+          - COMPLETED
+        actionId:
+          $ref: "#/components/schemas/WorkflowTaskActionId"
+        commandId: *a3
+        workflowAdvance:
+          type: string
+          enum:
+          - PENDING
+          description: Task completion, audit and outbox are committed; Temporal advancement is asynchronous (stable commandId).
+    WorkflowAnnotationLabel:
+      type: string
+      enum:
+      - MISSING_STAMP
+      - ILLEGIBLE_AREA
+      - AMOUNT_FIELD
+      - DATE_FIELD
+      - DIAGNOSIS_FIELD
+      - PROVIDER_FIELD
+      - POSSIBLE_ALTERATION
+      - NEEDS_SECOND_LOOK
+      description: Evidence aid only. A label never changes claim, task, EOB or payment state and never substitutes a domain decision.
+    WorkflowAnnotationCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - documentId
+      - documentVersion
+      - page
+      - region
+      - labelKey
+      properties:
+        documentId: *a3
+        documentVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        page:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        region:
+          $ref: "#/components/schemas/Region"
+        labelKey:
+          $ref: "#/components/schemas/WorkflowAnnotationLabel"
+        fieldKey:
+          $ref: "#/components/schemas/WorkflowRefKey"
+      description: Append-only; no free text (open VWF-OD-04). Document must belong to the task claim and allowedEvidence scope.
+    WorkflowAnnotation:
+      type: object
+      additionalProperties: false
+      required:
+      - annotationId
+      - taskId
+      - documentId
+      - documentVersion
+      - page
+      - region
+      - labelKey
+      - authorKind
+      - createdAt
+      properties:
+        annotationId: *a3
+        taskId: *a3
+        documentId: *a3
+        documentVersion:
+          $ref: "#/components/schemas/VersionNumber"
+        page:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        region:
+          $ref: "#/components/schemas/Region"
+        labelKey:
+          $ref: "#/components/schemas/WorkflowAnnotationLabel"
+        fieldKey:
+          $ref: "#/components/schemas/WorkflowRefKey"
+        authorKind: *a6
+        createdAt: *a4
+    WorkflowAnnotationPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowAnnotation"
+          minItems: 0
+          maxItems: 200
+        nextCursor:
+          type: string
+          minLength: 1
+          maxLength: 2048
+    WorkflowActorScope:
+      type: object
+      additionalProperties: false
+      required:
+      - principalId
+      - actorKind
+      - mfaVerified
+      - workflowRoles
+      - capabilities
+      properties:
+        principalId: *a3
+        actorKind:
+          type: string
+          enum:
+          - HUMAN
+        mfaVerified:
+          type: boolean
+        workflowRoles:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowStaffRole"
+          minItems: 0
+          maxItems: 6
+          uniqueItems: true
+        capabilities:
+          type: array
+          items:
+            type: string
+            enum:
+            - DESIGN_DRAFT
+            - VALIDATE_DRAFT
+            - PUBLISH_VERSION
+            - REVOKE_VERSION
+            - VIEW_TASKS
+            - CLAIM_TASK
+            - ACT_ON_TASK
+            - REASSIGN_TASK
+            - ANNOTATE
+            - OBSERVE
+          minItems: 0
+          maxItems: 10
+          uniqueItems: true
+      description: Derived from verified principal + membership context; display hint only. No tenantId. AI service actors
+        have no bearer actor scope.

@@ -127,3 +127,39 @@ The public branding endpoint, the TPA ops workspace list and slug changes are no
 - FE/BE parity: the same normalized inputs are accepted or rejected by the contract and by the workbench prototype validators.
 
 `types.ts` adds compile-time checks. The new event-only root adds one intentional `no-unused-components` lint warning (5 total). WS01–WS12 runtime cases (authorization, idempotency persistence, concurrency, logo pipeline, audit/outbox) are **not executed**: there is no endpoint, migration or identity yet.
+
+## VWF-01 visual claims workflow contract (API 1.4.0, #78)
+
+Spec: `docs/ai-specs/14-visual-claims-workflow.md`, with `14a` (action catalog v1, operation authorization matrix, bpmn-js vocabulary), `14b` (VW01–VW25, not executed) and `examples/visual-workflow-intake-review.example.json`. The change is contract-only and additive. It adds 17 operations and 65 `Workflow*` schemas:
+
+- **Design:** draft, validate, publish (maker-checker), revoke, version lookup.
+- **Runtime:** action catalog and actor scope.
+- **Tasks:** list, detail, claim, reassign, action, annotations.
+
+Every operation uses bearer + `X-Membership-Context` and is no-store. Mutations require `Idempotency-Key`, MFA and an expected revision/version/hash. No schema accepts or returns `tenantId`, and no event, internal path or C1 component is added.
+
+`test/pre-vwf1-baseline.json` stores SHA-256 hashes of every 1.3.0 path, component and top-level block. The tests prove they are unchanged.
+
+Boundaries encoded in schemas and tests:
+
+- The BPMN subset is START/END/HUMAN_TASK/AI_ACTIVITY/CONDITION/SUPPLEMENT_WAIT/TIMER. Parallel gateways are rejected.
+- Loops are bounded (`loopBack.maxIterations` ≤ 5), and every cycle must pass through a human task or a supplement wait.
+- The action vocabulary is closed and contains no approve/reject/EOB/OTP/payment action.
+- AI actions are `PROPOSE_*` only, evidence-only, never candidates, owners or bearer actors.
+- Confidence is a signal, never permission.
+- Labels never change business state. Every AI node has a human accountable owner.
+- Executions pin form/model/prompt/policy/catalog/definition versions.
+
+`test/workflow-graph-oracle.mjs` is a **test-only** reference for the semantic publish rules in spec 14 §3.5 (reachability, dead ends, routes, loops, scope, pins). It defines the expected detail codes that the #80 server validator must reproduce. It is not runtime code.
+
+`test/workflow-contracts.test.mjs` and 202 fixtures in `test/workflow-fixtures.json` cover:
+
+- the inventory and the additive snapshot;
+- tenant denial;
+- catalog/matrix consistency;
+- valid variants and invalid vectors for every node type, action and detail code;
+- cycles and version conflicts;
+- AI scope;
+- spec 14/14a/14b parity.
+
+The 10 workflow decisions (VWF-OD-01…10) are recorded as **open**, each with a fail-closed default. Runtime cases VW01–VW25 need #79–#84 together with #21/#22/#25/#38/#39, and are **not executed**.
