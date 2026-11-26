@@ -1,0 +1,2925 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MPS TPA Core & AI Worker API Contracts",
+    "version": "1.2.0",
+    "description": "Hop dong giao tiep chuan giua Zalo Mini App, Next.js Workbench, NestJS Core API va Python AI Worker."
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "x-platform-requirements": {
+    "architecture": "06-backend-platform-architecture.md",
+    "domain": "07-domain-data-and-api-requirements.md",
+    "acceptance": "08-delivery-and-acceptance.md",
+    "tenantSource": "verified-principal-membership",
+    "idempotency": "same-key-different-payload-returns-409"
+  },
+  "paths": {
+    "/v1/auth/zalo/exchange": {
+      "post": {
+        "operationId": "exchangeZaloIdentity",
+        "summary": "Exchange verified Zalo identity",
+        "description": "BLOCKED pending provider evidence: code, PKCE, state and redirect semantics are adapter proposals, not a claim of Zalo support. Fail closed 503 PROVIDER_NOT_CONFIGURED until approved. Verify upstream identity server-side; rate-limit; no client-asserted tenant. Idempotency scoped to verified exchange transaction; never log code/tokens.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSession"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZaloExchange"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "Read verified principal and granted memberships",
+        "description": "Read verified principal and granted memberships",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/v1/me/memberships": {
+      "get": {
+        "operationId": "getMemberships",
+        "summary": "List active verified memberships",
+        "description": "List active verified memberships",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/v1/me/membership": {
+      "post": {
+        "operationId": "selectMembership",
+        "summary": "Select an existing membership grant",
+        "description": "Select an existing membership grant",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipContext"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipSelection"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/consents": {
+      "post": {
+        "operationId": "recordConsent",
+        "summary": "Record versioned consent evidence",
+        "description": "Record versioned consent evidence",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentRecord"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/members/{memberId}/e-card": {
+      "get": {
+        "operationId": "getECard",
+        "summary": "Read dynamic authorized e-card",
+        "description": "Verify member ownership/guardian or granted staff access; Cache-Control: no-store; QR rotates within 60 seconds. Token is opaque and excludes PII. Redemption protocol blocked pending provider decision.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "memberId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ECard"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/v1/claims/upload-url": {
+      "post": {
+        "operationId": "presignUpload",
+        "summary": "Create owner-bound upload session",
+        "description": "Presigned direct-to-S3 only. Bind subject, membership, member, declared type/size/checksum. Expiry <=300s, unique immutable key, quarantine bucket; no public ACL. Never trust caller object keys. Consent required before processing.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadGrant"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/uploads/{uploadId}/complete": {
+      "post": {
+        "operationId": "completeUpload",
+        "summary": "Verify and quarantine uploaded object",
+        "description": "Owner-only; independently verify HEAD/checksum/size/sniffed type. Return QUARANTINED/SCANNING, never CLEAN before scan. SSRF/XXE/decompression and page limits enforced by downstream scanner. Replayed completion returns original result.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uploadId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds before polling",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                }
+              },
+              "Location": {
+                "description": "Authorized status resource",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^/v1/(preflights|documents)/[0-9a-f-]{36}$"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadComplete"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/documents/{documentId}": {
+      "get": {
+        "operationId": "getDocument",
+        "summary": "Read authorized document scan status",
+        "description": "Read authorized document scan status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/v1/claims/preflight-check": {
+      "post": {
+        "operationId": "preflightClaim",
+        "summary": "Run fast or pending preflight",
+        "description": "Fast target p95 <=3s is not a guaranteed SLA. 200 only COMPLETED; 202 only PENDING with Location/statusUrl and Retry-After. Verify CLEAN document ownership; warnings use versioned verified rules, never legal/benefit approval.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreflightCompleted"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Durably scheduled; poll statusUrl. Retry-After seconds.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreflightPending"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds before polling",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                }
+              },
+              "Location": {
+                "description": "Authorized status resource",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^/v1/(preflights|documents)/[0-9a-f-]{36}$"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreflightRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/preflights/{preflightId}": {
+      "get": {
+        "operationId": "getPreflight",
+        "summary": "Poll authorized preflight",
+        "description": "Poll authorized preflight",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "preflightId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreflightStatus"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/v1/claims": {
+      "post": {
+        "operationId": "submitClaim",
+        "summary": "Submit reimbursement claim",
+        "description": "Submit reimbursement claim",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimSummary"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimSubmit"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listClaims",
+        "summary": "List authorized claims using stable cursor",
+        "description": "Allowlist cursor/limit/status/memberId only; reject unknown filters/sort/tenant/DSL 422. Stable createdAt+claimId ordering, opaque cursor bound to membership and filters; authorize every object. PostgreSQL business truth.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/ClaimStatus"
+            }
+          },
+          {
+            "in": "query",
+            "name": "memberId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimList"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/v1/claims/{claimId}": {
+      "get": {
+        "operationId": "getClaim",
+        "summary": "Read authorized claim detail",
+        "description": "Read authorized claim detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claimId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimDetail"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/v1/claims/{claimId}/documents": {
+      "post": {
+        "operationId": "supplementClaim",
+        "summary": "Attach authorized supplement documents",
+        "description": "Attach authorized supplement documents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claimId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/MembershipContext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimDetail"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimSupplement"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/v1/webhooks/ai-result": {
+      "post": {
+        "operationId": "receiveAiResult",
+        "summary": "Accept authenticated versioned AI proposal",
+        "description": "Ingress mTLS/service identity AND HMAC-SHA256 required. Sign UTF-8 timestamp + newline + event ID + newline + exact raw body bytes; lowercase hex digest, constant-time comparison. Reject timestamps outside +/-300 seconds (including future), invalid signature 401, untrusted service 403. Header/body eventId must match. Dedup by verified service/run/event ID plus raw-body hash; changed payload 409. Tenant resolved from authorized extraction run; check expected claim version and referenced evidence. Duplicate in replay window returns durable original acknowledgement; expired signed replay rejected 401 even if previously seen. Key rotation/identity trust deployment blocked until approved.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Signature-HMAC",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Event-Id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Signature-Timestamp",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAcknowledgement"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "Must be no-store for sensitive data",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiResult"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "internalHmac": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "internalHmac": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Signature-HMAC"
+      }
+    },
+    "parameters": {
+      "IdempotencyKey": {
+        "in": "header",
+        "name": "Idempotency-Key",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/IdempotencyKeyValue"
+        },
+        "description": "Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets."
+      },
+      "MembershipContext": {
+        "in": "header",
+        "name": "X-Membership-Context",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192
+        },
+        "description": "Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs."
+      }
+    },
+    "responses": {
+      "Error401": {
+        "description": "Missing/invalid/expired authentication or service signature",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error401"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Authenticated principal lacks action permission",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error403"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Missing or inaccessible object; conceal cross-tenant existence",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error404"
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "Stale version, idempotency mismatch or in-progress operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error409"
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds before retry when retryable; omit for payload/stale conflicts",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "Error422": {
+        "description": "Invalid schema/domain/ownership/scan state; no raw input echoed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error422"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Rate limited",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error429"
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds before retry when retryable; omit for payload/stale conflicts",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "Error503": {
+        "description": "Dependency unavailable or provider not configured; no false success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error503"
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds before retry when retryable; omit for payload/stale conflicts",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Hash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "Money": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,12})\\.[0-9]{2}$",
+        "description": "VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number."
+      },
+      "BenefitType": {
+        "type": "string",
+        "enum": [
+          "OUTPATIENT",
+          "INPATIENT",
+          "DENTAL",
+          "MATERNITY",
+          "ACCIDENT",
+          "HOSPITAL_INCOME"
+        ]
+      },
+      "DocumentType": {
+        "type": "string",
+        "enum": [
+          "INVOICE_PHOTO",
+          "ITEMIZED_LIST",
+          "PRESCRIPTION",
+          "LAB_ORDER",
+          "LAB_RESULT",
+          "DISCHARGE_PAPER",
+          "VNEID_HISTORY"
+        ]
+      },
+      "ClaimStatus": {
+        "type": "string",
+        "enum": [
+          "PREFLIGHT",
+          "SUBMITTED",
+          "AI_PROCESSING",
+          "GREEN_STP",
+          "DOCTOR_REVIEW",
+          "FRAUD_HOLD",
+          "SUPPLEMENT_REQUIRED",
+          "WAITING_ORIGINAL_DOCS",
+          "EOB_READY",
+          "OTP_SIGNED",
+          "PAYOUT_PROCESSING",
+          "PAID",
+          "REJECTED",
+          "CLOSED_EXPIRED"
+        ]
+      },
+      "ApiError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "UNAUTHENTICATED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "IDEMPOTENCY_CONFLICT",
+              "STALE_VERSION",
+              "OPERATION_IN_PROGRESS",
+              "VALIDATION_FAILED",
+              "DOMAIN_VIOLATION",
+              "RATE_LIMITED",
+              "DEPENDENCY_UNAVAILABLE",
+              "PROVIDER_NOT_CONFIGURED",
+              "INVALID_SIGNATURE",
+              "REPLAY_REJECTED"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Membership": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "membershipId",
+          "roles",
+          "memberIds",
+          "version"
+        ],
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MEMBER",
+                "GUARDIAN",
+                "CLAIM_REVIEWER",
+                "INSURER_REVIEWER",
+                "FINANCE",
+                "CURATOR"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 10,
+            "uniqueItems": true
+          },
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        },
+        "description": "Server-issued active grant; roles alone do not grant object access. No client tenant assertion."
+      },
+      "Me": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "principalId",
+          "memberships",
+          "mfaVerified"
+        ],
+        "properties": {
+          "principalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Membership"
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "mfaVerified": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MembershipSelection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "membershipId"
+        ],
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "description": "Select an existing grant; server revalidates active membership on every request."
+      },
+      "MembershipContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "membershipId",
+          "expiresAt",
+          "contextToken"
+        ],
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contextToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          }
+        },
+        "description": "Opaque server-bound context, never a tenant ID. Revoke on membership change."
+      },
+      "ZaloExchange": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "authorizationCode",
+          "codeVerifier",
+          "redirectUri",
+          "state"
+        ],
+        "properties": {
+          "authorizationCode": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "codeVerifier": {
+            "type": "string",
+            "minLength": 43,
+            "maxLength": 128
+          },
+          "redirectUri": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048
+          },
+          "state": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 256
+          }
+        },
+        "description": "Technical adapter proposal only; blocked until provider-supported code/PKCE/state semantics are verified. No client userId/tenantId accepted."
+      },
+      "AuthSession": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "accessToken",
+          "tokenType",
+          "expiresIn"
+        ],
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          },
+          "tokenType": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ]
+          },
+          "expiresIn": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "description": "No local identity/password server. Issuer/audience/algorithms/JWKS/MFA mapping require approved OIDC provider configuration."
+      },
+      "ConsentRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "memberId",
+          "purpose",
+          "policyVersion",
+          "policyHash",
+          "accepted"
+        ],
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "policyVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "policyHash": {
+            "$ref": "#/components/schemas/Hash"
+          },
+          "accepted": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "description": "Server verifies subject/guardian, approved purpose and exact presented policy; records server time and evidence. Client boolean alone is insufficient."
+      },
+      "ConsentRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "consentId",
+          "memberId",
+          "purpose",
+          "policyVersion",
+          "policyHash",
+          "recordedAt",
+          "version"
+        ],
+        "properties": {
+          "consentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "policyVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "policyHash": {
+            "$ref": "#/components/schemas/Hash"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "ECard": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "memberId",
+          "coverageVersionId",
+          "displayNameMasked",
+          "cardNumberMasked",
+          "qrToken",
+          "issuedAt",
+          "expiresAt"
+        ],
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "coverageVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayNameMasked": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "cardNumberMasked": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "qrToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Opaque short-lived token, maximum 60 seconds; no raw CCCD/phone/bank data. Backend authorization required on redemption; coverage is not benefit approval."
+      },
+      "ContentType": {
+        "type": "string",
+        "enum": [
+          "image/jpeg",
+          "image/png",
+          "image/heic",
+          "image/heif",
+          "application/pdf",
+          "application/xml",
+          "text/xml"
+        ]
+      },
+      "UploadRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "memberId",
+          "fileName",
+          "contentType",
+          "docType",
+          "sizeBytes",
+          "sha256"
+        ],
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[^/\\\\\\x00-\\x1f]+$"
+          },
+          "contentType": {
+            "$ref": "#/components/schemas/ContentType"
+          },
+          "docType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20971520
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/Hash"
+          }
+        },
+        "description": "20 MiB technical maximum; deploy policy may be stricter. Bind immutable object key, verified subject/membership/member and checksum. No arbitrary object key accepted."
+      },
+      "UploadHeaders": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Content-Type",
+          "x-amz-checksum-sha256"
+        ],
+        "properties": {
+          "Content-Type": {
+            "$ref": "#/components/schemas/ContentType"
+          },
+          "x-amz-checksum-sha256": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]{43}=$"
+          }
+        }
+      },
+      "UploadGrant": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "uploadId",
+          "uploadUrl",
+          "method",
+          "expiresAt",
+          "requiredHeaders"
+        ],
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requiredHeaders": {
+            "$ref": "#/components/schemas/UploadHeaders"
+          }
+        },
+        "description": "Expires in at most 300 seconds. Private bucket; URL/header secrets must never enter logs/events/history; checksum header is base64 SHA-256."
+      },
+      "UploadComplete": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sha256",
+          "sizeBytes"
+        ],
+        "properties": {
+          "sha256": {
+            "$ref": "#/components/schemas/Hash"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20971520
+          }
+        },
+        "description": "Server independently HEAD/checks owner, immutable key/version, actual size/checksum and sniffed type. Mismatch 422; expired session 409; no fetch of caller URLs."
+      },
+      "Document": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "documentId",
+          "memberId",
+          "docType",
+          "contentType",
+          "sizeBytes",
+          "sha256",
+          "version",
+          "scanStatus",
+          "createdAt"
+        ],
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "docType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "contentType": {
+            "$ref": "#/components/schemas/ContentType"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20971520
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/Hash"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "scanStatus": {
+            "type": "string",
+            "enum": [
+              "QUARANTINED",
+              "SCANNING",
+              "CLEAN",
+              "REJECTED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Original immutable, inaccessible to AI/preflight/claim attachment until CLEAN. Reject malware, polyglots, decompression bombs; no storage keys or PII in response."
+      },
+      "PreflightRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "memberId",
+          "benefitType",
+          "documentIds"
+        ],
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "benefitType": {
+            "$ref": "#/components/schemas/BenefitType"
+          },
+          "documentIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "uniqueItems": true
+          }
+        },
+        "description": "Only CLEAN documents owned by same subject/member/membership. Does not approve benefits or reserve money."
+      },
+      "Warning": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "severity",
+          "messageVi",
+          "ruleVersion"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "BLURRY_IMAGE",
+              "ND70_COMPANY_ADDRESS",
+              "MISSING_STAMP",
+              "PRESCRIPTION_WINDOW",
+              "SUPPLEMENT_REQUIRED",
+              "UNVERIFIED_SOURCE",
+              "MANUAL_REVIEW"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "BLOCKER",
+              "WARNING"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evidenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "description": "Warnings require versioned verified policy evidence; examples are not universal legal exclusions."
+      },
+      "PreflightCompleted": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "preflightId",
+          "status",
+          "version",
+          "passed",
+          "warnings",
+          "completedAt"
+        ],
+        "properties": {
+          "preflightId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PreflightPending": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "preflightId",
+          "status",
+          "version",
+          "statusUrl",
+          "retryAfterSeconds"
+        ],
+        "properties": {
+          "preflightId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "statusUrl": {
+            "type": "string",
+            "pattern": "^/v1/preflights/[0-9a-f-]{36}$"
+          },
+          "retryAfterSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          }
+        }
+      },
+      "PreflightFailed": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "preflightId",
+          "status",
+          "version",
+          "error"
+        ],
+        "properties": {
+          "preflightId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "FAILED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "PreflightStatus": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PreflightCompleted"
+          },
+          {
+            "$ref": "#/components/schemas/PreflightPending"
+          },
+          {
+            "$ref": "#/components/schemas/PreflightFailed"
+          }
+        ]
+      },
+      "ClaimSubmit": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "memberId",
+          "benefitType",
+          "visitDate",
+          "totalRequested",
+          "consentAccepted",
+          "consentId",
+          "documentIds",
+          "preflightId",
+          "expectedPreflightVersion"
+        ],
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "benefitType": {
+            "$ref": "#/components/schemas/BenefitType"
+          },
+          "visitDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalRequested": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "consentAccepted": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "consentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "uniqueItems": true
+          },
+          "preflightId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expectedPreflightVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "admitDatetime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dischargeDatetime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasSurgeryCert": {
+            "type": "boolean"
+          },
+          "icd10Code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          }
+        },
+        "description": "Server verifies ownership, CLEAN docs, current consent/purpose/policy, preflight version and coverage. No raw storage keys. Post-commit only: business state + audit hash chain + outbox in withTenantTransaction using SET LOCAL/RLS."
+      },
+      "ClaimSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claimId",
+          "claimCode",
+          "memberId",
+          "benefitType",
+          "visitDate",
+          "totalRequested",
+          "status",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "claimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimCode": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "benefitType": {
+            "$ref": "#/components/schemas/BenefitType"
+          },
+          "visitDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalRequested": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ClaimStatus"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ClaimDetail": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim",
+          "documents",
+          "supplementAllowed"
+        ],
+        "properties": {
+          "claim": {
+            "$ref": "#/components/schemas/ClaimSummary"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "supplementAllowed": {
+            "type": "boolean"
+          },
+          "supplementDeadline": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Owner/verified guardian or explicitly assigned staff only; detail reads PostgreSQL, not search. No cross-tenant existence disclosure."
+      },
+      "ClaimList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClaimSummary"
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "nextCursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        }
+      },
+      "ClaimSupplement": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedVersion",
+          "documentIds"
+        ],
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "documentIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "uniqueItems": true
+          }
+        },
+        "description": "Only SUPPLEMENT_REQUIRED before deadline; server checks status, CLEAN owner/member docs and aggregate version under lock. Atomic audit/outbox; duplicate command has no repeated transition."
+      },
+      "Region": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "properties": {
+          "x": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "y": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "width": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 1
+          },
+          "height": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "Evidence": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidenceId",
+          "documentId",
+          "documentVersion",
+          "page",
+          "field",
+          "source",
+          "confidence"
+        ],
+        "properties": {
+          "evidenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "XML",
+              "OCR",
+              "VLM",
+              "QR",
+              "IMAGE_ANALYSIS"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "region": {
+            "$ref": "#/components/schemas/Region"
+          }
+        },
+        "description": "Normalized page region; confidence is not money. Evidence resolves authorized immutable original, never an arbitrary URL."
+      },
+      "TaxVerification": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "parseStatus",
+          "verificationStatus",
+          "source",
+          "checkedAt",
+          "evidenceIds"
+        ],
+        "properties": {
+          "parseStatus": {
+            "type": "string",
+            "enum": [
+              "PARSED",
+              "FAILED",
+              "UNAVAILABLE"
+            ]
+          },
+          "verificationStatus": {
+            "type": "string",
+            "enum": [
+              "UNVERIFIED",
+              "VERIFIED_VALID",
+              "CANCELLED",
+              "NOT_FOUND",
+              "UNAVAILABLE"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "description": "Parsing QR/XML never implies VERIFIED_VALID. Verified outcomes require independently authenticated source evidence; provider semantics remain blocked pending sandbox verification."
+      },
+      "ExtractedLine": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lineId",
+          "itemName",
+          "quantity",
+          "unitPrice",
+          "requestedAmount",
+          "evidenceIds"
+        ],
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,7})\\.[0-9]{2}$"
+          },
+          "unitPrice": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "requestedAmount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true
+          }
+        },
+        "description": "AI proposal only; no approved/rejected amount or contract decision. PII-redacted item text; core recomputes monetary consistency with Decimal."
+      },
+      "FraudSignal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "confidence",
+          "evidenceIds"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "IMAGE_SIMILARITY",
+              "EXIF_TAMPER",
+              "SOURCE_MISMATCH",
+              "PRICE_ANOMALY",
+              "ICD_MISMATCH"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true
+          }
+        },
+        "description": "Signal for review, never sufficient to deny coverage."
+      },
+      "AiResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schemaVersion",
+          "eventId",
+          "claimId",
+          "expectedClaimVersion",
+          "extractionRunId",
+          "occurredAt",
+          "modelVersion",
+          "promptVersion",
+          "ruleVersion",
+          "inputDocumentIds",
+          "taxVerification",
+          "extractedLines",
+          "fraudSignals",
+          "evidence"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "1.0.0"
+            ]
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expectedClaimVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "extractionRunId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modelVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "promptVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "ruleVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "inputDocumentIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "uniqueItems": true
+          },
+          "taxVerification": {
+            "$ref": "#/components/schemas/TaxVerification"
+          },
+          "extractedLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtractedLine"
+            },
+            "minItems": 0,
+            "maxItems": 1000,
+            "uniqueItems": true
+          },
+          "fraudSignals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FraudSignal"
+            },
+            "minItems": 0,
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "minItems": 1,
+            "maxItems": 1000,
+            "uniqueItems": true
+          },
+          "invoice": {
+            "$ref": "#/components/schemas/ExtractedInvoice"
+          }
+        },
+        "description": "Service identity maps run to tenant/claim; no caller tenant. Core verifies run, document ownership/version, evidence references and stale version. No raw XML/OCR/PII, URLs, benefit decisions. Never log body. Invoice is omitted if not extracted; failure/unavailable source status must not become VERIFIED_VALID."
+      },
+      "AiAcknowledgement": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eventId",
+          "disposition"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "DUPLICATE"
+            ]
+          }
+        },
+        "description": "200 only after durable inbox/dedup+result+audit+outbox commit. Same eventId/different raw body hash 409; valid identical replay returns DUPLICATE without side effects."
+      },
+      "Error401": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "UNAUTHENTICATED",
+              "INVALID_SIGNATURE",
+              "REPLAY_REJECTED"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Error403": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "FORBIDDEN"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Error404": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "NOT_FOUND"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Error409": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "IDEMPOTENCY_CONFLICT",
+              "STALE_VERSION",
+              "OPERATION_IN_PROGRESS"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Error422": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "VALIDATION_FAILED",
+              "DOMAIN_VIOLATION"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Error429": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "RATE_LIMITED"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Error503": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "messageVi",
+          "correlationId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "DEPENDENCY_UNAVAILABLE",
+              "PROVIDER_NOT_CONFIGURED"
+            ]
+          },
+          "messageVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "IdempotencyKeyValue": {
+        "type": "string",
+        "minLength": 16,
+        "maxLength": 100,
+        "pattern": "^[A-Za-z0-9._:-]+$"
+      },
+      "ExtractedInvoice": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sellerTaxCode",
+          "invoiceSerial",
+          "invoiceNumber",
+          "invoiceDate",
+          "buyerAddressType",
+          "totalAmount",
+          "isMergedSummary",
+          "evidenceIds"
+        ],
+        "properties": {
+          "sellerTaxCode": {
+            "type": "string",
+            "pattern": "^[0-9-]{10,14}$"
+          },
+          "invoiceSerial": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "invoiceDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "buyerAddressType": {
+            "type": "string",
+            "enum": [
+              "PERSONAL",
+              "COMPANY",
+              "UNKNOWN"
+            ]
+          },
+          "totalAmount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "isMergedSummary": {
+            "type": "boolean"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Redacted extraction proposal, not verified tax evidence; excludes raw buyer name/address/identity. Seller identifier must be authorized for service processing; never log payload."
+      }
+    }
+  }
+}

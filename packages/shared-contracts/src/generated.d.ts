@@ -303,6 +303,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/policies/{policyId}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create policy version
+         * @description Authorized policy administrator with MFA; exact approved source clauses, dates and precedence. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["createPolicyVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/policies/{policyId}/versions/{versionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get policy version
+         * @description Authorized assigned policy/coverage reader only; used versions immutable. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["getPolicyVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/benefit-plans/{planId}/rule-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create benefit rule version
+         * @description Policy administrator with MFA; verify plan/policy ownership and approved terms/config. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["createBenefitRuleVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/benefit-plans/{planId}/rule-versions/{versionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get benefit rule version
+         * @description Only authorized plan/coverage rules; no universal defaults. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["getBenefitRuleVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/claims/{claimId}/calculations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Calculate claim
+         * @description Assigned MFA reviewer; reproducible immutable snapshot, not monetary authorization. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["calculateClaim"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/claims/{claimId}/calculations/{calculationRunId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get calculation run
+         * @description Assigned staff reviewer only; member-safe EOB separate, no raw input exposed. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["getCalculationRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/claims/{claimId}/eob": {
         parameters: {
             query?: never;
@@ -310,31 +430,33 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lay Bang Giai Trinh Quyen Loi (Explainable EOB) cho Zalo Mini App */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    claimId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Bang giai trình tung dong kem dieu khoan trich dan va audit hash */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ExplainableEOBResponse"];
-                    };
-                };
-            };
-        };
+        /**
+         * Get eob
+         * @description Owner/guardian or assigned staff; PostgreSQL published snapshot only. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["getEob"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/claims/{claimId}/eob/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publish eob
+         * @description Assigned MFA adjudicator verifies clauses/snapshot and atomic limit reservation. New EOB invalidates old OTP/approvals; payout submitted blocks edits. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["publishEob"];
         delete?: never;
         options?: never;
         head?: never;
@@ -354,76 +476,317 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Bac si tham dinh dieu chinh/duyet/tu choi 1 dong chi phi (Contract-Locked) */
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    claimId: string;
-                    lineId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        decisionStatus: "APPROVED" | "PARTIAL" | "REJECTED";
-                        /** @example 0.00 */
-                        approvedAmount: string;
-                        /** @example Dieu 5.3 - Loai tru Thuc pham chuc nang */
-                        contractClauseCited: string;
-                        explanationVi: string;
-                        /** @enum {string} */
-                        updateMedicalCatalogAs?: "NONE" | "DRUG" | "SUPPLEMENT_TPCN" | "COSMETIC";
-                    };
-                };
-            };
-            responses: {
-                /** @description Da cap nhat dong chi phi va ghi noi chuoi Audit Hash */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
+        /**
+         * Decide claim line
+         * @description Assigned MFA reviewer; immutable clause/explanationVi for reductions/rejections. Relabel creates proposal only. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        patch: operations["decideClaimLine"];
+        trace?: never;
+    };
+    "/v1/claims/{claimId}/otp/challenges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
+        get?: never;
+        put?: never;
+        /**
+         * Create otp challenge
+         * @description Owner/guardian only. Durable resend/attempt/expiry/one-use policy; no OTP/hash output or logging. Provider pending, fail closed 503 PROVIDER_NOT_CONFIGURED. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["createOtpChallenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/claims/{claimId}/otp/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Verify eob otp
+         * @description Owner/guardian; current EOB/member binding, durable attempt cap/expiry/one-use lock; invalid code 422, stale 409, abuse 429. Idempotent replay does not consume twice. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["verifyEobOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/claims/{claimId}/signatures/{signatureId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get eob signature
+         * @description Owner/guardian or assigned staff; effective validity checked against current EOB/expiry/revocation, never trust historical VALID alone. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["getEobSignature"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/insurer/claims/{claimId}/approvals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decide insurer approval
+         * @description Assigned insurer MFA reviewer; server derives stage; checker differs from maker and references current decision/EOB/config. New EOB revokes older approvals. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["decideInsurerApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/claims/{claimId}/original-documents/receive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive original documents
+         * @description Authorized receipt staff MFA verifies actual receipt/evidence; tracking alone insufficient. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["receiveOriginalDocuments"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create payment intent
+         * @description Finance MFA; current signature/approval/original/reservations/funds gates under lock. UNKNOWN never blind retry. Provider submission blocked pending actual bank contract. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["createPaymentIntent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payments/{paymentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get payment intent
+         * @description Finance/insurer with payment object permission; PostgreSQL status, no payee PII. UNKNOWN requires reconciliation, not resubmission. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["getPaymentIntent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/internal/v1/payments/callbacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive payment callback
+         * @description Generic INTERNAL adapter contract, NOT actual bank wire format. Require ingress mTLS/service identity AND HMAC-SHA256 of UTF-8 timestamp + newline + event ID + newline + exact raw body; lowercase hex, constant-time check. Reject outside +/-300s including future 401 REPLAY_REJECTED; invalid signature 401, untrusted service 403. Header/body eventId equal. Tenant resolved from verified service/payment/attempt. Durable service/payment/attempt/event dedup + raw body hash; identical valid replay ack, changed body 409. Expired replay rejected even if seen. Stale/reordered/conflicting terminal updates 409 then reconcile, never downgrade success. Evidence verification/key rotation/identity trust/provider mapping pending; fail closed until approved. Server verifies service identity and payment/attempt permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        post: operations["receivePaymentCallback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payment-reconciliations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record payment reconciliation
+         * @description Finance MFA; independently verify provider evidence to resolve UNKNOWN without resending. Atomic balanced journal/reservation/audit/outbox on success; POSTED corrections via reversal only. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["recordPaymentReconciliation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/search/claims": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search claims
+         * @description Inject verified tenant and per-object permissions for query/get/mget/count/suggest/aggregation/export. Reject unknown filters/tenant/DSL 422; no direct Elasticsearch. Cursor bound to membership/filter/order, stable updatedAt+claimId. Minimal projection only, no PII/raw source or money aggregation. Eventual consistency; detail/decisions from PostgreSQL. Search outage 503 never blocks submit/payment. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["searchClaims"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/insurer/payment-exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create payment export
+         * @description Finance/insurer export permission; each payment authorized at creation/execution/download; cancel on revocation. CSV formula mitigation =,+,-,@ after leading whitespace/control, quote CSV and force XLSX text cells; fixed safe columns. No PII or signed URLs in logs/events/history. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["createPaymentExport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/insurer/payment-exports/{exportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get payment export
+         * @description Revalidate subject/membership and every payment permission; status 200 may PENDING/READY/FAILED. READY private signed URL TTL <=300s via authorized download gateway if revocation otherwise impossible. No URL logging. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["getPaymentExport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/catalog-proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create catalog proposal
+         * @description Assigned MFA reviewer creates evidenced proposal, never global catalog mutation. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["createCatalogProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/catalog-proposals/{proposalId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get catalog proposal
+         * @description Assigned tenant reviewer or separately authorized curator; no cross-tenant evidence leakage. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store.
+         */
+        get: operations["getCatalogProposal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/catalog-proposals/{proposalId}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Review catalog proposal
+         * @description MFA reviewer differs from proposer; tenant authority separate from global curator. Approval creates scoped immutable version, rejection leaves catalog unchanged. Server verifies principal, active membership and object permissions; conceal inaccessible objects 404, action denied 403. Revalidate on replay; no-store. Durable tenant/actor/operation/key canonical hash: same body returns original, changed body 409 IDEMPOTENCY_CONFLICT; in-progress 409 with Retry-After. Retention >=24h never permits duplicate semantic side effects. Business state + audit + outbox atomic in withTenantTransaction using SET LOCAL/RLS. Stale aggregate/EOB version/hash 409 STALE_VERSION.
+         */
+        post: operations["reviewCatalogProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        ExplainableEOBResponse: {
-            eobVersion: number;
-            eobHash: string;
-            /** Format: uuid */
-            contractVersionId?: string;
-            claimCode: string;
-            status: string;
-            summary: {
-                totalRequested?: string;
-                totalApproved?: string;
-                totalRejected?: string;
-                remainingAnnualLimit?: string;
-            };
-            lineItems: {
-                lineId?: string;
-                itemName?: string;
-                requested?: string;
-                approved?: string;
-                rejected?: string;
-                status?: string;
-                clauseCited?: string;
-                explanationVi?: string;
-            }[];
-            auditProof: {
-                hashChainTail?: string;
-                contractLocked?: boolean;
-            };
-        };
         Hash: string;
         /** @description VND NUMERIC(15,2); Decimal ROUND_HALF_UP for computation; never JSON number. */
         Money: string;
@@ -815,6 +1178,623 @@ export interface components {
             totalAmount: components["schemas"]["Money"];
             isMergedSummary: boolean;
             evidenceIds: string[];
+        };
+        VersionNumber: number;
+        VersionedReference: {
+            /** Format: uuid */
+            id: string;
+            version: components["schemas"]["VersionNumber"];
+            hash: components["schemas"]["Hash"];
+        };
+        /** @description Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals. */
+        EobBinding: {
+            eobVersion: components["schemas"]["VersionNumber"];
+            eobHash: components["schemas"]["Hash"];
+        };
+        /** @description Immutable cited text and Vietnamese explanation from approved source version. Server verifies ownership, exact text and applicability; no invented exclusions. */
+        ContractClause: {
+            /** Format: uuid */
+            clauseId: string;
+            /** @enum {string} */
+            source: "BENEFIT_RULE" | "MEDICAL_CATALOG";
+            sourceVersion: components["schemas"]["VersionedReference"];
+            contractClauseCited: string;
+            explanationVi: string;
+        };
+        /** @description Creates immutable version, never edits/deletes used policy. Verify approved source, interval and complete deterministic endorsement precedence; no default terms. */
+        PolicyVersionInput: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: date */
+            effectiveFrom: string;
+            /** Format: date */
+            effectiveTo: string;
+            sourceDocument: components["schemas"]["VersionedReference"];
+            endorsements: components["schemas"]["VersionedReference"][];
+            precedence: string[];
+            clauses: components["schemas"]["ContractClause"][];
+        };
+        PolicyVersion: {
+            /** Format: uuid */
+            policyId: string;
+            policyVersion: components["schemas"]["VersionedReference"];
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            definition: components["schemas"]["PolicyVersionInput"];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description All values from approved immutable contract/config; no thresholds/defaults inferred. Plan-specific terms resolve via configurationVersion; missing terms require review, not invented rejection. */
+        BenefitRuleVersionInput: {
+            configuration: components["schemas"]["BenefitConfiguration"];
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            policyVersion: components["schemas"]["VersionedReference"];
+            benefitType: components["schemas"]["BenefitType"];
+            annualLimit: components["schemas"]["Money"];
+            perVisitLimit?: components["schemas"]["Money"];
+            deductiblePerClaim: components["schemas"]["Money"];
+            copayInsurerPct: string;
+            waitingDaysNormal: number;
+            waitingDaysSpecial: number;
+            configurationVersion: components["schemas"]["VersionedReference"];
+            clauses: components["schemas"]["ContractClause"][];
+        };
+        BenefitRuleVersion: {
+            ruleVersion: components["schemas"]["VersionedReference"];
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            definition: components["schemas"]["BenefitRuleVersionInput"];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description Core selects authorized claim/member/coverage/documents and reservation accounts under lock. Caller cannot assert balances/totals. Calculation alone is not publication or payout authorization. */
+        CalculationRequest: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            policyVersion: components["schemas"]["VersionedReference"];
+            benefitRuleVersion: components["schemas"]["VersionedReference"];
+            configurationVersion: components["schemas"]["VersionedReference"];
+        };
+        /** @description All reductions/rejections require immutable cited clause and explanationVi. Server verifies Decimal amount conservation and status consistency; schema alone cannot compare money. */
+        LineDecision: {
+            /** @enum {string} */
+            decisionStatus: "APPROVED" | "PARTIAL" | "REJECTED";
+            approvedAmount: components["schemas"]["Money"];
+            contractClause: components["schemas"]["ContractClause"];
+            explanationVi: string;
+        };
+        EobLine: {
+            /** Format: uuid */
+            lineId: string;
+            itemName: string;
+            requested: components["schemas"]["Money"];
+            approved: components["schemas"]["Money"];
+            rejected: components["schemas"]["Money"];
+            /** @enum {string} */
+            status: "APPROVED" | "PARTIAL" | "REJECTED";
+            clauseCited: string;
+            contractClause: components["schemas"]["ContractClause"];
+            explanationVi: string;
+            evidenceIds: string[];
+        };
+        EobSummary: {
+            totalRequested: components["schemas"]["Money"];
+            totalApproved: components["schemas"]["Money"];
+            totalRejected: components["schemas"]["Money"];
+            remainingAnnualLimit: components["schemas"]["Money"];
+        };
+        /** @description Committed immutable audit chain. Business state + audit + outbox in same withTenantTransaction using SET LOCAL and RLS. Not an independent external anchor. */
+        AuditProof: {
+            hashChainTail: components["schemas"]["Hash"];
+            /** @enum {boolean} */
+            contractLocked: true;
+        };
+        /** @description Immutable input/output snapshots, stable line order and exact engine/rule/config/catalog/model/prompt versions. Decimal ROUND_HALF_UP only; no float calculations. STP operational default SHADOW until approved per tenant/plan. TC03 cap requires review; TC06 defines routing only, no inferred amounts. */
+        CalculationRun: {
+            /** Format: uuid */
+            calculationRunId: string;
+            /** Format: uuid */
+            claimId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            inputSnapshot: components["schemas"]["VersionedReference"];
+            policyVersion: components["schemas"]["VersionedReference"];
+            benefitRuleVersion: components["schemas"]["VersionedReference"];
+            configurationVersion: components["schemas"]["VersionedReference"];
+            catalogVersion: components["schemas"]["VersionedReference"];
+            modelVersion: string;
+            promptVersion: string;
+            engineVersion: string;
+            /** @enum {string} */
+            roundingMode: "ROUND_HALF_UP";
+            /** @enum {integer} */
+            roundingScale: 0;
+            lineOrder: string[];
+            summary: components["schemas"]["EobSummary"];
+            lineItems: components["schemas"]["EobLine"][];
+            outputHash: components["schemas"]["Hash"];
+            /** @enum {string} */
+            triageLane: "GREEN_STP" | "YELLOW_REVIEW" | "RED_FRAUD";
+            stpEligible: boolean;
+            /** @enum {string} */
+            stpExecutionMode: "SHADOW" | "ENABLED" | "DISABLED";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description First publish version=0 without hash; replacement requires current nonzero version AND hash. Server validates relationship, current snapshot and clauses, atomically reserves/releases limits and creates immutable EOB version. Revoke old OTP/approvals. Submitted payout blocks edits; adjustments use controlled reversal flow. */
+        PublishEobRequest: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            expectedEobVersion: number;
+            expectedEobHash?: components["schemas"]["Hash"];
+            calculationRun: components["schemas"]["VersionedReference"];
+        } & ({
+            /** @enum {integer} */
+            expectedEobVersion?: 0;
+        } | {
+            expectedEobHash: string;
+            expectedEobVersion?: number;
+        });
+        /** @description Immutable published snapshot; canonicalization version comes from approved config. Every read authorized; PostgreSQL truth. New version invalidates earlier signatures and approvals. */
+        ExplainableEOBResponse: {
+            claimCode: string;
+            /** Format: uuid */
+            claimId: string;
+            status: components["schemas"]["ClaimStatus"];
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            eobVersion: components["schemas"]["VersionNumber"];
+            eobHash: components["schemas"]["Hash"];
+            /** Format: uuid */
+            contractVersionId: string;
+            policyVersion: components["schemas"]["VersionedReference"];
+            benefitRuleVersion: components["schemas"]["VersionedReference"];
+            configurationVersion: components["schemas"]["VersionedReference"];
+            calculationRun: components["schemas"]["VersionedReference"];
+            summary: components["schemas"]["EobSummary"];
+            lineItems: components["schemas"]["EobLine"][];
+            reservationIds: string[];
+            auditProof: components["schemas"]["AuditProof"];
+            /** Format: date-time */
+            publishedAt: string;
+        };
+        /** @description Assigned MFA reviewer records versioned decision, never mutates published EOB or catalog. Non-NONE relabel creates proposal with provenance only; invalidates old confirmations and requires republish. */
+        LineDecisionRequest: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            expectedEobVersion: number;
+            expectedEobHash?: components["schemas"]["Hash"];
+            decision: components["schemas"]["LineDecision"];
+            /** @enum {string} */
+            updateMedicalCatalogAs?: "NONE" | "DRUG" | "SUPPLEMENT_TPCN" | "COSMETIC";
+        } & ({
+            /** @enum {integer} */
+            expectedEobVersion?: 0;
+        } | {
+            expectedEobHash: string;
+            expectedEobVersion?: number;
+        });
+        LineDecisionResult: {
+            /** Format: uuid */
+            claimId: string;
+            /** Format: uuid */
+            lineId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            decision: components["schemas"]["LineDecision"];
+            /** @enum {boolean} */
+            requiresEobPublication: true;
+            auditProof: components["schemas"]["AuditProof"];
+            /** Format: uuid */
+            catalogProposalId?: string;
+        };
+        /** @description Owner/guardian; destination resolved from verified member, never caller phone. Durable resend/attempt/expiry/one-use policy from approved config. Provider delivery semantics pending #11/#12/#13/#14. */
+        OtpChallengeRequest: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+        };
+        /** @description No OTP, hash or phone in output/log/event/history. Server-issued policy times/limits; not proof of provider delivery. */
+        OtpChallenge: {
+            /** Format: uuid */
+            challengeId: string;
+            /** Format: uuid */
+            claimId: string;
+            /** Format: uuid */
+            memberId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date-time */
+            resendAfter: string;
+            maxAttempts: number;
+            policyVersion: components["schemas"]["VersionedReference"];
+            /** @enum {string} */
+            status: "PENDING";
+        };
+        /** @description Opaque secret code, no guessed provider digit count. Never log/retain plaintext. Verify durable hash, expiry, attempts, subject and one-use under lock. Wrong/expired/consumed 422; stale EOB 409; abuse 429. Idempotent success replay returns original signature without consuming twice. */
+        OtpVerifyRequest: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            /** Format: uuid */
+            challengeId: string;
+            code: string;
+        };
+        /** @description Exact EOB confirmation evidence, not assertion of legally qualified signature. Recheck validity/revocation and current EOB at payout. */
+        EobSignature: {
+            /** Format: uuid */
+            signatureId: string;
+            /** Format: uuid */
+            claimId: string;
+            /** Format: uuid */
+            memberId: string;
+            /** Format: uuid */
+            challengeId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            /** Format: date-time */
+            signedAt: string;
+            /** Format: date-time */
+            validUntil: string;
+            /** @enum {string} */
+            status: "VALID" | "INVALIDATED" | "EXPIRED";
+            policyVersion: components["schemas"]["VersionedReference"];
+            auditProof: components["schemas"]["AuditProof"];
+        };
+        /** @description Server derives maker/checker and actor from verified grant/config. Checker differs from maker and references current maker decision. Cite approved clause for rejection; no hardcoded amount thresholds. */
+        InsurerDecisionRequest: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            /** Format: uuid */
+            makerDecisionId?: string;
+            reasonVi: string;
+            contractClause: components["schemas"]["ContractClause"];
+        };
+        InsurerDecision: {
+            /** Format: uuid */
+            decisionId: string;
+            /** Format: uuid */
+            claimId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            /** @enum {string} */
+            stage: "MAKER" | "CHECKER";
+            /** Format: uuid */
+            actorId: string;
+            /** Format: uuid */
+            makerDecisionId?: string;
+            configurationVersion: components["schemas"]["VersionedReference"];
+            reasonVi: string;
+            contractClause: components["schemas"]["ContractClause"];
+            /** Format: date-time */
+            decidedAt: string;
+            auditProof: components["schemas"]["AuditProof"];
+        };
+        /** @description Authorized receipt staff physically verifies receipt and immutable CLEAN evidence linked to claim/member. Tracking alone insufficient. Server records receiver/time; missing/mismatched evidence 422. */
+        OriginalReceiptRequest: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            receivedDocumentIds: string[];
+            receiptEvidence: components["schemas"]["VersionedReference"];
+            trackingCode?: string;
+        };
+        OriginalReceipt: {
+            /** Format: uuid */
+            receiptId: string;
+            /** Format: uuid */
+            claimId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            receivedDocumentIds: string[];
+            receiptEvidence: components["schemas"]["VersionedReference"];
+            /** Format: uuid */
+            receivedBy: string;
+            /** Format: date-time */
+            receivedAt: string;
+            /** @enum {string} */
+            status: "RECEIVED";
+            auditProof: components["schemas"]["AuditProof"];
+        };
+        /** @description Core derives immutable amount/currency/payee from current approved EOB and authorized payee snapshot. Caller cannot assert bank/amount. Lock/check valid signature, required maker-checker/originals, reservations and funds. Semantic key uniqueness outlives transport key. UNKNOWN blocks new payout; failed retry only after definitive non-success evidence. */
+        PaymentIntentRequest: {
+            /** Format: uuid */
+            claimId: string;
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            /** Format: uuid */
+            signatureId: string;
+            approvalDecisionIds: string[];
+            /** Format: uuid */
+            originalReceiptId?: string;
+            reservationIds: string[];
+            payeeSnapshot: components["schemas"]["VersionedReference"];
+            semanticPayoutKey: components["schemas"]["IdempotencyKeyValue"];
+        };
+        /** @enum {string} */
+        PaymentStatus: "CREATED" | "SUBMITTED" | "UNKNOWN" | "SUCCEEDED" | "FAILED";
+        /** @description CREATED -> SUBMITTED -> SUCCEEDED|FAILED|UNKNOWN. Timeout UNKNOWN never blind retry. Only authenticated evidence-backed callback/query/reconciliation resolves UNKNOWN. PAID only after definitive success with balanced journal + audit + reservation consumption + outbox atomically. POSTED journals immutable, corrections only by new balanced reversal referencing original; no UPDATE/DELETE. Payee/amount locked after approval/submission. */
+        PaymentIntent: {
+            /**
+             * Format: uuid
+             * @description Server-created stable non-PII identifier of the applicable payment attempt. Returned by authorized payment reads for every state after CREATED; use this exact reference in reconciliation. Never regenerate it on retries or UNKNOWN timeout. Core verifies it belongs to this payment and current obligation; stale or mismatched attempt returns 409 STALE_VERSION.
+             */
+            attemptId?: string;
+            /** Format: uuid */
+            paymentId: string;
+            /** Format: uuid */
+            claimId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            amount: components["schemas"]["Money"];
+            /** @enum {string} */
+            currency: "VND";
+            payeeSnapshot: components["schemas"]["VersionedReference"];
+            semanticPayoutKey: components["schemas"]["IdempotencyKeyValue"];
+            status: components["schemas"]["PaymentStatus"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            journalId?: string;
+            auditProof: components["schemas"]["AuditProof"];
+        } & ({
+            /** @enum {string} */
+            status?: "CREATED";
+        } | {
+            /** Format: uuid */
+            attemptId: string;
+            /** @enum {string} */
+            status?: "SUBMITTED" | "UNKNOWN" | "SUCCEEDED" | "FAILED";
+        });
+        /** @description Generic internal adapter contract, NOT bank wire format. Verified service maps payment/attempt to tenant and verifies evidence against submitted amount/payee/semantic key. No caller tenant/raw bank/PII. Stale/out-of-order/conflicting terminal updates 409 then reconcile; never downgrade success. Actual bank contract pending. */
+        PaymentCallback: {
+            /** @enum {string} */
+            schemaVersion: "1.0.0";
+            /** Format: uuid */
+            eventId: string;
+            /** Format: uuid */
+            paymentId: string;
+            /** Format: uuid */
+            attemptId: string;
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: date-time */
+            occurredAt: string;
+            /** @enum {string} */
+            status: "SUCCEEDED" | "FAILED" | "UNKNOWN";
+            evidenceReference: string;
+        };
+        /** @description Commit durable inbox/dedup, status/audit/outbox and journal if applicable before ack. Valid identical replay no repeated side effects; changed body 409. No exactly-once promise. */
+        PaymentAcknowledgement: {
+            /** Format: uuid */
+            eventId: string;
+            /** Format: uuid */
+            paymentId: string;
+            /** @enum {string} */
+            disposition: "ACCEPTED" | "DUPLICATE";
+        };
+        /** @description Finance MFA; independently verify immutable authorized evidence against provider, attempt, amount/payee and obligation. Caller assertion alone cannot settle; unresolved remains UNKNOWN, never resubmit blindly. */
+        ReconciliationRequest: {
+            /** Format: uuid */
+            paymentId: string;
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            /** Format: uuid */
+            attemptId: string;
+            evidenceDocument: components["schemas"]["VersionedReference"];
+            /** @enum {string} */
+            observedStatus: "SUCCEEDED" | "FAILED" | "UNKNOWN";
+            reasonVi: string;
+        };
+        ReconciliationRecord: {
+            /** Format: uuid */
+            reconciliationId: string;
+            /** Format: uuid */
+            paymentId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            evidenceDocument: components["schemas"]["VersionedReference"];
+            resolvedStatus: components["schemas"]["PaymentStatus"];
+            /** Format: date-time */
+            recordedAt: string;
+            /** Format: uuid */
+            recordedBy: string;
+            auditProof: components["schemas"]["AuditProof"];
+        };
+        /** @description Only these query fields. Reject tenant/DSL/PII/sort/unknown fields 422. HTTP adapter deliberately parses integer limit before validation; validator never coerces. */
+        ClaimSearchQuery: {
+            status?: components["schemas"]["ClaimStatus"];
+            benefitType?: components["schemas"]["BenefitType"];
+            cursor?: string;
+            /** @default 20 */
+            limit: number;
+        };
+        /** @description Minimal projection allowlist, no names/CCCD/phone/bank/documents/diagnosis/raw OCR/XML. No monetary aggregation; PostgreSQL business truth. */
+        ClaimSearchHit: {
+            /** Format: uuid */
+            claimId: string;
+            status: components["schemas"]["ClaimStatus"];
+            benefitType: components["schemas"]["BenefitType"];
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ClaimSearchPage: {
+            items: components["schemas"]["ClaimSearchHit"][];
+            nextCursor?: string;
+            /** Format: date-time */
+            indexedAt: string;
+            /** @enum {string} */
+            consistency: "EVENTUAL";
+        };
+        /** @description Fixed column allowlist, no PII/tenant/DSL. Verify each payment at creation/execution/download. Neutralize CSV formulas =,+,-,@ after leading whitespace/control, quote/escape CSV and force XLSX text cells. Money exact decimal text; no bank T+N scheduling promise. */
+        PaymentExportRequest: {
+            /** @enum {string} */
+            format: "CSV" | "XLSX";
+            paymentIds: string[];
+            columns: ("paymentId" | "claimId" | "status" | "amount" | "currency" | "updatedAt")[];
+        };
+        ExportJobPending: {
+            /** Format: uuid */
+            exportId: string;
+            /** @enum {string} */
+            status: "PENDING";
+            statusUrl: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description Private signed URL TTL <=300s, no-store, no logs/events/history. Revalidate membership/object permission; use authorized download gateway if storage cannot enforce revocation. */
+        ExportJobReady: {
+            /** Format: uuid */
+            exportId: string;
+            /** @enum {string} */
+            status: "READY";
+            /** Format: uri */
+            downloadUrl: string;
+            /** Format: date-time */
+            expiresAt: string;
+            sha256: components["schemas"]["Hash"];
+        };
+        ExportJobFailed: {
+            /** Format: uuid */
+            exportId: string;
+            /** @enum {string} */
+            status: "FAILED";
+            error: components["schemas"]["ApiError"];
+        };
+        ExportJob: components["schemas"]["ExportJobPending"] | components["schemas"]["ExportJobReady"] | components["schemas"]["ExportJobFailed"];
+        /** @description Assigned reviewer creates tenant-scoped proposal with immutable provenance, never direct global catalog update. Global curator authority separate; no caller global scope. */
+        CatalogProposalRequest: {
+            /** Format: uuid */
+            claimId: string;
+            /** Format: uuid */
+            lineId: string;
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            eob: components["schemas"]["EobBinding"];
+            expectedCatalogVersion: components["schemas"]["VersionedReference"];
+            /** @enum {string} */
+            proposedCategory: "DRUG" | "SUPPLEMENT_TPCN" | "COSMETIC" | "LAB_TEST" | "CONSULTATION";
+            evidenceIds: string[];
+            contractClause: components["schemas"]["ContractClause"];
+            reasonVi: string;
+        };
+        CatalogProposal: {
+            /** Format: uuid */
+            proposalId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: uuid */
+            proposerId: string;
+            /** @enum {string} */
+            scope: "TENANT";
+            proposal: components["schemas"]["CatalogProposalRequest"];
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED";
+            /** Format: date-time */
+            createdAt: string;
+            auditProof: components["schemas"]["AuditProof"];
+        };
+        /** @description Reviewer differs from proposer. Verify tenant authority or separately provisioned global curator authority; tenant membership never grants global writes. Stale proposal/catalog 409. Approval creates new scoped version; immutable cited versions unchanged. */
+        CatalogReviewRequest: {
+            expectedAggregateVersion: components["schemas"]["VersionNumber"];
+            expectedCatalogVersion: components["schemas"]["VersionedReference"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            reasonVi: string;
+        };
+        CatalogReview: {
+            /** Format: uuid */
+            reviewId: string;
+            /** Format: uuid */
+            proposalId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: uuid */
+            reviewerId: string;
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            reasonVi: string;
+            /** Format: date-time */
+            reviewedAt: string;
+            resultingCatalogVersion?: components["schemas"]["VersionedReference"];
+            auditProof: components["schemas"]["AuditProof"];
+        };
+        /** @description Internal outbox envelope only, tenantId derived by trusted core. No public tenant selector. Minimal non-PII payload; partition by tenantId:aggregateId, consumer inbox dedup and aggregate version ordering/gap reconciliation required. No exactly-once promise. */
+        EobPublishedEvent: {
+            /** Format: uuid */
+            eventId: string;
+            /** @enum {string} */
+            eventType: "eob.published";
+            /** @enum {string} */
+            schemaVersion: "1.0.0";
+            /** Format: uuid */
+            tenantId: string;
+            /** Format: uuid */
+            aggregateId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: uuid */
+            correlationId: string;
+            /** Format: uuid */
+            causationId: string;
+            payload: {
+                eob: components["schemas"]["EobBinding"];
+                /** Format: uuid */
+                calculationRunId: string;
+            };
+        };
+        /** @description Internal outbox envelope only, tenantId derived by trusted core. No public tenant selector. Minimal non-PII payload; partition by tenantId:aggregateId, consumer inbox dedup and aggregate version ordering/gap reconciliation required. No exactly-once promise. */
+        PaymentStatusChangedEvent: {
+            /** Format: uuid */
+            eventId: string;
+            /** @enum {string} */
+            eventType: "payment.status-changed";
+            /** @enum {string} */
+            schemaVersion: "1.0.0";
+            /** Format: uuid */
+            tenantId: string;
+            /** Format: uuid */
+            aggregateId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: uuid */
+            correlationId: string;
+            /** Format: uuid */
+            causationId: string;
+            payload: {
+                status: components["schemas"]["PaymentStatus"];
+            };
+        };
+        /** @description Internal outbox envelope only, tenantId derived by trusted core. No public tenant selector. Minimal non-PII payload; partition by tenantId:aggregateId, consumer inbox dedup and aggregate version ordering/gap reconciliation required. No exactly-once promise. */
+        CatalogProposalReviewedEvent: {
+            /** Format: uuid */
+            eventId: string;
+            /** @enum {string} */
+            eventType: "catalog.proposal-reviewed";
+            /** @enum {string} */
+            schemaVersion: "1.0.0";
+            /** Format: uuid */
+            tenantId: string;
+            /** Format: uuid */
+            aggregateId: string;
+            aggregateVersion: components["schemas"]["VersionNumber"];
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: uuid */
+            correlationId: string;
+            /** Format: uuid */
+            causationId: string;
+            payload: {
+                /** @enum {string} */
+                decision: "APPROVE" | "REJECT";
+                catalogVersion?: components["schemas"]["VersionedReference"];
+            };
+        };
+        /** @description Approved immutable configuration snapshot; no default thresholds/periods. Optional rules absent means unspecified, not zero/unlimited/waived. Server requires complete applicable contract terms before publication; missing terms require review. Rule order contains approved stable rule identifiers; shadow is deployment default until explicit tenant/plan approval. */
+        BenefitConfiguration: {
+            /** @enum {string} */
+            stpExecutionMode: "SHADOW" | "ENABLED" | "DISABLED";
+            ruleOrder: string[];
+            maxVisitsPerYear?: number;
+            waitingDaysMaternity?: number;
+            maxPrescriptionDays?: number;
+            stpAutoApproveLimit?: components["schemas"]["Money"];
+            dualApprovalThreshold?: components["schemas"]["Money"];
+            originalDocumentsThreshold?: components["schemas"]["Money"];
         };
     };
     responses: {
@@ -1480,6 +2460,911 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AiAcknowledgement"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createPolicyVersion: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                policyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PolicyVersionInput"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getPolicyVersion: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                policyId: string;
+                versionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createBenefitRuleVersion: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                planId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BenefitRuleVersionInput"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenefitRuleVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getBenefitRuleVersion: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                planId: string;
+                versionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenefitRuleVersion"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    calculateClaim: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalculationRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalculationRun"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getCalculationRun: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+                calculationRunId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalculationRun"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getEob: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExplainableEOBResponse"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    publishEob: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishEobRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExplainableEOBResponse"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    decideClaimLine: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+                lineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LineDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LineDecisionResult"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createOtpChallenge: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpChallengeRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpChallenge"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    verifyEobOtp: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EobSignature"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getEobSignature: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EobSignature"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    decideInsurerApproval: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InsurerDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InsurerDecision"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    receiveOriginalDocuments: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                claimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OriginalReceiptRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OriginalReceipt"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createPaymentIntent: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentIntentRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentIntent"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getPaymentIntent: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                paymentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentIntent"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    receivePaymentCallback: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Signature-HMAC": string;
+                "X-Event-Id": string;
+                "X-Signature-Timestamp": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentCallback"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentAcknowledgement"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    recordPaymentReconciliation: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReconciliationRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationRecord"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    searchClaims: {
+        parameters: {
+            query?: {
+                /** @description Exploded allowlisted query fields; reject all other query keys. */
+                filters?: components["schemas"]["ClaimSearchQuery"];
+            };
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimSearchPage"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createPaymentExport: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Durably scheduled; poll authorized status */
+            202: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    /** @description Authorized status resource */
+                    Location?: string;
+                    /** @description Poll interval seconds */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobPending"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getPaymentExport: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                exportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJob"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    createCatalogProposal: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogProposal"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getCatalogProposal: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                proposalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized committed result */
+            200: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogProposal"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    reviewCatalogProposal: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Durable scope: verified tenant/membership + actor + operation + key; >=24h retention. Same payload replays original; mismatch/in-progress 409. Never log secrets. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Opaque server-issued context from membership selection. Verify binding to current principal, active grant and expiry; never accept tenant IDs. */
+                "X-Membership-Context": components["parameters"]["MembershipContext"];
+            };
+            path: {
+                proposalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Authorized committed result */
+            201: {
+                headers: {
+                    /** @description Sensitive response */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogReview"];
                 };
             };
             401: components["responses"]["Error401"];
