@@ -1,0 +1,148 @@
+{
+  "tenantId": "00000000-0000-0000-0000-000000000001",
+  "actorId": "00000000-0000-0000-0000-000000000002",
+  "claimId": "00000000-0000-0000-0000-000000000003",
+  "policy": {
+    "id": "00000000-0000-0000-0000-00000000000a",
+    "policyId": "00000000-0000-0000-0000-00000000000b",
+    "version": 1,
+    "effectiveFrom": "2026-01-01",
+    "effectiveTo": "2026-12-31",
+    "sourceDocument": {
+      "id": "00000000-0000-0000-0000-00000000000c",
+      "version": 1,
+      "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "approvalReference": "00000000-0000-0000-0000-00000000000d",
+    "clauses": [
+      {
+        "clauseId": "00000000-0000-0000-0000-00000000000e",
+        "source": "BENEFIT_RULE",
+        "sourceVersion": {
+          "id": "00000000-0000-0000-0000-00000000000f",
+          "version": 1,
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contractClauseCited": "SYNTHETIC C1 — approved fixture terms only",
+        "explanationVi": "Điều khoản giả lập phục vụ kiểm thử, không áp dụng thực tế."
+      }
+    ],
+    "endorsements": [],
+    "precedence": []
+  },
+  "rule": {
+    "id": "00000000-0000-0000-0000-000000000014",
+    "planId": "00000000-0000-0000-0000-000000000015",
+    "version": 1,
+    "policyVersion": {
+      "id": "00000000-0000-0000-0000-00000000000a",
+      "version": 1,
+      "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "clauseId": "00000000-0000-0000-0000-00000000000e",
+    "effectiveFrom": "2026-01-01",
+    "effectiveTo": "2026-12-31",
+    "benefitType": "HOSPITAL_INCOME",
+    "annualLimit": "10000000.00",
+    "perVisitLimit": "2000000.00",
+    "deductiblePerClaim": "0.00",
+    "copayInsurerPct": "80.00",
+    "waitingDaysNormal": 30,
+    "waitingDaysSpecial": 365,
+    "configurationVersion": {
+      "id": "00000000-0000-0000-0000-000000000016",
+      "version": 1,
+      "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "configuration": {
+      "stpExecutionMode": "SHADOW",
+      "ruleOrder": [
+        "ELIGIBILITY",
+        "EXCLUSIONS",
+        "DEDUCTIBLE",
+        "COPAY",
+        "LIMITS"
+      ]
+    },
+    "edgeTerms": {
+      "hospitalIncome": {
+        "dayBasis": "NIGHTS",
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      },
+      "admissionOverlap": {
+        "action": "REVIEW",
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      },
+      "daycare": {
+        "maxHours": 24,
+        "withoutSurgery": "OUTPATIENT",
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      },
+      "prePostAdmission": {
+        "beforeDays": 30,
+        "afterDays": 30,
+        "icdGroupingVersion": {
+          "id": "00000000-0000-0000-0000-000000000010",
+          "version": 1,
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      },
+      "stamp": {
+        "emrWaiver": true,
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      },
+      "prescription": {
+        "normalDays": 5,
+        "maximumDays": 30,
+        "interimReceiptRequired": true,
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      },
+      "originalDocuments": {
+        "threshold": "20000000.00",
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      },
+      "dualApproval": {
+        "threshold": "15000000.00",
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      },
+      "guardianPayee": {
+        "minorAge": 18,
+        "mode": "VERIFIED_GUARDIAN",
+        "clauseId": "00000000-0000-0000-0000-00000000000e"
+      }
+    },
+    "approvalReference": "00000000-0000-0000-0000-000000000017"
+  },
+  "coverage": {
+    "id": "00000000-0000-0000-0000-00000000001e",
+    "memberId": "00000000-0000-0000-0000-00000000001f",
+    "planId": "00000000-0000-0000-0000-000000000015",
+    "version": 1,
+    "policyVersion": {
+      "id": "00000000-0000-0000-0000-00000000000a",
+      "version": 1,
+      "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "ruleVersion": {
+      "id": "00000000-0000-0000-0000-000000000014",
+      "version": 1,
+      "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "effectiveFrom": "2026-01-01",
+    "effectiveTo": "2026-12-31",
+    "premiumPaid": true,
+    "guardianMemberId": "00000000-0000-0000-0000-000000000020",
+    "approvalReference": "00000000-0000-0000-0000-000000000021"
+  },
+  "request": {
+    "memberId": "00000000-0000-0000-0000-00000000001f",
+    "planId": "00000000-0000-0000-0000-000000000015",
+    "visitDate": "2026-06-15",
+    "benefitType": "HOSPITAL_INCOME",
+    "admission": true,
+    "prePostAdmission": true,
+    "prescription": true,
+    "minor": true
+  }
+}
