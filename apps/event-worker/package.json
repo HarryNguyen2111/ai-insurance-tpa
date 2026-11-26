@@ -1,0 +1,25 @@
+{
+  "name": "@tpa/event-worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "start": "node src/main.ts",
+    "test": "node --test test/*.unit.test.ts",
+    "test:e2e": "node --test --test-concurrency=1 --test-timeout=420000 test/*.e2e.test.ts"
+  },
+  "dependencies": {
+    "@tpa/database": "workspace:*",
+    "@tpa/event-contracts": "workspace:*",
+    "kafkajs": "2.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/pg": "8.23.1",
+    "pg": "8.23.1",
+    "typescript": "6.0.3"
+  }
+}

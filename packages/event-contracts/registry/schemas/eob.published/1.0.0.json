@@ -1,0 +1,95 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "tenantId",
+    "aggregateId",
+    "aggregateVersion",
+    "occurredAt",
+    "correlationId",
+    "causationId",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "eob.published"
+      ]
+    },
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "tenantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eob",
+        "calculationRunId"
+      ],
+      "properties": {
+        "eob": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "eobVersion",
+            "eobHash"
+          ],
+          "properties": {
+            "eobVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "eobHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "description": "Exact immutable EOB binding. Stale version/hash returns 409 STALE_VERSION; republication invalidates older challenges, signatures and approvals."
+        },
+        "calculationRunId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    }
+  },
+  "description": "Internal outbox envelope only, tenantId derived by trusted core. No public tenant selector. Minimal non-PII payload; partition by tenantId:aggregateId, consumer inbox dedup and aggregate version ordering/gap reconciliation required. No exactly-once promise.",
+  "$schema": "http://json-schema.org/draft-04/schema#"
+}
