@@ -29,6 +29,13 @@
       "when": 1795576604000,
       "tag": "0003_immutable_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795576605000,
+      "tag": "0004_idempotency_records",
+      "breakpoints": true
     }
   ]
 }
