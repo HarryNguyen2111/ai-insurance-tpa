@@ -4,6 +4,8 @@
 import { createTenantDatabase } from '@tpa/database/tenant';
 import { allowlistAuthorizer, runReplayCommand, ReplayDeniedError, ReplayUsageError } from './replay.ts';
 import { consumerHandlers } from './registry.ts';
+import { connectTemporalEngine } from '@tpa/workflow/engine';
+import { createWorkflowHandler } from './workflow.ts';
 
 const url = process.env.EVENT_REPLAY_DATABASE_URL;
 let parsed: URL | undefined;
@@ -13,9 +15,13 @@ if (!parsed || parsed.username !== 'tpa_app') {
   process.exit(2);
 }
 const db = createTenantDatabase({ connectionString: url, max: 2, connectionTimeoutMillis: 10_000 });
+let temporal: Awaited<ReturnType<typeof connectTemporalEngine>> | undefined;
 try {
+  if (process.argv[process.argv.indexOf('--consumer') + 1] === 'claim-workflow' && process.argv[2] === 'replay') {
+    temporal = await connectTemporalEngine({ address: process.env.TEMPORAL_ADDRESS ?? '', namespace: process.env.TEMPORAL_NAMESPACE });
+  }
   await runReplayCommand(process.argv.slice(2), {
-    db, handlers: consumerHandlers, authorize: allowlistAuthorizer(process.env.EVENT_REPLAY_OPERATORS),
+    db, handlers: [...consumerHandlers, createWorkflowHandler(temporal?.engine ?? { async submitClaimCommand() { throw new Error('Temporal unavailable'); } })], authorize: allowlistAuthorizer(process.env.EVENT_REPLAY_OPERATORS),
     out: line => console.log(line),
   });
 } catch (error) {
@@ -24,5 +30,5 @@ try {
     errorName: error instanceof Error ? error.name : 'unknown' }));
   process.exitCode = known ? 2 : 1;
 } finally {
-  await db.close();
+  await Promise.allSettled([db.close(), temporal?.close()]);
 }

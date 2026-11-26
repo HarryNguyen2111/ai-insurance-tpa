@@ -1,0 +1,25 @@
+{
+  "name": "@tpa/workflow-worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "start": "node src/main.ts",
+    "test": "node --test test/*.unit.test.ts"
+  },
+  "dependencies": {
+    "@temporalio/activity": "1.27.0",
+    "@temporalio/client": "1.27.0",
+    "@temporalio/worker": "1.27.0",
+    "@temporalio/workflow": "1.27.0",
+    "@tpa/database": "workspace:*",
+    "@tpa/workflow": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "6.0.3"
+  }
+}
