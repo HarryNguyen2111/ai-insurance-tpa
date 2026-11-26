@@ -8,8 +8,11 @@ import { ECardPage } from './pages/ecard.tsx';
 import { FnolPage } from './pages/fnol.tsx';
 import { ClaimDetailPage, ClaimsPage } from './pages/claims.tsx';
 import { EobPage } from './pages/eob.tsx';
+import { useInertExitingScreens } from './components/screen-transition.ts';
 
 export function App({ runtime }: { runtime: RuntimeKind }) {
+  // Outgoing screen stays mounted during the zmp-ui page transition; take it out of a11y/interaction.
+  useInertExitingScreens();
   return (
     <ZaloApp>
       <SnackbarProvider>

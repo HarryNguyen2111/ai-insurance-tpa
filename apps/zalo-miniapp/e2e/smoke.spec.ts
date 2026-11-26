@@ -169,3 +169,35 @@ test('claim tracker and EOB render synthetic fixtures with string money and cite
   await expect(page.getByText(/trước 06\/12\/2026|trước 05\/12\/2026/)).toBeVisible();
   g.assertClean();
 });
+
+test('during a screen transition only the incoming screen is exposed and interactive', async ({ page }) => {
+  // Regression for the flaky "Quay lại resolved to 2 elements": zmp-ui keeps the outgoing screen mounted
+  // for the 400 ms transition. It must be inert + aria-hidden for that whole window.
+  const g = guard(page);
+  await accept(page);
+  await page.getByRole('button', { name: 'Hồ sơ của tôi' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Hồ sơ của tôi' })).toBeVisible();
+
+  const items = page.locator('.zaui-routes > .zaui-routes-item');
+  const exiting = page.locator('.zaui-routes > .zaui-routes-item[inert][aria-hidden="true"]');
+
+  await page.getByTestId('claim-MAU-2026-000101').click();
+  // Both screens are mounted right now (transition in progress)…
+  await expect(items).toHaveCount(2);
+  // …but the outgoing one is already inert/hidden, so the accessible tree holds exactly one screen.
+  await expect(exiting).toHaveCount(1);
+  await expect(exiting).toContainText('Hồ sơ của tôi');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Quay lại' })).toHaveCount(1);
+  // Transition completes and the outgoing screen unmounts.
+  await expect(items).toHaveCount(1);
+  await expect(exiting).toHaveCount(0);
+
+  // Same guarantee for a back (POP) transition.
+  await page.getByRole('button', { name: 'Quay lại' }).click();
+  await expect(exiting).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 1, name: 'Hồ sơ của tôi' })).toBeVisible();
+  await expect(items).toHaveCount(1);
+  g.assertClean();
+});
