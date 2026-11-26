@@ -37,8 +37,8 @@ test('overview shows real core-api liveness through the same-origin route', asyn
   const foreign = trackForeignRequests(page);
   await page.goto(webUrl);
   await expect(page.locator('html')).toHaveAttribute('lang', 'vi');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Không gian làm việc TPA Sức khỏe & Nhân thọ');
-  await expect(page.getByTestId('backend-status-pill')).toHaveAttribute('data-state', 'ONLINE');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Chào mừng đến TPA Workspace');
+  await expect(page.getByTestId('backend-status-panel')).toHaveAttribute('data-state', 'ONLINE');
   await expect(page.getByTestId('backend-status-title')).toHaveText('Core API đang chạy');
   await expect(page.getByTestId('backend-http-status')).toHaveText('200');
   await expect(page.getByTestId('backend-status-panel')).toContainText('KHÔNG phải sẵn sàng nghiệp vụ');
@@ -97,7 +97,7 @@ test('backend down is shown truthfully and recovers when core-api restarts', asy
   await page.getByRole('button', { name: 'Kiểm tra lại' }).click();
   await expect(page.getByTestId('backend-status-panel')).toHaveAttribute('data-state', 'UNREACHABLE');
   await expect(page.getByTestId('backend-status-title')).toHaveText('Không kết nối được Core API');
-  await expect(page.getByTestId('backend-status-pill')).toHaveAttribute('data-state', 'UNREACHABLE');
+  await expect(page.getByTestId('backend-status-pill').first()).toHaveAttribute('data-state', 'UNREACHABLE');
   await expect(page.getByTestId('backend-detail')).toHaveText('CONNECTION_FAILED');
   await page.screenshot({ path: `${EVIDENCE}/03-backend-down.png`, fullPage: true });
 
@@ -110,7 +110,7 @@ test('browser offline state is distinct from backend failure and recovers when o
   await page.goto(`${webUrl}/he-thong`);
   await expect(page.getByTestId('backend-status-panel')).toHaveAttribute('data-state', 'ONLINE');
   await context.setOffline(true);
-  await expect(page.getByTestId('backend-status-pill')).toHaveAttribute('data-state', 'BROWSER_OFFLINE');
+  await expect(page.getByTestId('backend-status-panel')).toHaveAttribute('data-state', 'BROWSER_OFFLINE');
   await page.getByRole('button', { name: 'Kiểm tra lại' }).click();
   await expect(page.getByTestId('backend-status-title')).toHaveText('Trình duyệt đang ngoại tuyến');
   await page.screenshot({ path: `${EVIDENCE}/04-browser-offline.png`, fullPage: true });
@@ -147,12 +147,14 @@ test('non-loopback backend address is refused at runtime (misconfigured, no requ
 test('responsive navigation works on a phone-sized viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(webUrl);
-  const menu = page.getByRole('button', { name: 'Mở menu' });
-  await expect(menu).toBeVisible();
-  await menu.click();
-  await page.locator('#mobile-nav').getByRole('link', { name: /Tiếp nhận hồ sơ/ }).click();
+  const trigger = page.getByRole('button', { name: 'Ẩn/hiện thanh bên' });
+  await expect(trigger).toBeVisible();
+  await expect(page.getByTestId('app-sidebar').getByRole('link', { name: /Tiếp nhận hồ sơ/ })).toBeHidden();
+  await trigger.click();
+  const sheet = page.getByRole('dialog', { name: 'Thanh điều hướng' });
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole('link', { name: /Tiếp nhận hồ sơ/ }).click();
   await expect(page).toHaveURL(`${webUrl}/tiep-nhan`);
-  await expect(page.locator('#mobile-nav')).toHaveCount(0);
-  await expect(page.getByTestId('backend-status-pill')).toHaveAttribute('data-state', 'ONLINE');
+  await expect(sheet).toBeHidden();
   await page.screenshot({ path: `${EVIDENCE}/05-mobile-intake.png`, fullPage: true });
 });

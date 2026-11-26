@@ -1,4 +1,4 @@
-import example from '../../../../../docs/ai-specs/examples/intake-form-health-outpatient.example.json';
+import example from '../../../../../../docs/ai-specs/examples/intake-form-health-outpatient.example.json';
 import { IntakePreviewView } from '@/components/intake-preview-view';
 import type { IntakeFormConfig } from '@/lib/intake-preview';
 
