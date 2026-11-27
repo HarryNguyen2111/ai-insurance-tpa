@@ -24,7 +24,13 @@ describe('Process health (HTTP)', () => {
     await request(app.getHttpServer()).post('/health').expect(404);
   });
 
-  it('does not expose a scaffold claim API', async () => {
-    await request(app.getHttpServer()).post('/v1/claims').send({}).expect(404);
+  it('exposes no unauthenticated or scaffold claim API (CLM-02 routes require verified identity)', async () => {
+    const server = app.getHttpServer();
+    for (const r of [request(server).post('/v1/claims').send({}), request(server).get('/v1/claims'),
+      request(server).get('/v1/claims/12345678-1234-1234-1234-123456789abc'),
+      request(server).post('/v1/claims/12345678-1234-1234-1234-123456789abc/documents').send({})]) {
+      const res = await r.expect(401).expect('Cache-Control', 'no-store');
+      expect(Object.keys(res.body).sort()).toEqual(['code', 'correlationId', 'messageVi']);
+    }
   });
 });
