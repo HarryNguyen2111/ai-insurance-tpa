@@ -23,7 +23,7 @@ Báo cáo kích thước bundle: `test-results/bundle-size.json`; ảnh chụp s
 | --- | --- |
 | `/` | Giới thiệu (onboarding) |
 | `/consent`, `/consent/denied` | Điều khoản đồng ý có phiên bản + mã băm SHA-256; nhánh **không đồng ý** → chế độ giới hạn (chỉ xem thẻ) |
-| `/home` | Trang chủ; nút gửi hồ sơ khóa khi chưa đồng ý phiên bản hiện hành |
+| `/home` | Trang chủ (banner, lời chào, hợp đồng, dịch vụ, hồ sơ gần đây) + thanh điều hướng dưới; nút gửi hồ sơ khóa khi chưa đồng ý phiên bản hiện hành |
 | `/ecard` | Thẻ điện tử với hình **MẪU (không phải mã QR)**, token placeholder đổi mỗi 60 giây |
 | `/claims/new` | FNOL mô phỏng: giả lập quyền camera; bị từ chối → 3 bước dự phòng (bật lại quyền · chọn ảnh có sẵn · lưu nháp); HEIC/HEIF nhận theo **kiểu tệp** (MIME, hoặc đuôi tệp khi MIME rỗng); không đọc nội dung, không tải lên |
 | `/claims`, `/claims/:id` | Danh sách + tiến trình hồ sơ (ẩn làn thẩm định nội bộ như FRAUD_HOLD với khách) |
@@ -32,6 +32,30 @@ Báo cáo kích thước bundle: `test-results/bundle-size.json`; ảnh chụp s
 Fixture (`src/fixtures/synthetic.ts`) theo hình dạng `ClaimSummary`, `ClaimDetail`, `ExplainableEOBResponse`, `EobLine`,
 `ContractClause`, `ECard` trong `docs/ai-specs/02-openapi-contracts.yaml`. Tiền luôn là chuỗi `"720000.00"`; hiển thị/cộng
 bằng `decimal.js` (`ROUND_HALF_UP`), không bao giờ dùng `number`.
+
+## Đối chiếu mẫu giao diện (issue #104)
+
+Owner chọn `/home/tnv/data/vimid-loyalty` (commit `79327a0`, dẫn xuất từ template công khai *ZaUI Coffee* của Zalo, không có
+tệp LICENSE, `package.json` ghi `UNLICENSED`) làm **mẫu cấu trúc thị giác**. Chỉ tái hiện cấu trúc bằng mã mới; **không** sao chép
+mã, ảnh, logo, AppID, URL API, đăng nhập mật khẩu, dữ liệu hay lockfile. Giữ zmp-ui/React 18/Vite 5 hiện tại (không chuyển
+sang Vite 2/Recoil/Swiper/Tailwind).
+
+| Mẫu (vimid-loyalty) | Thành phần TPA | Điều chỉnh |
+| --- | --- | --- |
+| `components/layout.tsx` (Routes + `<Navigation/>` ngoài routes) | `src/app.tsx` | `BottomNav` đặt **một lần** ngoài `AnimationRoutes`, không bị nhân đôi khi chuyển cảnh |
+| `components/navigation.tsx` (ZaUI `BottomNavigation`, nút "Liên hệ" nổi màu `#183346`, ẩn khi bàn phím mở / trang chi tiết) | `src/components/bottom-nav.tsx`, `src/lib/navigation.ts` | Tab chỉ trỏ tới route đã có: Trang chủ `/home`, Hồ sơ `/claims`, Thẻ BH `/ecard`; nút nổi → **Gửi hồ sơ** `/claims/new`, bị khóa khi chưa đồng ý phiên bản điều khoản hiện hành; "Cá nhân" hiển thị **Sắp có**, bấm chỉ báo chưa khả dụng (không có màn giả). Bỏ badge số đếm giả. Ẩn thanh ở onboarding/consent/FNOL/chi tiết hồ sơ/EOB nên không che nút gửi hay EOB; ẩn khi bàn phím mở (ngưỡng 160 px như mẫu) |
+| `pages/index/index.tsx` (`bg-[#FFF8E6]`: Banner → Welcome → nội dung cuộn) | `src/pages/home.tsx` (`.page.warm`) | Cùng thứ tự |
+| `pages/index/banner.tsx` (Swiper 2:1, chấm phân trang dạng viên thuốc) | `Banner` trong `home.tsx` | CSS scroll-snap, 3 slide chữ + biểu tượng, không ảnh, không tự chạy |
+| `components/welcome_vimid.tsx` (tiêu đề app + "Chào mừng, {tên}!") | `Welcome` trong `home.tsx` | Tiêu đề trung tính "Bồi thường Sức khỏe", tên đã che từ fixture; không logo DNBH/tenant |
+| `components/section.tsx` + `divider.tsx` | `src/components/section.tsx` | Khối trắng có tiêu đề → thẻ bo góc 16 px trên nền ấm |
+| `recommend.tsx`, `product-list.tsx` (xe/sản phẩm) | "Hợp đồng của bạn", "Dịch vụ" (lưới biểu tượng), "Hồ sơ gần đây" | Nội dung xe/loyalty thay bằng hợp đồng, chức năng và hồ sơ **giả lập** |
+| `css/app.scss`, `tailwind.config.js`, `app-config.json` `primaryColor` | `src/styles.css` | Màu lấy từ mẫu: nền `#FFF8E6`/`#f4f5f6`, vàng `#ecbf3b`, navy `#183346`, viền `#E9EBED`. Vàng chỉ dùng làm nền/chỉ báo (chữ vàng trên trắng chỉ ~1.9:1); nút chính dùng navy. Chữ phụ giữ `#4a5468` vì xám mẫu `#767A7F` không đạt 4.5:1 trên nền ấm |
+| Font biểu tượng zmp-ui (`<Icon>`, tải từ CDN `h5.zadn.vn`) | `src/components/icons.tsx` | SVG nội tuyến tự vẽ: bản giả lập không được gọi ra ngoài 127.0.0.1 |
+
+Banner thử nghiệm giờ là một dải gọn (≤ 2 dòng) nhưng vẫn luôn hiển thị. Ảnh so sánh 390×844 và 360×640: `pnpm test:smoke`
+sinh `test-results/104-*.png`. Kiểm thử hồi quy: `e2e/navigation.spec.ts` (tab/`aria-current`, tab chưa khả dụng, khóa theo
+đồng ý, một thanh duy nhất khi chuyển cảnh, nội dung không bị che ở 2 khung nhìn, safe-area 34 px). Chạy khi cổng 3201 đang
+bận: `SMOKE_PORT=3317 pnpm test:smoke`.
 
 ## Dev fallback (không có Zalo runtime)
 
