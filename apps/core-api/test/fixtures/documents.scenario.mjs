@@ -60,6 +60,8 @@ try{
   const completionCall=call(),doc=(await api.complete(completionCall,grant.uploadId,completeBody)).body;
   assert.equal(doc.scanStatus,'QUARANTINED');
   await assert.rejects(api.consume(a,doc.documentId,()=>assert.fail('quarantine consumed')),rejected);
+  await assert.rejects(db.withTenantTransaction(T,tx=>scanNext(tx,{...runtime,appendAudit:async()=>{throw new Error('synthetic audit outage');}},storage,scanner,service)));
+  assert.equal((await api.get(a,doc.documentId)).scanStatus,'QUARANTINED','scan audit failure rolls back state/outbox');
   assert.equal(await db.withTenantTransaction(T,tx=>scanNext(tx,runtime,storage,scanner,service)),true);
   assert.equal((await api.get(a,doc.documentId)).scanStatus,'CLEAN');
   assert.deepEqual((await api.complete(completionCall,grant.uploadId,completeBody)).body,doc,'replay returns original QUARANTINED response');
@@ -71,6 +73,10 @@ try{
   await client.send(new PutObjectCommand({Bucket:bucket,Key:upload.object_key,Body:Buffer.from('MZ changed'),ContentType:'application/pdf'}));
   await api.consume(a,doc.documentId,async(_tx,o,v)=>assert.deepEqual(Buffer.from(await storage.read(o,v)),payload));
   const create=async bytes=>{const g=(await api.presign(call(),request(bytes))).body;assert.ok((await put(g,bytes)).ok);return {g,body:{sha256:hash(bytes),sizeBytes:bytes.length}};};
+  const concurrent=await create(Buffer.from('%PDF-1.7\nconcurrent\n%%EOF'));
+  const pair=await Promise.all([api.complete(call(),concurrent.g.uploadId,concurrent.body),api.complete(call(),concurrent.g.uploadId,concurrent.body)]);
+  assert.equal(pair[0].body.documentId,pair[1].body.documentId,'different-key concurrent completion creates one document');
+  await db.withTenantTransaction(T,tx=>scanNext(tx,runtime,storage,scanner,service));
   for(const marker of ['EICAR','POLYGLOT','BOMB']){
     const {g,body}=await create(Buffer.from(`%PDF-1.7\n${marker}\n%%EOF`)),d=(await api.complete(call(),g.uploadId,body)).body;
     await db.withTenantTransaction(T,tx=>scanNext(tx,runtime,storage,scanner,service));assert.equal((await api.get(a,d.documentId)).scanStatus,'REJECTED');
@@ -92,6 +98,9 @@ try{
   const {rows:[evidence]}=await admin.query(`SELECT (SELECT json_agg(a) FROM tpa.audit_logs a WHERE tenant_id=$1) AS audit,(SELECT json_agg(i) FROM tpa.idempotency_records i WHERE tenant_id=$1) AS operations`,[T]);
   assert.doesNotMatch(JSON.stringify(evidence),/SYNTHETIC_PII|X-Amz-Signature|https:\/\//);
   assert.ok(evidence.audit.some(r=>r.action==='DOCUMENT_CONTENT_ACCESS'));assert.ok(evidence.audit.some(r=>r.action==='DOCUMENT_SCANNED'));
+  await admin.query('UPDATE tpa.consent_policies SET active=false WHERE tenant_id=$1',[T]);
+  assert.equal(await db.withTenantTransaction(T,tx=>scanNext(tx,runtime,storage,{scan:async()=>assert.fail('revoked policy reached scanner')},service)),false);
+  await assert.rejects(api.consume(a,doc.documentId,()=>assert.fail('revoked consent consumed')),rejected);
   // Authorization is revalidated on a replay; revoked relation never receives old URL/response.
   await admin.query('UPDATE tpa.identity_member_grants SET active=false WHERE tenant_id=$1 AND membership_id=$2',[T,membership]);
   await assert.rejects(api.complete(completionCall,grant.uploadId,completeBody),hidden);

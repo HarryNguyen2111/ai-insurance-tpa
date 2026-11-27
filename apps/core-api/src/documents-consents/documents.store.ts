@@ -179,7 +179,9 @@ export class DocumentsStore implements DocumentsApi {
  */
 export async function scanNext(tx: IdentityTransaction, runtime: WorkflowRuntime, storage: DocumentStorage,
   scanner: DocumentScanner, serviceId: string): Promise<boolean> {
-  const { rows: [d] } = await tx.query<DocumentRow>(`${DOCUMENT} WHERE s.status='QUARANTINED' ORDER BY d.created_at LIMIT 1 FOR UPDATE OF s SKIP LOCKED`);
+  const { rows: [d] } = await tx.query<DocumentRow>(`${DOCUMENT} WHERE s.status='QUARANTINED' AND EXISTS (SELECT 1 FROM tpa.consent_records c
+    JOIN tpa.consent_policies p ON p.tenant_id=c.tenant_id AND p.purpose=c.purpose AND p.policy_version=c.policy_version AND p.policy_hash=c.policy_hash
+    WHERE c.tenant_id=u.tenant_id AND c.id=u.consent_id AND p.active AND tpa.document_lock_policy(p.purpose,p.policy_version,p.policy_hash)) ORDER BY d.created_at LIMIT 1 FOR UPDATE OF s SKIP LOCKED`);
   if (!d) return false;
   await tx.query(`UPDATE tpa.document_scan_outbox SET status='SCANNING' WHERE document_id=$1`, [d.document_id]);
   const bytes = await storage.read(object(d), d.object_version), verdict = await scanner.scan(bytes, d.content_type);
