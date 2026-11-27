@@ -107,6 +107,11 @@ try{
   await assert.rejects(api.consume(a,doc.documentId,()=>assert.fail('revoked consent consumed')),rejected);
   // Authorization is revalidated on a replay; revoked relation never receives old URL/response.
   await admin.query('UPDATE tpa.identity_member_grants SET active=false WHERE tenant_id=$1 AND membership_id=$2',[T,membership]);
-  await assert.rejects(api.complete(completionCall,grant.uploadId,completeBody),hidden);
+  // AUTH-01 bumps the membership version on grant changes: the old context fails closed first.
+  await assert.rejects(api.complete(completionCall,grant.uploadId,completeBody),{status:409,code:'STALE_VERSION'});
+  // A freshly selected context without the SELF grant still cannot replay the stored response.
+  const fresh={identity:alice,membershipContext:await select(alice,membership)};
+  await assert.rejects(api.complete({...fresh,idempotencyKey:completionCall.idempotencyKey},grant.uploadId,completeBody),hidden);
+  await assert.rejects(api.get(fresh,doc.documentId),hidden);
   console.log('PASS DOC-01 synthetic PG16/private S3/TLS scanner: consent policy/owner, direct PUT, pinned version, quarantine/CLEAN/malware/unsafe/outage, tenant RLS/FK, replay/conflict/revocation, minimal audit evidence.');
 }finally{await identity?.close();await issuer?.close();await db.close();client.destroy();await admin.end();}
