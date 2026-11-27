@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { NativeConnection, Worker } from '@temporalio/worker';
 import { TASK_QUEUES } from '@tpa/workflow/contracts';
 import type { TransitionActivities } from './activities/transitions.ts';
+import type { DefinitionActivities } from './activities/definition.ts';
 
 export const WORKFLOWS_PATH = fileURLToPath(new URL('./workflows/index.ts', import.meta.url));
 
@@ -13,7 +14,7 @@ export interface ClaimWorkers { run(): Promise<void>; shutdown(): void }
  * code is bundled from WORKFLOWS_PATH, so non-deterministic imports fail at startup.
  */
 export async function createClaimWorkers(options: {
-  connection: NativeConnection; namespace?: string; activities: TransitionActivities; identity?: string;
+  connection: NativeConnection; namespace?: string; activities: TransitionActivities & Partial<DefinitionActivities>; identity?: string;
 }): Promise<ClaimWorkers> {
   const namespace = options.namespace ?? 'default';
   const orchestration = await Worker.create({ connection: options.connection, namespace, taskQueue: TASK_QUEUES.orchestration,

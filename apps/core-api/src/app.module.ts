@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { HealthController } from './health.controller';
 import { IdentityTenantModule } from './identity-tenant/identity.module';
+import { WorkflowDefinitionModule } from './workflow-definition/workflow-definition.module';
 
-@Module({ imports: [IdentityTenantModule.register()], controllers: [HealthController] })
+const identity = IdentityTenantModule.register();
+@Module({ imports: [identity, WorkflowDefinitionModule.register({ identity })], controllers: [HealthController] })
 export class AppModule {}

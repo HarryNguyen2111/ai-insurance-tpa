@@ -6,7 +6,9 @@
   "license": "UNLICENSED",
   "exports": {
     "./contracts": "./src/contracts.ts",
-    "./engine": "./src/engine.ts"
+    "./engine": "./src/engine.ts",
+    "./definition": "./src/definition.ts",
+    "./definition-validator": "./src/definition-validator.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -14,7 +16,8 @@
     "test": "node --test test/*.test.ts"
   },
   "dependencies": {
-    "@temporalio/client": "1.27.0"
+    "@temporalio/client": "1.27.0",
+    "@tpa/shared-contracts": "workspace:*"
   },
   "devDependencies": {
     "@tpa/event-contracts": "workspace:*",
