@@ -129,7 +129,9 @@ export class ClaimsStore implements ClaimsApi {
       if ((await tx.query('SELECT 1 FROM tpa.claims WHERE submission_hash=$1', [submissionHash])).rows.length) throw conflict();
       try { await lockCurrentConsent(tx, actor, b.memberId, this.options.claimPurpose, b.consentId); }
       catch (error) { throw error instanceof IdentityError && error.code === 'DOMAIN_VIOLATION' ? domain('CONSENT_REQUIRED') : error; }
-      // Verified insured member: provisioned BEN-01 coverage. Date/benefit applicability is pinned later via
+      // Verified insured member: provisioned BEN-01 coverage. Source: 02-openapi-contracts.yaml ClaimSubmit ("Server verifies
+      // ownership, CLEAN docs, current consent/purpose/policy, preflight version and coverage") with the contracted
+      // Error422 code DOMAIN_VIOLATION (ApiError enum; 07 §4 "422 domain violation"). Date/benefit applicability is pinned later via
       // PolicyBenefitRepository.resolveAndPin, where missing/ambiguous configuration routes review (spec 03 §5).
       const { rows: insured } = await tx.query('SELECT 1 FROM tpa.member_coverages WHERE member_id=$1 LIMIT 1', [b.memberId]);
       if (!insured.length) throw domain('MEMBER_NOT_INSURED');
