@@ -57,6 +57,23 @@ sinh `test-results/104-*.png`. Kiểm thử hồi quy: `e2e/navigation.spec.ts` 
 đồng ý, một thanh duy nhất khi chuyển cảnh, nội dung không bị che ở 2 khung nhìn, safe-area 34 px). Chạy khi cổng 3201 đang
 bận: `SMOKE_PORT=3317 pnpm test:smoke`.
 
+## Trang tiện ích, đổi không gian và Loyalty360 (issue #106)
+
+Thiết kế đầy đủ (bản đồ màn hình, ma trận trường → nguồn → quyền → test, máy trạng thái, ranh giới dữ liệu, token
+giao diện, khoảng trống hợp đồng G1–G9): [`docs/106-user-hub-design.md`](docs/106-user-hub-design.md).
+
+- Vào từ màn đầu tiên: **Mở trang tiện ích cá nhân** → `/hub`. Không chọn đơn vị ⇒ Loyalty360 cá nhân (giả lập).
+- Biểu tượng đơn vị: chạm 1 lần mở danh sách chọn; chạm đúp chuyển lần lượt Cá nhân → An Bình → Bình Minh →
+  Cát Tường → Cá nhân. Bàn phím/trình đọc màn hình: Enter mở danh sách.
+- Giao diện theo màu thương hiệu của đơn vị đang dùng (hợp đồng #72); Bình Minh cố ý có màu tương phản thấp để thể
+  hiện cảnh báo OD-WS1 và màu chữ/viền dẫn xuất.
+- Mọi dữ liệu đơn vị/Loyalty360 là giả lập trong `src/fixtures/workspaces.ts`, qua cổng `src/adapters/ports.ts`.
+  Không có API thật, không lưu gì vào bộ nhớ trình duyệt.
+- Kịch bản qua URL: `?members=0|1|2|3`, `?start=PERSONAL|AB|BM|CT`, `?slow=BM` (phản hồi trễ 1,5 s),
+  `?badtheme=CT` (màu không hợp lệ). Các tình huống mất mạng/lỗi/thu hồi quyền/đổi màu ở màn **Cá nhân → Bảng
+  điều khiển mô phỏng**.
+- Chuông thông báo chỉ là chỗ giữ chỗ cho #107: không có số đếm, không có thông báo.
+
 ## Dev fallback (không có Zalo runtime)
 
 `src/lib/platform.ts` nhận diện Zalo qua cầu nối native (`ZaloJavaScriptInterface` / `ZJSBridge`). Ngoài Zalo:

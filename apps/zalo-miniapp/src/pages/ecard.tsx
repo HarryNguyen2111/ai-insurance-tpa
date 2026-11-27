@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Shell } from '../components/shell.tsx';
-import { SYNTHETIC_ECARD, SYNTHETIC_PLAN } from '../fixtures/synthetic.ts';
+import { ServiceState } from '../components/service-state.tsx';
+import { useTpaView } from '../state.tsx';
 import { ROTATION_SECONDS, placeholderCard, placeholderPattern, secondsRemaining } from '../lib/ecard.ts';
 
 function useNow(intervalMs: number): number {
@@ -27,13 +28,22 @@ export function ECardPage() {
   }, [card.windowIndex]);
 
   const cell = 8;
+  const view = useTpaView();
+  if (view.status !== 'ready') {
+    return (
+      <Shell title="Thẻ bảo hiểm điện tử">
+        <ServiceState view={view} serviceVi="Bảo hiểm sức khỏe" />
+      </Shell>
+    );
+  }
+  const { plan, ecard } = view.data;
   return (
     <Shell title="Thẻ bảo hiểm điện tử">
       <section className="card ecard" aria-label="Thẻ bảo hiểm mẫu">
-        <p className="meta">{SYNTHETIC_PLAN.insurerLabel}</p>
-        <h2>{SYNTHETIC_ECARD.displayNameMasked}</h2>
-        <p>Số thẻ: <span data-testid="card-number">{SYNTHETIC_ECARD.cardNumberMasked}</span></p>
-        <p>Hiệu lực: {SYNTHETIC_PLAN.effectiveFrom} → {SYNTHETIC_PLAN.effectiveTo}</p>
+        <p className="meta">{plan.insurerLabel}</p>
+        <h2>{ecard.displayNameMasked}</h2>
+        <p>Số thẻ: <span data-testid="card-number">{ecard.cardNumberMasked}</span></p>
+        <p>Hiệu lực: {plan.effectiveFrom} → {plan.effectiveTo}</p>
         <figure className="placeholder">
           <svg
             role="img"

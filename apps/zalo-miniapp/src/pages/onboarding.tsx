@@ -15,6 +15,8 @@ export function OnboardingPage() {
         Đây là bản mẫu: không đăng nhập, không kết nối Zalo thật, không tải tệp lên máy chủ. Mọi số liệu đều là giả lập.
       </p>
       <Button fullWidth onClick={() => navigate('/consent')}>Bắt đầu</Button>
+      {/* #106: the user-centric hub (personal Loyalty360 + workspaces) is reachable from the first screen. */}
+      <Button fullWidth variant="secondary" onClick={() => navigate('/hub')}>Mở trang tiện ích cá nhân</Button>
     </Shell>
   );
 }
