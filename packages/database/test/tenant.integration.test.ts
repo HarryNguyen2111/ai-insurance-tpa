@@ -94,11 +94,11 @@ test('PT01 foundation: PG16 app role through real PgBouncer transaction pool', a
       assert.ok(Object.entries(role).every(([k, v]) => k === 'name' || v === false));
       const tables = (await admin.query(`SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity, r.rolname AS owner
         FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_roles r ON r.oid=c.relowner
-        WHERE n.nspname='tpa' AND c.relname IN ('isolation_parent','isolation_child') ORDER BY c.relname`)).rows;
-      assert.equal(tables.length, 2);
+        WHERE n.nspname='tpa' AND c.relname IN ('isolation_parent','isolation_child','consent_policies','consent_records','upload_sessions','document_versions','document_scan_outbox','ledger_accounts','journal_entries','journal_lines') ORDER BY c.relname`)).rows;
+      assert.equal(tables.length, 10);
       for (const table of tables) { assert.equal(table.owner, 'tpa_migrator'); assert.equal(table.relrowsecurity, true); assert.equal(table.relforcerowsecurity, true); }
       const policies = (await admin.query("SELECT policyname, qual, with_check FROM pg_policies WHERE schemaname='tpa'")).rows;
-      assert.equal(policies.length, 38); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01), +6 BEN-01 snapshot tables, +6 AUTH-01 identity tables, +4 BEN-03 benefit ledger tables, +6 VWF-03 workflow definition tables, +2 BEN-04 tenant invoice allocation tables (global invoice tables have no policy and no app grant), +3 PAY-01 ledger tables
+      assert.equal(policies.length, 43); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01), +6 BEN-01 snapshot tables, +6 AUTH-01 identity tables, +4 BEN-03 benefit ledger tables, +6 VWF-03 workflow definition tables, +2 BEN-04 tenant invoice allocation tables (global invoice tables have no policy and no app grant), +5 DOC-01 consent/upload/document tables, +3 PAY-01 ledger tables
       // AUTH-01: identity discovery happens BEFORE a tenant is chosen, so exactly these two global
       // policies are scoped to the verified principal instead of a tenant. Every other policy stays tenant-scoped.
       const principalScoped: Record<string, RegExp> = {
