@@ -21,6 +21,7 @@ Ordering is guaranteed per aggregate key within one topic only.
 | payment.status-changed | payment | OpenAPI `PaymentStatusChangedEvent` |
 | catalog.proposal-reviewed | catalog | OpenAPI `CatalogProposalReviewedEvent` |
 | workspace.changed | workspace | OpenAPI `WorkspaceChangedEvent` |
+| benefit.limit-changed | benefit | BEN-03 internal; aggregate = benefit limit account; changeKind + optional reservationId only |
 
 ## Compatibility policy (`pnpm --filter @tpa/event-contracts check:registry`, part of `test`)
 - `registry/registry.json` pins every published version by sha256 of its
