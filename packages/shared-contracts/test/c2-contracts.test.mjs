@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import YAML from 'yaml';
 import { validate } from '../src/validate.cjs';
+import { isNotificationExempt } from './notification-exemption.mjs';
 const read = name => readFileSync(new URL(name,import.meta.url),'utf8');
 const spec = YAML.parse(read('../../../docs/ai-specs/02-openapi-contracts.yaml'));
 const baseline = JSON.parse(read('./c1-baseline.json'));
@@ -23,7 +24,8 @@ test('C2 mutation keys, verified membership, no-store and concrete success/error
     if (baseline.paths[path]?.[method]) continue;
     assert.ok(op.operationId,path);
     assert.deepEqual(op.security??spec.security,path.startsWith('/internal/')?[{internalHmac:[]}]:[{bearerAuth:[]}]);
-    if (!path.startsWith('/internal/')) {
+    // D3 (#107): explicit 4-operation allowlist; notification-contracts.test.mjs asserts the stricter replacement rules.
+    if (!path.startsWith('/internal/') && !isNotificationExempt(op)) {
       assert.ok(op.parameters.some(p=>p.$ref?.endsWith('/MembershipContext')),path);
       if(method!=='get')assert.ok(op.parameters.some(p=>p.$ref?.endsWith('/IdempotencyKey')),path);
     }

@@ -20102,6 +20102,471 @@
     "description": "Derived from verified principal + membership context; display hint only. No tenantId. AI service actors have no bearer actor scope.",
     "$schema": "http://json-schema.org/draft-04/schema#"
   },
+  "NotificationScope": {
+    "type": "string",
+    "enum": [
+      "PERSONAL",
+      "TENANT"
+    ],
+    "description": "PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationService": {
+    "type": "string",
+    "enum": [
+      "TPA_INSURANCE",
+      "LOYALTY360"
+    ],
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationCategory": {
+    "type": "string",
+    "enum": [
+      "CLAIM_STATUS",
+      "SERVICE_NOTICE"
+    ],
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationPriority": {
+    "type": "string",
+    "enum": [
+      "INFO",
+      "ACTION_REQUIRED"
+    ],
+    "description": "Presentation urgency only; ACTION_REQUIRED never performs or authorizes the action.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationTarget": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "kind",
+      "id"
+    ],
+    "properties": {
+      "kind": {
+        "type": "string",
+        "enum": [
+          "CLAIM"
+        ]
+      },
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "description": "Internal target descriptor, never a URL. The client maps kind to its own route and the target API re-authorizes membership and object access (unauthorized targets are 404 there).",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "Notification": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "notificationId",
+      "scope",
+      "service",
+      "category",
+      "priority",
+      "templateKey",
+      "templateVersion",
+      "titleVi",
+      "bodyVi",
+      "occurredAt",
+      "createdAt",
+      "expiresAt",
+      "version"
+    ],
+    "properties": {
+      "notificationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "scope": {
+        "type": "string",
+        "enum": [
+          "PERSONAL",
+          "TENANT"
+        ],
+        "description": "PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership."
+      },
+      "service": {
+        "type": "string",
+        "enum": [
+          "TPA_INSURANCE",
+          "LOYALTY360"
+        ]
+      },
+      "category": {
+        "type": "string",
+        "enum": [
+          "CLAIM_STATUS",
+          "SERVICE_NOTICE"
+        ]
+      },
+      "priority": {
+        "type": "string",
+        "enum": [
+          "INFO",
+          "ACTION_REQUIRED"
+        ],
+        "description": "Presentation urgency only; ACTION_REQUIRED never performs or authorizes the action."
+      },
+      "templateKey": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+      },
+      "templateVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "titleVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "description": "Server-rendered allowlisted template text; plain text, no markup, URLs or PII."
+      },
+      "bodyVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 280,
+        "description": "Server-rendered allowlisted template text; plain text, no markup, URLs or PII."
+      },
+      "target": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "CLAIM"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "description": "Internal target descriptor, never a URL. The client maps kind to its own route and the target API re-authorizes membership and object access (unauthorized targets are 404 there)."
+      },
+      "occurredAt": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Business time of the source event."
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Server time the notification was created; order and read-all cutoff use this."
+      },
+      "expiresAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "readAt": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Absent while unread. In-app read state only; not provider delivery and not a confirmation."
+      },
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2,
+        "description": "1 unread, 2 read. Read is monotonic."
+      }
+    },
+    "description": "No recipient, tenant, membership, source event or claim fields beyond the target descriptor.",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationList": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "scope",
+      "items",
+      "asOf"
+    ],
+    "properties": {
+      "scope": {
+        "type": "string",
+        "enum": [
+          "PERSONAL",
+          "TENANT"
+        ],
+        "description": "PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership."
+      },
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "notificationId",
+            "scope",
+            "service",
+            "category",
+            "priority",
+            "templateKey",
+            "templateVersion",
+            "titleVi",
+            "bodyVi",
+            "occurredAt",
+            "createdAt",
+            "expiresAt",
+            "version"
+          ],
+          "properties": {
+            "notificationId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "scope": {
+              "type": "string",
+              "enum": [
+                "PERSONAL",
+                "TENANT"
+              ],
+              "description": "PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership."
+            },
+            "service": {
+              "type": "string",
+              "enum": [
+                "TPA_INSURANCE",
+                "LOYALTY360"
+              ]
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "CLAIM_STATUS",
+                "SERVICE_NOTICE"
+              ]
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "ACTION_REQUIRED"
+              ],
+              "description": "Presentation urgency only; ACTION_REQUIRED never performs or authorizes the action."
+            },
+            "templateKey": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+            },
+            "templateVersion": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "titleVi": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Server-rendered allowlisted template text; plain text, no markup, URLs or PII."
+            },
+            "bodyVi": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 280,
+              "description": "Server-rendered allowlisted template text; plain text, no markup, URLs or PII."
+            },
+            "target": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "id"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "CLAIM"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "description": "Internal target descriptor, never a URL. The client maps kind to its own route and the target API re-authorizes membership and object access (unauthorized targets are 404 there)."
+            },
+            "occurredAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Business time of the source event."
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Server time the notification was created; order and read-all cutoff use this."
+            },
+            "expiresAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "readAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Absent while unread. In-app read state only; not provider delivery and not a confirmation."
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2,
+              "description": "1 unread, 2 read. Read is monotonic."
+            }
+          },
+          "description": "No recipient, tenant, membership, source event or claim fields beyond the target descriptor."
+        },
+        "minItems": 0,
+        "maxItems": 50,
+        "uniqueItems": true
+      },
+      "nextCursor": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2048
+      },
+      "asOf": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Server time of the query; use as markMyNotificationsRead cutoff."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationUnreadCount": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "scope",
+      "unreadCount",
+      "capped",
+      "asOf"
+    ],
+    "properties": {
+      "scope": {
+        "type": "string",
+        "enum": [
+          "PERSONAL",
+          "TENANT"
+        ],
+        "description": "PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership."
+      },
+      "service": {
+        "type": "string",
+        "enum": [
+          "TPA_INSURANCE",
+          "LOYALTY360"
+        ]
+      },
+      "unreadCount": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 999
+      },
+      "capped": {
+        "type": "boolean",
+        "description": "True when at least 999 unread notifications exist."
+      },
+      "asOf": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationReadRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "scope"
+    ],
+    "properties": {
+      "scope": {
+        "type": "string",
+        "enum": [
+          "PERSONAL",
+          "TENANT"
+        ],
+        "description": "PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationReadAllRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "scope",
+      "cutoff"
+    ],
+    "properties": {
+      "scope": {
+        "type": "string",
+        "enum": [
+          "PERSONAL",
+          "TENANT"
+        ],
+        "description": "PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership."
+      },
+      "service": {
+        "type": "string",
+        "enum": [
+          "TPA_INSURANCE",
+          "LOYALTY360"
+        ]
+      },
+      "cutoff": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Inclusive createdAt upper bound; must not be in the future."
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "NotificationReadAllResult": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "scope",
+      "cutoff",
+      "markedCount"
+    ],
+    "properties": {
+      "scope": {
+        "type": "string",
+        "enum": [
+          "PERSONAL",
+          "TENANT"
+        ],
+        "description": "PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership."
+      },
+      "service": {
+        "type": "string",
+        "enum": [
+          "TPA_INSURANCE",
+          "LOYALTY360"
+        ]
+      },
+      "cutoff": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "markedCount": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
   "AiCallbackHeaders": {
     "type": "object",
     "additionalProperties": false,

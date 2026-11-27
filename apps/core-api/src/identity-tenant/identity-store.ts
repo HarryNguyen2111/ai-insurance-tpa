@@ -42,6 +42,33 @@ export class IdentityStore {
     } catch (error) { await client.query('ROLLBACK').catch(() => {}); throw error instanceof IdentityError ? error : unavailable(); }
     finally { client.release(); }
   }
+  /**
+   * Principal-scoped transaction for data that belongs to a person, not a tenant (NOTIF-01 personal inbox).
+   * No tenant context is set, so any tenant table access fails closed (tpa.current_tenant_id() raises 42501);
+   * principal-scoped RLS reads app.identity_hash (SET LOCAL via set_config(..., true)). No tenant=NULL bypass.
+   */
+  async withPrincipal<T>(identity: VerifiedIdentity, fn: (tx: IdentityTransaction, principalId: string) => Promise<T>): Promise<T> {
+    assertVerifiedIdentity(identity);
+    const client = await this.pool.connect();
+    let began = false;
+    try {
+      const { rows: [role] } = await client.query(`SELECT current_user AS name, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole, rolreplication FROM pg_roles WHERE rolname=current_user`);
+      if (role.name !== 'tpa_app' || Object.entries(role).some(([k, v]) => k !== 'name' && v !== false)) throw unavailable();
+      await client.query('BEGIN'); began = true;
+      await client.query("SELECT pg_catalog.set_config('app.identity_hash', $1, true)", [identity.identityHash]);
+      const { rows: [principal] } = await client.query<{ id: string }>(
+        `SELECT id FROM tpa.identity_principals WHERE identity_hash=$1 AND active AND kind='HUMAN'`, [identity.identityHash]);
+      // No row lock: tpa_app has no UPDATE right on principals, and RLS re-checks the active principal on every query.
+      if (!principal) throw denied();
+      const tx: IdentityTransaction = Object.freeze({ query: <R extends pg.QueryResultRow>(sql: string, values?: unknown[]) => client.query<R>(sql, values) });
+      const value = await fn(tx, principal.id);
+      await client.query('COMMIT'); began = false;
+      return value;
+    } catch (error) {
+      if (began) await client.query('ROLLBACK').catch(() => {});
+      throw error instanceof IdentityError ? error : unavailable();
+    } finally { client.release(); }
+  }
   private async inTenant<T>(identity: VerifiedIdentity, directory: Directory, fn: (tx: IdentityTransaction, grant: Grant) => Promise<T>): Promise<T> {
     try {
       return await this.database.withTenantTransaction(directory.tenant_id, async tx => {

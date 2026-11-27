@@ -97,17 +97,33 @@ test('PT01 foundation: PG16 app role through real PgBouncer transaction pool', a
         WHERE n.nspname='tpa' AND c.relname IN ('isolation_parent','isolation_child','consent_policies','consent_records','upload_sessions','document_versions','document_scan_outbox','ledger_accounts','journal_entries','journal_lines','claims','claim_documents') ORDER BY c.relname`)).rows;
       assert.equal(tables.length, 12);
       for (const table of tables) { assert.equal(table.owner, 'tpa_migrator'); assert.equal(table.relrowsecurity, true); assert.equal(table.relforcerowsecurity, true); }
-      const policies = (await admin.query("SELECT policyname, qual, with_check FROM pg_policies WHERE schemaname='tpa'")).rows;
-      assert.equal(policies.length, 45); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01), +6 BEN-01 snapshot tables, +6 AUTH-01 identity tables, +4 BEN-03 benefit ledger tables, +6 VWF-03 workflow definition tables, +2 BEN-04 tenant invoice allocation tables (global invoice tables have no policy and no app grant), +5 DOC-01 consent/upload/document tables, +3 PAY-01 ledger tables, +2 CLM-02 claims/claim_documents
+      const policies = (await admin.query("SELECT policyname, cmd, qual, with_check FROM pg_policies WHERE schemaname='tpa'")).rows;
+      assert.equal(policies.length, 49); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01), +6 BEN-01 snapshot tables, +6 AUTH-01 identity tables, +4 BEN-03 benefit ledger tables, +6 VWF-03 workflow definition tables, +2 BEN-04 tenant invoice allocation tables (global invoice tables have no policy and no app grant), +5 DOC-01 consent/upload/document tables, +3 PAY-01 ledger tables, +2 CLM-02 claims/claim_documents, +3 NOTIF-01 tenant inbox (per-command) +1 NOTIF-01 personal inbox (principal-scoped)
       // AUTH-01: identity discovery happens BEFORE a tenant is chosen, so exactly these two global
       // policies are scoped to the verified principal instead of a tenant. Every other policy stays tenant-scoped.
       const principalScoped: Record<string, RegExp> = {
         identity_principals_self: /^\(identity_hash = current_setting\('app\.identity_hash'::text, true\)\)$/,
         identity_directory_self: /^\(principal_id = tpa\.identity_principal_id\(\)\)$/,
+        // NOTIF-01 (#107, controller D2): the personal inbox belongs to a person, not a tenant; no tenant column at all.
+        personal_notifications_self: /^\(recipient_principal_id = tpa\.identity_principal_id\(\)\)$/,
       };
-      assert.equal(policies.filter(p => p.policyname in principalScoped).length, 2);
+      assert.equal(policies.filter(p => p.policyname in principalScoped).length, 3);
+      // NOTIF-01 tenant inbox: per-command policies, pinned exactly. The producer inserts by tenant only and cannot
+      // read back; reads/marks additionally need the recipient principal and an ACTIVE recipient membership.
+      const recipient = '((tenant_id = tpa.current_tenant_id()) AND (recipient_principal_id = tpa.identity_principal_id()) AND (EXISTS ( SELECT 1\n'
+        + '   FROM tpa.identity_memberships m\n'
+        + '  WHERE ((m.tenant_id = tenant_notifications.tenant_id) AND (m.id = tenant_notifications.recipient_membership_id) AND (m.principal_id = tenant_notifications.recipient_principal_id) AND m.active))))';
+      const perCommand: Record<string, { cmd: string; qual: string | null; with_check: string | null }> = {
+        tenant_notifications_produce: { cmd: 'INSERT', qual: null, with_check: '(tenant_id = tpa.current_tenant_id())' },
+        tenant_notifications_recipient_read: { cmd: 'SELECT', qual: recipient, with_check: null },
+        tenant_notifications_recipient_mark: { cmd: 'UPDATE', qual: recipient,
+          with_check: '((tenant_id = tpa.current_tenant_id()) AND (recipient_principal_id = tpa.identity_principal_id()))' },
+      };
+      assert.equal(policies.filter(p => p.policyname in perCommand).length, 3);
       for (const policy of policies) {
         if (policy.policyname in principalScoped) { assert.match(policy.qual, principalScoped[policy.policyname]); assert.equal(policy.qual, policy.with_check); continue; }
+        if (policy.policyname in perCommand) { assert.deepEqual({ cmd: policy.cmd, qual: policy.qual, with_check: policy.with_check }, perCommand[policy.policyname], policy.policyname); continue; }
+        assert.equal(policy.cmd, 'ALL', policy.policyname);
         assert.match(policy.qual, /tenant_id = tpa.current_tenant_id/);
         // Context inserts additionally require the current membership/principal versions.
         if (policy.policyname === 'identity_context_self') { assert.match(policy.with_check, /tenant_id = tpa.current_tenant_id/); assert.match(policy.with_check, /principal_version/); continue; }

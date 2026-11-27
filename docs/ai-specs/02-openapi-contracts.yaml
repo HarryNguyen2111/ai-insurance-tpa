@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: MPS TPA Core & AI Worker API Contracts
-  version: 1.4.0
+  version: 1.5.0
   description: Hop dong giao tiep chuan giua Zalo Mini App, Next.js Workbench, NestJS Core API va Python AI Worker.
 
 # Contract nền: endpoint mới liệt kê trong 07 phải được đặc tả đầy đủ trước implementation.
@@ -3003,6 +3003,212 @@ paths:
         "422": *a5
         "429": *a6
         "503": *a7
+  /v1/me/notifications:
+    get:
+      operationId: listMyNotifications
+      summary: List the caller's in-app notifications for one explicit scope
+      description: NOTIF-01 (#107). Exactly one explicit scope per request, never a mixed or all-tenant inbox.
+        PERSONAL lists only rows addressed to the verified principal and MUST NOT carry X-Membership-Context
+        (422). TENANT requires X-Membership-Context and lists only rows addressed to the verified principal in
+        that currently active membership; the membership is re-authorized on every request (revoked 403, stale
+        409). Allowlist scope/service/status/cursor/limit only; unknown or repeated parameters 422. Stable
+        createdAt+notificationId order (newest first), opaque cursor bound to principal, scope, membership and
+        filters. Expired notifications are excluded. Text is minimal server-rendered template output; no amounts,
+        diagnosis, identifiers, document URLs or OTP. Reading a list never marks anything read. Unread/read is
+        in-app state only, distinct from provider delivery and from any EOB/OTP/consent/claim action.
+      parameters:
+      - $ref: '#/components/parameters/NotificationScopeQuery'
+      - $ref: '#/components/parameters/NotificationServiceQuery'
+      - in: query
+        name: status
+        required: false
+        schema:
+          type: string
+          enum:
+          - UNREAD
+          - ALL
+          default: ALL
+      - in: query
+        name: cursor
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 2048
+      - in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 20
+      - $ref: '#/components/parameters/NotificationMembershipContext'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+          headers:
+            Cache-Control:
+              description: Must be no-store for sensitive data
+              schema:
+                type: string
+                enum:
+                - no-store
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/me/notifications/unread-count:
+    get:
+      operationId: getMyNotificationUnreadCount
+      summary: Count unread, unexpired notifications for one explicit scope
+      description: NOTIF-01 (#107). Same scope, membership and service rules as listMyNotifications; counts exactly
+        the rows listMyNotifications returns with status=UNREAD. The count is capped at 999 with capped=true;
+        never estimated or fabricated. asOf is the server time of the count and is the recommended cutoff for
+        markMyNotificationsRead.
+      parameters:
+      - $ref: '#/components/parameters/NotificationScopeQuery'
+      - $ref: '#/components/parameters/NotificationServiceQuery'
+      - $ref: '#/components/parameters/NotificationMembershipContext'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationUnreadCount'
+          headers:
+            Cache-Control:
+              description: Must be no-store for sensitive data
+              schema:
+                type: string
+                enum:
+                - no-store
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/me/notifications/{notificationId}/read:
+    post:
+      operationId: markMyNotificationRead
+      summary: Mark one notification read (idempotent, server-authoritative across devices)
+      description: NOTIF-01 (#107). Naturally idempotent, so no Idempotency-Key header; the first call sets readAt and
+        version 2; repeats (any device) return the same readAt and never revert to unread. Unknown, expired,
+        other-recipient, other-tenant, other-membership or other-scope notifications are 404 without revealing
+        existence. TENANT scope re-authorizes the current membership and records an immutable audit entry for the
+        first transition only; PERSONAL read-state is recipient UI state and is not a tenant audit event. Marking
+        read never signs OTP, approves an EOB, accepts consent or advances a claim.
+      parameters:
+      - in: path
+        name: notificationId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/NotificationMembershipContext'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationReadRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          headers:
+            Cache-Control:
+              description: Must be no-store for sensitive data
+              schema:
+                type: string
+                enum:
+                - no-store
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /v1/me/notifications/read-all:
+    post:
+      operationId: markMyNotificationsRead
+      summary: Mark the current scope read up to an explicit cutoff (idempotent)
+      description: NOTIF-01 (#107). Marks unread, unexpired notifications of exactly one scope (and optional service)
+        whose createdAt is at or before cutoff; notifications created after the cutoff, in another scope, membership
+        or tenant are never touched, so concurrent new events stay unread. cutoff is normally the asOf of the list or
+        count the user saw; a cutoff in the future is 422. Naturally idempotent; repeats return markedCount 0. TENANT scope re-authorizes
+        the membership and audits one entry when markedCount > 0. Never an EOB/OTP/consent/claim action.
+      parameters:
+      - $ref: '#/components/parameters/NotificationMembershipContext'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationReadAllRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationReadAllResult'
+          headers:
+            Cache-Control:
+              description: Must be no-store for sensitive data
+              schema:
+                type: string
+                enum:
+                - no-store
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '503':
+          $ref: '#/components/responses/Error503'
 components:
   securitySchemes:
     bearerAuth:
@@ -3113,6 +3319,30 @@ components:
       required: false
       schema:
         $ref: "#/components/schemas/WorkflowTaskStatus"
+    NotificationScopeQuery:
+      in: query
+      name: scope
+      required: true
+      schema:
+        $ref: '#/components/schemas/NotificationScope'
+      description: Explicit inbox scope. There is no all-scope or all-tenant aggregation.
+    NotificationServiceQuery:
+      in: query
+      name: service
+      required: false
+      schema:
+        $ref: '#/components/schemas/NotificationService'
+      description: Optional service filter inside the scope. LOYALTY360 has no producer yet (design gap).
+    NotificationMembershipContext:
+      in: header
+      name: X-Membership-Context
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 8192
+      description: Required when scope=TENANT and forbidden (422) when scope=PERSONAL. Same opaque server-issued
+        context as MembershipContext; never a tenant ID.
   responses:
     Error401:
       description: Missing/invalid/expired authentication or service signature
@@ -8139,3 +8369,200 @@ components:
           uniqueItems: true
       description: Derived from verified principal + membership context; display hint only. No tenantId. AI service actors
         have no bearer actor scope.
+    NotificationScope:
+      type: string
+      enum:
+      - PERSONAL
+      - TENANT
+      description: PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership.
+    NotificationService:
+      type: string
+      enum:
+      - TPA_INSURANCE
+      - LOYALTY360
+    NotificationCategory:
+      type: string
+      enum:
+      - CLAIM_STATUS
+      - SERVICE_NOTICE
+    NotificationPriority:
+      type: string
+      enum:
+      - INFO
+      - ACTION_REQUIRED
+      description: Presentation urgency only; ACTION_REQUIRED never performs or authorizes the action.
+    NotificationTarget:
+      type: object
+      additionalProperties: false
+      required:
+      - kind
+      - id
+      properties:
+        kind:
+          type: string
+          enum:
+          - CLAIM
+        id:
+          type: string
+          format: uuid
+      description: Internal target descriptor, never a URL. The client maps kind to its own route and the target API
+        re-authorizes membership and object access (unauthorized targets are 404 there).
+    Notification:
+      type: object
+      additionalProperties: false
+      required:
+      - notificationId
+      - scope
+      - service
+      - category
+      - priority
+      - templateKey
+      - templateVersion
+      - titleVi
+      - bodyVi
+      - occurredAt
+      - createdAt
+      - expiresAt
+      - version
+      properties:
+        notificationId:
+          type: string
+          format: uuid
+        scope:
+          $ref: '#/components/schemas/NotificationScope'
+        service:
+          $ref: '#/components/schemas/NotificationService'
+        category:
+          $ref: '#/components/schemas/NotificationCategory'
+        priority:
+          $ref: '#/components/schemas/NotificationPriority'
+        templateKey:
+          type: string
+          pattern: ^[A-Z][A-Z0-9_]{2,63}$
+        templateVersion:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        titleVi:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: Server-rendered allowlisted template text; plain text, no markup, URLs or PII.
+        bodyVi:
+          type: string
+          minLength: 1
+          maxLength: 280
+          description: Server-rendered allowlisted template text; plain text, no markup, URLs or PII.
+        target:
+          $ref: '#/components/schemas/NotificationTarget'
+        occurredAt:
+          type: string
+          format: date-time
+          description: Business time of the source event.
+        createdAt:
+          type: string
+          format: date-time
+          description: Server time the notification was created; order and read-all cutoff use this.
+        expiresAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+          description: Absent while unread. In-app read state only; not provider delivery and not a confirmation.
+        version:
+          type: integer
+          minimum: 1
+          maximum: 2
+          description: 1 unread, 2 read. Read is monotonic.
+      description: No recipient, tenant, membership, source event or claim fields beyond the target descriptor.
+    NotificationList:
+      type: object
+      additionalProperties: false
+      required:
+      - scope
+      - items
+      - asOf
+      properties:
+        scope:
+          $ref: '#/components/schemas/NotificationScope'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+          minItems: 0
+          maxItems: 50
+          uniqueItems: true
+        nextCursor:
+          type: string
+          minLength: 1
+          maxLength: 2048
+        asOf:
+          type: string
+          format: date-time
+          description: Server time of the query; use as markMyNotificationsRead cutoff.
+    NotificationUnreadCount:
+      type: object
+      additionalProperties: false
+      required:
+      - scope
+      - unreadCount
+      - capped
+      - asOf
+      properties:
+        scope:
+          $ref: '#/components/schemas/NotificationScope'
+        service:
+          $ref: '#/components/schemas/NotificationService'
+        unreadCount:
+          type: integer
+          minimum: 0
+          maximum: 999
+        capped:
+          type: boolean
+          description: True when at least 999 unread notifications exist.
+        asOf:
+          type: string
+          format: date-time
+    NotificationReadRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - scope
+      properties:
+        scope:
+          $ref: '#/components/schemas/NotificationScope'
+    NotificationReadAllRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - scope
+      - cutoff
+      properties:
+        scope:
+          $ref: '#/components/schemas/NotificationScope'
+        service:
+          $ref: '#/components/schemas/NotificationService'
+        cutoff:
+          type: string
+          format: date-time
+          description: Inclusive createdAt upper bound; must not be in the future.
+    NotificationReadAllResult:
+      type: object
+      additionalProperties: false
+      required:
+      - scope
+      - cutoff
+      - markedCount
+      properties:
+        scope:
+          $ref: '#/components/schemas/NotificationScope'
+        service:
+          $ref: '#/components/schemas/NotificationService'
+        cutoff:
+          type: string
+          format: date-time
+        markedCount:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
