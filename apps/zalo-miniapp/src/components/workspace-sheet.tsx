@@ -93,7 +93,7 @@ export function WorkspaceSheet() {
                   data-testid={`ws-option-${id === PERSONAL ? 'personal' : m?.workspace.shortName}`}
                 >
                   <span className="ws-order" aria-hidden="true">{i + 1}</span>
-                  <TenantMark shortName={m?.workspace.shortName ?? ''} personal={id === PERSONAL} size={36} />
+                  <TenantMark shortName={m?.workspace.shortName ?? ''} personal={id === PERSONAL} other={!current} size={36} />
                   <span className="ws-body">
                     <strong>{label}</strong>
                     <span className="ws-badges">

@@ -117,6 +117,11 @@ test('single tap opens the chooser after the double-tap window and does not swit
   await expect(sheet(page)).toBeVisible();
   await expect(page.getByTestId('ws-option-AB')).toHaveAttribute('aria-current', 'true');
   await expect(sheet(page).getByText('(đang dùng)')).toHaveCount(1);
+  // Other workspaces are never painted with the active tenant's brand (branding ≠ access, not yet authorised).
+  const markBg = (id: string) => page.getByTestId(id).locator('.tenant-mark').evaluate((e) => getComputedStyle(e).backgroundColor);
+  expect(await markBg('ws-option-AB')).toBe('rgb(15, 118, 110)');
+  expect(await markBg('ws-option-BM')).toBe('rgb(236, 239, 243)');
+  expect(await markBg('ws-option-CT')).toBe('rgb(236, 239, 243)');
   expect(await html(page).getAttribute('data-context-generation')).toBe(gen);
   await page.screenshot({ path: 'test-results/106-sheet-390x844.png' });
   g.assertClean();

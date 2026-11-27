@@ -6,9 +6,11 @@ import { PERSONAL } from '../lib/context-ring.ts';
 import { useWorkspace } from '../state.tsx';
 
 /** Rounded-square tenant mark: initials on the tenant brand (never a logo URL from the tenant). */
-export function TenantMark({ shortName, personal, size = 40 }: { shortName: string; personal?: boolean; size?: number }) {
+/** `other` = a workspace that is NOT the committed context: neutral, never painted with the active brand. */
+export function TenantMark({ shortName, personal, other, size = 40 }: { shortName: string; personal?: boolean; other?: boolean; size?: number }) {
+  const cls = personal ? 'tenant-mark personal' : other ? 'tenant-mark other' : 'tenant-mark';
   return (
-    <span className={personal ? 'tenant-mark personal' : 'tenant-mark'} style={{ width: size, height: size }} aria-hidden="true">
+    <span className={cls} style={{ width: size, height: size }} aria-hidden="true">
       {personal ? <SvgIcon name="star" size={Math.round(size * 0.5)} /> : shortName}
     </span>
   );
