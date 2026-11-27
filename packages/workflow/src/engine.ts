@@ -1,4 +1,8 @@
-import { Client, Connection, WorkflowExecutionAlreadyStartedError } from '@temporalio/client';
+import { Client, Connection, WorkflowExecutionAlreadyStartedError, WorkflowNotFoundError } from '@temporalio/client';
+import {
+  assertDefinitionCommand, assertDefinitionExecutionRef, DEFINITION_COMMAND_SIGNAL, DEFINITION_WORKFLOW_TYPE, definitionWorkflowId,
+  type DefinitionCommand, type DefinitionExecutionRef,
+} from './definition.ts';
 import {
   assertClaimCommand, assertClaimRef, CLAIM_COMMAND_SIGNAL, CLAIM_WORKFLOW_TYPE, claimWorkflowId, TASK_QUEUES,
   type ClaimCommand, type ClaimRef,
@@ -24,10 +28,22 @@ export interface IWorkflowEngine {
   submitClaimCommand(ref: ClaimRef, command: ClaimCommand): Promise<WorkflowAcceptance>;
 }
 
+/** VWF-03 (#80) port for pinned definition executions; separate from the claim command port. */
+export interface IDefinitionWorkflowEngine {
+  /**
+   * VWF-03: durably start the interpreter for one PostgreSQL execution binding on the
+   * stable id `wfexec/{tenant}/{execution}`. Args are the exact pin (ids/version/hash).
+   * Idempotent: an already started/closed execution resolves without a second run.
+   */
+  startDefinitionExecution(ref: DefinitionExecutionRef): Promise<WorkflowAcceptance>;
+  /** VWF-03: deliver a resume command; the workflow dedups by `commandId`. Never starts a run. */
+  submitDefinitionCommand(ref: DefinitionExecutionRef, command: DefinitionCommand): Promise<WorkflowAcceptance>;
+}
+
 export interface TemporalEngineOptions { address: string; namespace?: string; connectTimeoutMs?: number }
 
 /** Temporal implementation: signal-with-start on the stable workflow id. */
-export class TemporalWorkflowEngine implements IWorkflowEngine {
+export class TemporalWorkflowEngine implements IWorkflowEngine, IDefinitionWorkflowEngine {
   readonly #client: Client;
   constructor(client: Client) { this.#client = client; }
 
@@ -48,6 +64,35 @@ export class TemporalWorkflowEngine implements IWorkflowEngine {
       return { workflowId, runId: handle.signaledRunId, status: 'accepted' };
     } catch (error) {
       if (error instanceof WorkflowExecutionAlreadyStartedError) return { workflowId, runId: null, status: 'closed' };
+      throw error;
+    }
+  }
+
+  async startDefinitionExecution(ref: DefinitionExecutionRef): Promise<WorkflowAcceptance> {
+    assertDefinitionExecutionRef(ref);
+    const workflowId = definitionWorkflowId(ref);
+    try {
+      const handle = await this.#client.workflow.start(DEFINITION_WORKFLOW_TYPE, {
+        workflowId, taskQueue: TASK_QUEUES.orchestration, args: [{ ...ref }],
+        // One run per binding for its whole lifetime: duplicates/redeliveries never start another.
+        workflowIdReusePolicy: 'REJECT_DUPLICATE', workflowIdConflictPolicy: 'FAIL',
+      });
+      return { workflowId, runId: handle.firstExecutionRunId, status: 'accepted' };
+    } catch (error) {
+      if (error instanceof WorkflowExecutionAlreadyStartedError) return { workflowId, runId: null, status: 'accepted' };
+      throw error;
+    }
+  }
+
+  async submitDefinitionCommand(ref: DefinitionExecutionRef, command: DefinitionCommand): Promise<WorkflowAcceptance> {
+    assertDefinitionExecutionRef(ref);
+    assertDefinitionCommand(command);
+    const workflowId = definitionWorkflowId(ref);
+    try {
+      await this.#client.workflow.getHandle(workflowId).signal(DEFINITION_COMMAND_SIGNAL, command);
+      return { workflowId, runId: null, status: 'accepted' };
+    } catch (error) {
+      if (error instanceof WorkflowNotFoundError) return { workflowId, runId: null, status: 'closed' };
       throw error;
     }
   }

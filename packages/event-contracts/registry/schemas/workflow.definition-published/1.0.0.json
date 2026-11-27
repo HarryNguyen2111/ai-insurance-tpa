@@ -1,0 +1,92 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "tenantId",
+    "aggregateId",
+    "aggregateVersion",
+    "occurredAt",
+    "correlationId",
+    "causationId",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "workflow.definition-published"
+      ]
+    },
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "tenantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changeKind",
+        "versionNo",
+        "contentHash"
+      ],
+      "properties": {
+        "changeKind": {
+          "type": "string",
+          "enum": [
+            "PUBLISHED"
+          ]
+        },
+        "versionNo": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "retiredVersionNo": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      }
+    }
+  },
+  "description": "Internal outbox envelope (VWF-03 #80); aggregateId is the workflowDefinitionId. Payload carries only the published version number, its content hash and the version it retired; never labels, content or actor identities. Consumers reload the authorized definition. Inbox dedup and aggregate version ordering required.",
+  "$schema": "http://json-schema.org/draft-04/schema#"
+}

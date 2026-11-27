@@ -1,0 +1,107 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "tenantId",
+    "aggregateId",
+    "aggregateVersion",
+    "occurredAt",
+    "correlationId",
+    "causationId",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "workflow.execution-changed"
+      ]
+    },
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "tenantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changeKind",
+        "claimId",
+        "definitionId",
+        "versionNo",
+        "contentHash"
+      ],
+      "properties": {
+        "changeKind": {
+          "type": "string",
+          "enum": [
+            "BOUND",
+            "SUSPENDED",
+            "COMPLETED"
+          ]
+        },
+        "claimId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "definitionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "versionNo": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "REVIEW_COMPLETED",
+            "ROUTED_TO_MANUAL_REVIEW",
+            "SUPPLEMENT_EXPIRED"
+          ]
+        }
+      }
+    }
+  },
+  "description": "Internal outbox envelope (VWF-03 #80); aggregateId is the workflowExecutionId. BOUND starts the pinned Temporal interpreter through the inbox bridge; COMPLETED carries the fixed END outcome for the claim workflow owner (#38). Exact pin (definition/version/hash) only; no content, labels, PII or documents.",
+  "$schema": "http://json-schema.org/draft-04/schema#"
+}
