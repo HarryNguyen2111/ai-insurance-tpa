@@ -37,3 +37,10 @@
 .license { white-space: pre-wrap; font-size: .75rem; line-height: 1.5; margin: .75rem 0; }
 @media (max-width: 1000px) { .workspace { grid-template-columns: 1fr; } .panel { max-height: none; } .canvas { height: 440px; } }
 @media (max-width: 600px) { .fields, .connections { grid-template-columns: 1fr; } .header { align-items: start; } .header h1 { font-size: 1.2rem; } .inline { margin-left: 0; } }
+.server { border: 1px solid var(--border); border-radius: .75rem; padding: .8rem; display: grid; gap: .6rem; font-size: .8rem; }
+.server h2 { font-weight: 650; display: inline; }
+.server summary { cursor: pointer; }
+.server form.inline, .server div.inline { margin-left: 0; gap: .5rem; flex-wrap: wrap; align-items: end; }
+.table { width: 100%; border-collapse: collapse; font-size: .75rem; }
+.table th, .table td { border-bottom: 1px solid var(--border); padding: .4rem; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.validation li button { text-align: left; text-decoration: underline; }

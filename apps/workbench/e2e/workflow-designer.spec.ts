@@ -36,6 +36,10 @@ test('lazy-loads upstream editor only on opening; reports measured script bytes 
   await page.goto(`${webUrl}/quy-trinh`);
   await expect(page.getByRole('heading', { name: 'Thiết kế quy trình' })).toBeVisible();
   await expect(page.locator('.bjs-container')).toHaveCount(0);
+  await expect(page.getByLabel('Access token', { exact: true })).toHaveCount(0);
+  await expect(page.locator('summary').filter({ hasText: 'Máy chủ quy trình' })).toHaveCount(0);
+  await expect(page.getByLabel('Access token')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Kết nối máy chủ', exact: true })).toHaveCount(0);
   const before = await page.evaluate(() => performance.getEntriesByType('resource').filter(e => e.name.endsWith('.js')).map(e => e.name));
   await page.getByRole('button', { name: 'Mở trình vẽ', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Bắt đầu', exact: true })).toBeEnabled();
@@ -187,7 +191,7 @@ test('read-only local preview disables mutations and never calls a workflow publ
   await expect(page.getByRole('button', { name: 'Lưu cục bộ', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Người xử lý', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Kết nối', exact: true })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Xuất bản (chưa kết nối)', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Xuất bản (cần máy chủ)', exact: true })).toBeDisabled();
   await expect(page.getByTestId('workflow-properties')).toBeDisabled();
   expect(await documentFromPreview(page)).toEqual(before);
   expect(workflowRequests).toEqual([]);
@@ -204,4 +208,34 @@ test('tampered stored draft is not rendered and cannot be overwritten by a save'
   await page.getByRole('button', { name: 'Lưu cục bộ', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Trình thiết kế quy trình', exact: true }).getByRole('alert')).toContainText('Không lưu được');
   expect(await page.evaluate(k => localStorage.getItem(k), key)).toBe('{broken');
+});
+
+
+test('properties panel configures candidates, owner, SLA, action and evidence, retained in preview and reload', async ({ page }) => {
+  await openEditor(page);
+  const content: WorkflowContent = JSON.parse(await readFile(new URL('../../../docs/ai-specs/examples/visual-workflow-intake-review.example.json', import.meta.url), 'utf8'));
+  await importJson(page, { content, layout: { nodes: {}, edges: {} } });
+  await page.getByLabel('Chọn phần tử').selectOption('n_confirm_extraction');
+  await page.getByLabel('Người chịu trách nhiệm').selectOption('CASE_OWNER');
+  await page.getByLabel('SLA (giây)', { exact: true }).fill('7200');
+  await page.getByLabel('Chuyển cấp khi quá SLA').selectOption('CASE_OWNER');
+  await page.getByLabel('REQUEST_SUPPLEMENT', { exact: true }).uncheck();
+  await page.getByLabel('LAB_RESULT', { exact: true }).check();
+  await page.getByRole('button', { name: 'Áp dụng thuộc tính', exact: true }).click();
+  const candidates = page.getByRole('group', { name: 'Ứng viên', exact: true });
+  await candidates.getByLabel('INSURER_REVIEWER', { exact: true }).check();
+  await candidates.getByLabel('Số việc tối đa mỗi người', { exact: true }).fill('7');
+  const updated = await documentFromPreview(page);
+  const human = updated.content.nodes.find(n => n.nodeId === 'confirm_extraction');
+  expect(human).toMatchObject({ accountableOwner: 'CASE_OWNER', sla: { dueSeconds: 7200, escalateTo: 'CASE_OWNER' } });
+  expect(human && 'allowedActionIds' in human && human.allowedActionIds).not.toContain('REQUEST_SUPPLEMENT');
+  expect(human && 'allowedEvidence' in human && human.allowedEvidence.documentTypes).toContain('LAB_RESULT');
+  expect(updated.content.assignmentPolicy.rules[0]).toMatchObject({ candidateRoles: ['CLAIM_REVIEWER', 'INSURER_REVIEWER'], maxActiveTasksPerAssignee: 7 });
+  await page.getByRole('button', { name: 'Xem trước', exact: true }).click();
+  await expect(page.getByTestId('workflow-summary')).toContainText('7200s → CASE_OWNER');
+  await expect(page.getByTestId('workflow-summary')).toContainText('INSURER_REVIEWER');
+  await page.getByRole('button', { name: 'Lưu cục bộ', exact: true }).click();
+  await page.reload(); await page.getByRole('button', { name: 'Mở trình vẽ', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Bắt đầu', exact: true })).toBeEnabled();
+  expect(await documentFromPreview(page)).toEqual(updated);
 });
