@@ -1,35 +1,134 @@
+/*
+ * Visual language follows the owner-selected reference vimid-loyalty (issue #104): warm home background,
+ * banner + welcome header, titled rounded sections, ZaUI bottom navigation with a raised navy centre action.
+ * Every colour below is taken from the reference (app-config `primaryColor`, app.tsx `--zmp-background-color`,
+ * tailwind.config.js, navigation.tsx) except the text/status colours kept from #74 for WCAG AA contrast.
+ * See README "Đối chiếu mẫu giao diện" for the mapping and adaptations.
+ */
 :root {
+  --warm: #fff8e6;          /* reference home page bg-[#FFF8E6] */
+  --bg: #f4f5f6;            /* reference --zmp-background-color */
+  --accent: #ecbf3b;        /* reference template.primaryColor (fills/indicators only; low contrast as text) */
+  --accent-soft: #fdf0c8;
+  --navy: #183346;          /* reference raised contact button; TPA primary action colour */
+  --navy-pressed: #0f2231;
   --fg: #1a1f2b;
-  --muted: #4a5468;
-  --bg: #f3f5f9;
+  --muted: #4a5468;         /* #74 value: AA on white and on --warm (ref #767A7F is only 4.3:1 on warm) */
+  --gray: #767a7f;          /* reference tailwind gray: icons/dividers only */
   --card: #ffffff;
-  --brand: #0a5fd8;
+  --line: #e9ebed;          /* reference tailwind divider */
   --ok: #0f6b3a;
   --warn: #8a4b00;
   --bad: #b3261e;
-  --line: #d7dce5;
+  --radius: 16px;
+  --nav-h: 56px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* zmp-ui theme tokens → reference-derived palette */
+  --zaui-light-button-primary-background: var(--navy);
+  --zaui-light-button-primary-background-pressed: var(--navy-pressed);
+  --zaui-light-button-secondary-background: var(--accent-soft);
+  --zaui-light-button-secondary-text: var(--navy);
+  --zaui-light-button-tertiary-text: var(--navy);
+  --zaui-light-color-primary: var(--navy);
+  --zaui-light-bottom-navigation-active-color: var(--navy);
+  --zaui-light-bottom-navigation-color: #5f646a;
+  --zaui-light-bottom-navigation-divider-color: var(--line);
   color-scheme: light;
 }
 * { box-sizing: border-box; }
 html, body, #app { margin: 0; min-height: 100%; background: var(--bg); color: var(--fg); }
 body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; line-height: 1.5; }
-.page { max-width: 480px; margin: 0 auto; padding: 0 0 calc(24px + env(safe-area-inset-bottom)); background: var(--bg); }
-.banner { position: sticky; top: 0; z-index: 10; display: flex; flex-direction: column; gap: 2px; padding: 8px 16px; background: #fff4d6; color: #5c3b00; border-bottom: 2px solid #e0a800; font-size: 13px; }
-.topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--card); border-bottom: 1px solid var(--line); }
-.topbar h1 { margin: 0; font-size: 18px; }
+
+/* ---------- frame ---------- */
+.page { max-width: 480px; margin: 0 auto; padding: 0 0 calc(24px + var(--safe-bottom)); background: var(--bg); }
+.page.warm { background: var(--warm); }
+/* Tab-root screens: reserve the bar + raised-button overhang + safe area so the last element is reachable. */
+body.has-bottom-nav .page { padding-bottom: calc(var(--nav-h) + 32px + var(--safe-bottom)); }
+
+.banner { position: sticky; top: 0; z-index: 10; display: flex; gap: 6px; align-items: flex-start; padding: 4px 16px; background: var(--accent-soft); color: #5c3b00; font-size: 12px; line-height: 1.4; border-bottom: 1px solid var(--accent); }
+.banner p { margin: 0; }
+.banner .svg-icon { flex: none; margin-top: 2px; }
+
+.topbar { position: relative; display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: var(--card); }
+.topbar h1 { margin: 0; font-size: 18px; font-weight: 600; }
 .back, .back-spacer { width: 44px; height: 44px; flex: none; }
-.back { border: 0; background: transparent; font-size: 28px; line-height: 1; border-radius: 8px; cursor: pointer; color: var(--fg); }
-.content { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 0; }
+.back { display: grid; place-items: center; border: 0; background: transparent; border-radius: 50%; cursor: pointer; color: var(--fg); }
+
+.content { display: flex; flex-direction: column; gap: 12px; padding: 12px 16px 16px; }
+
+/* ---------- home: banner + welcome (reference pages/index) ---------- */
+.home-banner { position: relative; padding: 12px 16px 0; }
+.slides { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; border-radius: var(--radius); scrollbar-width: none; }
+.slides::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 2 / 1; min-height: 132px; display: flex; align-items: center; gap: 14px; padding: 16px 18px 28px; border-radius: var(--radius); color: #fff; background: linear-gradient(135deg, var(--navy) 0%, #24506b 60%, #2f6a7f 100%); }
+.slide:nth-child(2) { background: linear-gradient(135deg, #24506b 0%, var(--navy) 100%); }
+.slide:nth-child(3) { background: linear-gradient(135deg, #2f6a7f 0%, var(--navy) 100%); }
+.slide-art { flex: none; width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: var(--accent); color: var(--navy); }
+.slide-text { display: grid; gap: 4px; }
+.slide-text strong { font-size: 17px; line-height: 1.3; }
+.slide-text span { font-size: 14px; line-height: 1.4; opacity: .92; }
+/* Reference swiper pagination: translucent pill with small dots, active dot scaled. */
+.dots { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 5px; padding: 4px 6px; border-radius: 100px; background: rgba(0, 0, 0, .25); }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, .6); }
+.dot.active { background: #fff; transform: scale(1.4); }
+.welcome { padding: 12px 16px 0; }
+.welcome p { margin: 0; }
+.welcome-title { font-size: 18px; font-weight: 700; color: var(--navy); }
+.welcome-sub { font-size: 14px; color: var(--muted); }
+
+/* ---------- sections & cards (reference components/section.tsx) ---------- */
+.section { background: var(--card); border-radius: var(--radius); padding: 16px; display: grid; gap: 12px; box-shadow: 0 1px 2px rgba(24, 51, 70, .06); }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.section-heading { margin: 0; font-size: 16px; font-weight: 600; }
+.link { border: 0; background: transparent; color: var(--navy); font: inherit; font-size: 14px; font-weight: 600; min-height: 44px; padding: 0 4px; cursor: pointer; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 0; }
 .card h2, .section-title { margin: 0 0 8px; font-size: 16px; }
 .card p { margin: 6px 0; }
-.notice { border-color: #e0a800; background: #fffaf0; }
+.notice { border-color: var(--accent); background: #fffaf0; }
+.notice .zaui-btn { margin-top: 4px; }
+
+.plan-card { display: grid; gap: 2px; padding: 16px; border-radius: 12px; color: var(--fg); background: linear-gradient(135deg, var(--accent-soft), #fff 70%); border: 1px solid var(--accent); }
+.plan-insurer { font-size: 13px; color: var(--muted); }
+.plan-name { font-size: 17px; color: var(--navy); }
+.plan-row { font-size: 14px; }
+.plan-row.muted { color: var(--muted); }
+
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 96px; padding: 8px 4px; border: 0; border-radius: 12px; background: transparent; color: var(--fg); font: inherit; font-size: 13px; line-height: 1.3; text-align: center; cursor: pointer; }
+.tile-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--navy); }
+.tile:disabled { cursor: not-allowed; color: var(--muted); }
+.tile:disabled .tile-icon { background: #eceff3; color: var(--gray); }
+
+.recent { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.recent-item { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--fg); font: inherit; text-align: left; cursor: pointer; }
+.recent-icon { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; background: var(--bg); color: var(--navy); }
+.recent-body { flex: 1; min-width: 0; display: grid; gap: 4px; justify-items: start; }
+.recent-row { width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; }
+.recent .chip { border-radius: 10px; font-size: 12px; }
+.recent-amount { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- bottom navigation (reference components/navigation.tsx) ---------- */
+.bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; max-width: 480px; margin: 0 auto; }
+.bottom-nav .zaui-bottom-navigation-content { display: flex; align-items: stretch; height: calc(var(--nav-h) + var(--safe-bottom)); padding: 0 4px var(--safe-bottom); box-shadow: 0 -1px 0 var(--line), 0 -4px 12px rgba(24, 51, 70, .06); }
+.bottom-nav .zaui-bottom-navigation-item { position: relative; justify-content: center; min-width: 44px; min-height: 44px; font-size: 11px; }
+.bottom-nav .zaui-bottom-navigation-item-active { font-weight: 600; }
+.bottom-nav .zaui-bottom-navigation-item-active::before { content: ''; position: absolute; top: 0; width: 24px; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+.bottom-nav .zaui-bottom-navigation-item.unavailable { color: #5f646a; }
+.soon-badge { position: absolute; top: 2px; right: 2px; padding: 0 5px; border-radius: 8px; background: var(--accent); color: var(--navy); font-size: 9px; font-weight: 700; line-height: 14px; white-space: nowrap; }
+.bottom-nav .raised-slot { visibility: hidden; }
+.raised-action { position: absolute; left: 50%; top: -20px; transform: translateX(-50%); display: grid; justify-items: center; gap: 2px; z-index: 51; }
+.raised-button { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; border: 4px solid var(--card); background: var(--navy); color: #fff; box-shadow: 0 2px 10px rgba(0, 0, 0, .2); cursor: pointer; }
+.raised-button:disabled { background: #9aa3ab; cursor: not-allowed; }
+.raised-label { font-size: 11px; color: var(--navy); font-weight: 600; }
+.bottom-nav-notice { position: absolute; left: 16px; right: 16px; bottom: calc(100% + 28px); margin: 0; padding: 8px 12px; border-radius: 12px; background: var(--fg); color: #fff; font-size: 13px; text-align: center; }
+
+/* ---------- unchanged #74 content styles ---------- */
 .lead { font-size: 17px; margin: 0; }
 .hint, .meta { color: var(--muted); font-size: 14px; }
 .steps-intro { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
 .actions { display: grid; gap: 10px; }
 .check { display: flex; gap: 10px; align-items: flex-start; }
-.check input, .radio input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; }
+.check input, .radio input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--navy); }
 .radio { display: flex; gap: 10px; align-items: center; min-height: 44px; }
 fieldset { border: 0; padding: 0; margin: 0; }
 legend { font-weight: 600; margin-bottom: 4px; }
@@ -46,7 +145,7 @@ input[type='file'] { display: block; margin-top: 4px; min-height: 44px; max-widt
 .tag { font-size: 13px; color: var(--ok); }
 .tag.bad { color: var(--bad); }
 .claims, .lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.claim { width: 100%; display: grid; gap: 6px; text-align: left; padding: 14px 16px; min-height: 64px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--fg); font: inherit; cursor: pointer; }
+.claim { width: 100%; display: grid; gap: 6px; text-align: left; padding: 14px 16px; min-height: 64px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); color: var(--fg); font: inherit; cursor: pointer; }
 .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; background: #e8eefb; color: #0b3f8f; }
 .chip.action { background: #fff1d6; color: var(--warn); }
 .chip.success { background: #e3f4ea; color: var(--ok); }
@@ -63,9 +162,9 @@ input[type='file'] { display: block; margin-top: 4px; min-height: 44px; max-widt
 .tracker li.done { color: var(--fg); }
 .tracker li.done::before { content: '✓'; background: var(--ok); border-color: var(--ok); color: #fff; }
 .tracker li.current { color: var(--fg); font-weight: 700; }
-.tracker li.current::before { border-color: var(--brand); color: var(--brand); }
-details summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--brand); }
-blockquote { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--line); color: var(--muted); }
+.tracker li.current::before { border-color: var(--navy); background: var(--accent); color: var(--navy); }
+details summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--navy); font-weight: 600; }
+blockquote { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--accent); color: var(--muted); }
 .ecard { text-align: center; }
 .placeholder { margin: 12px auto 4px; display: inline-flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; border: 2px dashed var(--muted); border-radius: 10px; }
 .placeholder svg rect { fill: #6b7385; }
@@ -74,5 +173,5 @@ blockquote { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--line
 code { font-size: 12px; word-break: break-all; }
 .btn-disabled { width: 100%; min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: #eceff3; color: var(--muted); font: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
-:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
