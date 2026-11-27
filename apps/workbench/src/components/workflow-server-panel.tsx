@@ -64,7 +64,7 @@ export function WorkflowServerPanel({ session, refresh, onSession, onOpen }: Pro
   });
 
   return <details className={styles.server} aria-labelledby="workflow-server-title" open={connected || undefined}>
-    <summary><h2 id="workflow-server-title">Máy chủ quy trình</h2> <span className={styles.hint}>{connected ? 'đã kết nối' : 'lưu, kiểm tra và xuất bản'}</span></summary>
+    <summary><h2 id="workflow-server-title">Máy chủ quy trình</h2> <span className={styles.hint}>{connected ? 'đã kết nối' : 'chế độ phát triển · lưu, kiểm tra và xuất bản'}</span></summary>
     <p role="note" className={styles.hint}>Workbench chưa có đăng nhập OIDC (nhà cung cấp chưa chốt, #21). Dùng access token tổng hợp/thử nghiệm; token chỉ giữ trong bộ nhớ tab, không lưu. Quyền, MFA và maker-checker luôn do máy chủ kiểm tra.</p>
     {!session && <form className={styles.inline} onSubmit={event => { event.preventDefault(); void connect(); }}>
       <label>Access token<input type="password" autoComplete="off" spellCheck={false} value={token} onChange={e => setToken(e.target.value)} disabled={busy} /></label>

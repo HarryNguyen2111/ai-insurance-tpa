@@ -40,6 +40,12 @@ async function mint(name: string): Promise<{ token: string; membershipId: string
 async function state() { return (await fetch(`${harness!.controlUrl}/state/${definitionId}`)).json(); }
 const designer = (page: Page) => page.getByRole('region', { name: 'Trình thiết kế quy trình', exact: true });
 const status = (page: Page) => page.getByTestId('workflow-status');
+const flowNode = (page: Page, id: string) => page.locator(`.react-flow__node[data-id="${id}"]`);
+const validate = (page: Page) => page.getByRole('button', { name: /^Kiểm tra/ }).click();
+const selectEdge = (page: Page, id: string) => page.getByRole('list', { name: 'Nhánh', exact: true }).getByRole('button', { name: new RegExp(`· ${id}$`) }).click();
+async function openAdvanced(page: Page) {
+  if (!await page.getByRole('button', { name: 'Xem JSON chuẩn' }).isVisible()) await page.getByRole('tab', { name: 'Nâng cao · JSON/BPMN' }).click();
+}
 
 async function connect(page: Page, name: string) {
   await page.goto(`${webUrl}/quy-trinh`);
@@ -57,14 +63,15 @@ async function openServer(page: Page, versionNo = 1) {
   await page.getByRole('button', { name: `Phiên bản của ${KEY}`, exact: true }).click();
   await page.getByRole('button', { name: `Mở ${KEY} v${versionNo}`, exact: true }).click();
   await expect(status(page)).toContainText(`Máy chủ · v${versionNo}`);
-  await expect(page.locator('[data-element-id="n_start"]').first()).toBeVisible();
+  await expect(flowNode(page, 'start')).toBeVisible();
 }
 async function previewDoc(page: Page): Promise<EditorDocument> {
   const preview = page.getByTestId('canonical-preview');
-  if (!await preview.isVisible()) await page.getByRole('button', { name: 'Xem JSON chuẩn' }).click();
+  if (!await preview.isVisible()) { await openAdvanced(page); await page.getByRole('button', { name: 'Xem JSON chuẩn' }).click(); }
   return JSON.parse((await preview.textContent())!);
 }
 async function importJson(page: Page, doc: unknown, name = 'synthetic.json') {
+  await openAdvanced(page);
   await page.getByLabel('Nhập JSON / BPMN').setInputFiles({ name, mimeType: 'application/json', buffer: Buffer.from(typeof doc === 'string' ? doc : canonicalJson(doc)) });
 }
 /** A forged request straight to the bridge with the person's own valid credentials, bypassing the UI. */
@@ -90,6 +97,8 @@ test('designer: server draft save/reload, backend validation errors with focus, 
   await expect(page.getByRole('button', { name: 'Bắt đầu', exact: true })).toBeEnabled();
   await importJson(page, { content: example, layout: { nodes: {}, edges: {} } });
   await expect(page.getByRole('status').filter({ hasText: 'Đã nhập' })).toBeVisible();
+  // Before any server save, publish is explained in plain language rather than silently hidden.
+  await expect(page.locator('#publish-hint')).toContainText('Lưu lên máy chủ trước');
   await page.getByRole('button', { name: 'Tạo bản nháp trên máy chủ', exact: true }).click();
   await expect(status(page)).toHaveText('Máy chủ · v1 · Bản nháp · revision 1');
   definitionId = (await forged(page, 'designer', 'GET', 'admin/workflow-definitions')).body.items[0].definitionId;
@@ -98,19 +107,22 @@ test('designer: server draft save/reload, backend validation errors with focus, 
   await expect(page.getByRole('button', { name: 'Xuất bản', exact: true })).toHaveCount(0);
 
   // Invalid edit: drop the escalate route. Server validation needs a saved revision first.
-  await page.getByLabel('Chọn phần tử').selectOption('e_e_escalate');
-  await page.getByRole('button', { name: 'Xóa phần tử', exact: true }).click();
+  await selectEdge(page, 'e_escalate');
+  await page.getByRole('button', { name: 'Xóa nhánh', exact: true }).click();
   await expect(status(page)).toContainText('chưa lưu');
-  await expect(page.getByRole('button', { name: 'Kiểm tra trên máy chủ', exact: true })).toBeDisabled();
+  // Unsaved: only browser feedback runs; the server is not asked to validate a revision it does not have.
+  await validate(page);
+  await expect(page.getByRole('note').filter({ hasText: 'lưu lên máy chủ để kiểm tra trên máy chủ' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Kết quả kiểm tra máy chủ' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Lưu lên máy chủ', exact: true }).click();
   await expect(status(page)).toHaveText('Máy chủ · v1 · Bản nháp · revision 2');
-  await page.getByRole('button', { name: 'Kiểm tra trên máy chủ', exact: true }).click();
+  await validate(page);
   const report = page.getByRole('region', { name: 'Kết quả kiểm tra máy chủ' });
   await expect(report).toBeFocused();
   await expect(report).toContainText('MISSING_ACTION_ROUTE');
   await expect(report).toContainText('Không thể xuất bản');
   await report.getByRole('button').filter({ hasText: 'MISSING_ACTION_ROUTE' }).first().click();
-  await expect(page.getByLabel('Chọn phần tử')).toHaveValue('n_confirm_extraction');
+  await expect(page.getByRole('complementary', { name: 'Thuộc tính' }).getByRole('heading', { level: 2 })).toHaveText('Xác nhận dữ liệu trích xuất');
 
   // Malicious fixtures are rejected locally before any server write; labels stay escaped text.
   const before = await previewDoc(page);
@@ -131,12 +143,13 @@ test('designer: server draft save/reload, backend validation errors with focus, 
 
   // Restore a valid definition, move a step, save; reload keeps semantics (server) and geometry (local cache by hash).
   await importJson(page, { content: example, layout: { nodes: {}, edges: {} } });
-  await expect(page.getByRole('button', { name: 'Bắt đầu', exact: true })).toBeEnabled();
-  await page.getByLabel('Chọn phần tử').selectOption('n_confirm_extraction');
-  await page.getByRole('button', { name: 'Phải', exact: true }).click();
+  await expect(flowNode(page, 'confirm_extraction')).toBeVisible();
+  const beforeMove = await previewDoc(page);
+  await flowNode(page, 'confirm_extraction').focus(); await page.keyboard.press('Enter'); await page.keyboard.press('ArrowRight');
+  await expect.poll(async () => (await previewDoc(page)).layout.nodes.confirm_extraction.x).toBeGreaterThan(beforeMove.layout.nodes.confirm_extraction.x);
   await page.getByRole('button', { name: 'Lưu lên máy chủ', exact: true }).click();
   await expect(status(page)).toHaveText('Máy chủ · v1 · Bản nháp · revision 3');
-  await page.getByRole('button', { name: 'Kiểm tra trên máy chủ', exact: true }).click();
+  await validate(page);
   await expect(page.getByRole('region', { name: 'Kết quả kiểm tra máy chủ' })).toContainText('Máy chủ: hợp lệ (revision 3)');
   const saved = await previewDoc(page);
   expect(saved.content).toEqual(example);
@@ -197,7 +210,8 @@ test('authorized publisher previews, validates and publishes; the published vers
   await page.getByRole('button', { name: 'Xem trước', exact: true }).click();
   await expect(page.getByTestId('workflow-summary')).toContainText('confirm_extraction');
   await expect(page.getByTestId('workflow-summary')).toContainText('CLAIM_REVIEWER');
-  await page.getByRole('button', { name: 'Kiểm tra trên máy chủ', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Xuất bản', exact: true })).toHaveAccessibleDescription(/Kiểm tra/);
+  await validate(page);
   await expect(page.getByRole('region', { name: 'Kết quả kiểm tra máy chủ' })).toContainText('Máy chủ: hợp lệ (revision 6)');
   const hash = (await forged(page, 'publisher', 'GET', versionPath())).body.contentHash;
   await page.getByRole('button', { name: 'Xuất bản', exact: true }).click();
@@ -207,7 +221,10 @@ test('authorized publisher previews, validates and publishes; the published vers
   await expect(status(page)).toHaveText('Máy chủ · v1 · Đã xuất bản · revision 6');
   await expect(page.getByTestId('immutable-notice')).toContainText('bất biến');
   await expect(page.getByRole('button', { name: 'Người xử lý', exact: true })).toBeDisabled();
-  await expect(page.getByTestId('workflow-properties')).toBeDisabled();
+  await expect(page.getByLabel('Tên workflow', { exact: true })).toBeDisabled();
+  await flowNode(page, 'confirm_extraction').click();
+  await expect(page.getByRole('complementary', { name: 'Thuộc tính' }).getByLabel('Tên bước')).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Hoàn tác' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Lưu lên máy chủ', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Tạo bản nháp mới từ phiên bản này', exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('published-immutable-view.png'), fullPage: true });
