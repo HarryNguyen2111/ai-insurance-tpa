@@ -230,10 +230,11 @@ test('BEN-03 PG16: atomic reservations, PT03 concurrency, idempotency, rollback 
       assert.deepEqual(await snapshot(), before);
       // A waiter blocked behind a transaction that later rolls back sees the full limit.
       const slow = new ben.BenefitAccountsService(database, async () => { await delay(400); throw new Error('Synthetic late failure'); });
-      const blocked = slow.acquire(tenantId, actor, { ...input, operationKey: opKey() });
+      // Attach the expectation immediately: the rejection lands while the waiter is still pending.
+      const blocked = assert.rejects(slow.acquire(tenantId, actor, { ...input, operationKey: opKey() }), /Synthetic late failure/);
       await delay(100);
       const waiter = await acquire(tenantId, [{ accountId: account.accountId, amount: '800000.00' }]);
-      await assert.rejects(blocked, /Synthetic late failure/);
+      await blocked;
       assert.equal(waiter.kind, 'RESERVED');
       const retried = await service.acquire(tenantId, actor, input);
       assert.equal(retried.kind, 'INSUFFICIENT_LIMIT'); // original key was never committed, so it is evaluated afresh
