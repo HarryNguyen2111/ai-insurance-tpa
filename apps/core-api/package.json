@@ -11,7 +11,7 @@
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
     "test:e2e": "pnpm test:integration && node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --config test/jest-e2e.json",
     "test:smoke": "node --test test/compiled.smoke.mjs",
-    "test:integration": "node --test --test-concurrency=1 --test-timeout=180000 test/identity.pg.test.mjs test/workflow-definitions.pg.test.mjs test/documents.pg.test.mjs"
+    "test:integration": "node --test --test-concurrency=1 --test-timeout=180000 test/identity.pg.test.mjs test/workflow-definitions.pg.test.mjs test/documents.pg.test.mjs test/claims.pg.test.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1178.0",
