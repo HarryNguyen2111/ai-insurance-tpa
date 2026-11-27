@@ -15,12 +15,12 @@ export interface DocumentsApi {
   complete(call: DocumentCall, id: string, body: unknown): Promise<MutationResult>;
   get(call: DocumentCall, id: string): Promise<JsonValue>;
 }
-interface UploadRow {
+export interface UploadRow {
   id: string; member_id: string; principal_id: string; membership_id: string; consent_id: string;
   object_key: string; content_type: string; doc_type: string; size_bytes: number; sha256: string; expires_at: Date;
 }
-interface DocumentRow extends UploadRow { document_id: string; object_version: string; created_at: Date; version: number; status: string }
-const DOCUMENT = `SELECT u.*,d.id AS document_id,d.object_version,d.created_at,d.version,s.status FROM tpa.document_versions d
+export interface DocumentRow extends UploadRow { document_id: string; object_version: string; created_at: Date; version: number; status: string }
+export const DOCUMENT = `SELECT u.*,d.id AS document_id,d.object_version,d.created_at,d.version,s.status FROM tpa.document_versions d
  JOIN tpa.upload_sessions u ON u.tenant_id=d.tenant_id AND u.id=d.upload_id
  JOIN tpa.document_scan_outbox s ON s.tenant_id=d.tenant_id AND s.document_id=d.id`;
 const hidden = () => new IdentityError(404, 'NOT_FOUND');
@@ -30,9 +30,29 @@ const conflict = () => new IdentityError(409, 'IDEMPOTENCY_CONFLICT');
 function object(row: UploadRow): UploadObject {
   return { key: row.object_key, contentType: row.content_type, sizeBytes: row.size_bytes, sha256: row.sha256, expiresAt: row.expires_at };
 }
-function view(d: DocumentRow): JsonValue {
+export function documentView(d: DocumentRow): JsonValue {
   return { documentId: d.document_id, memberId: d.member_id, docType: d.doc_type, contentType: d.content_type,
     sizeBytes: d.size_bytes, sha256: d.sha256, version: d.version, scanStatus: d.status, createdAt: d.created_at.toISOString() };
+}
+/** Locks the approved policy behind the caller's current consent for `purpose`; DOMAIN_VIOLATION when absent/revoked. */
+export async function lockCurrentConsent(tx: IdentityTransaction, actor: AuthorizedActor, memberId: string, purpose: string, consentId?: string): Promise<string> {
+  const { rows: [c] } = await tx.query<{ id: string }>(`SELECT c.id FROM tpa.consent_records c
+    JOIN tpa.consent_policies p ON p.tenant_id=c.tenant_id AND p.purpose=c.purpose
+     AND p.policy_version=c.policy_version AND p.policy_hash=c.policy_hash
+    WHERE c.member_id=$1 AND c.principal_id=$2 AND c.membership_id=$3 AND c.purpose=$4 AND p.active
+     AND ($5::uuid IS NULL OR c.id=$5) AND tpa.document_lock_policy(p.purpose,p.policy_version,p.policy_hash) ORDER BY c.recorded_at DESC LIMIT 1`,
+  [memberId, actor.principalId, actor.membershipId, purpose, consentId ?? null]);
+  if (!c) throw domain(); return c.id;
+}
+/** The DOC-01 consumer gate inside the caller's transaction: uploader-owned, member-related, consent still current,
+ * scan state share-locked at CLEAN. Hidden (404) for other owners; DOMAIN_VIOLATION when not consumable. */
+export async function lockConsumableDocument(tx: IdentityTransaction, actor: AuthorizedActor, id: string, purpose: string): Promise<DocumentRow> {
+  if (!UUID.test(id)) throw hidden();
+  const { rows: [d] } = await tx.query<DocumentRow>(`${DOCUMENT} WHERE d.id=$1 FOR SHARE OF s`, [id]);
+  if (!d || !memberRelationAllows(actor, d.member_id) || d.principal_id !== actor.principalId || d.membership_id !== actor.membershipId) throw hidden();
+  await lockCurrentConsent(tx, actor, d.member_id, purpose, d.consent_id);
+  if (d.status !== 'CLEAN') throw domain();
+  return d;
 }
 /** All business queries live inside IdentityStore.withMembership -> withTenantTransaction (SET LOCAL). */
 export class DocumentsStore implements DocumentsApi {
@@ -50,14 +70,8 @@ export class DocumentsStore implements DocumentsApi {
     this.member(actor, u.member_id);
     if (u.principal_id !== actor.principalId || u.membership_id !== actor.membershipId) throw hidden();
   }
-  private async currentConsent(tx: IdentityTransaction, actor: AuthorizedActor, memberId: string, consentId?: string): Promise<string> {
-    const { rows: [c] } = await tx.query<{ id: string }>(`SELECT c.id FROM tpa.consent_records c
-      JOIN tpa.consent_policies p ON p.tenant_id=c.tenant_id AND p.purpose=c.purpose
-       AND p.policy_version=c.policy_version AND p.policy_hash=c.policy_hash
-      WHERE c.member_id=$1 AND c.principal_id=$2 AND c.membership_id=$3 AND c.purpose=$4 AND p.active
-       AND ($5::uuid IS NULL OR c.id=$5) AND tpa.document_lock_policy(p.purpose,p.policy_version,p.policy_hash) ORDER BY c.recorded_at DESC LIMIT 1`,
-    [memberId, actor.principalId, actor.membershipId, this.uploadPurpose, consentId ?? null]);
-    if (!c) throw domain(); return c.id;
+  private currentConsent(tx: IdentityTransaction, actor: AuthorizedActor, memberId: string, consentId?: string): Promise<string> {
+    return lockCurrentConsent(tx, actor, memberId, this.uploadPurpose, consentId);
   }
   private async mutate(call: DocumentCall, operation: string, schema: string, body: unknown, params: JsonValue,
     authorize: (tx: IdentityTransaction, actor: AuthorizedActor) => Promise<void>,
@@ -133,7 +147,7 @@ export class DocumentsStore implements DocumentsApi {
       await tx.query('SELECT pg_advisory_xact_lock(hashtextextended($1,151526))', [id]);
       if (b.sha256 !== u.sha256 || b.sizeBytes !== u.size_bytes) throw domain();
       const { rows: [existing] } = await tx.query<DocumentRow>(`${DOCUMENT} WHERE d.upload_id=$1`, [id]);
-      if (existing) return { status: 202, body: { ...view(existing) as Record<string, JsonValue>, scanStatus: 'QUARANTINED' } };
+      if (existing) return { status: 202, body: { ...documentView(existing) as Record<string, JsonValue>, scanStatus: 'QUARANTINED' } };
       if (u.expires_at.getTime() <= Date.now()) throw conflict();
       let h;
       try { h = await this.storage.head(object(u)); } catch { throw unavailable(); }
@@ -147,7 +161,7 @@ export class DocumentsStore implements DocumentsApi {
       await tx.query(`INSERT INTO tpa.document_scan_outbox(tenant_id,document_id) VALUES(tpa.current_tenant_id(),$1)`, [documentId]);
       await this.audit(tx, actor, documentId, 'DOCUMENT_QUARANTINED', { uploadId: id, objectVersion: h.version, sha256: u.sha256 });
       const { rows: [d] } = await tx.query<DocumentRow>(`${DOCUMENT} WHERE d.id=$1`, [documentId]);
-      return { status: 202, body: view(d) };
+      return { status: 202, body: documentView(d) };
     });
   }
   get(call: DocumentCall, id: string): Promise<JsonValue> {
@@ -158,17 +172,14 @@ export class DocumentsStore implements DocumentsApi {
         return d ? { id: d.document_id, kind: 'DOCUMENT', memberId: d.member_id } : null;
       }, async (tx, actor) => {
         const { rows: [d] } = await tx.query<DocumentRow>(`${DOCUMENT} WHERE d.id=$1`, [id]);
-        await this.audit(tx, actor, id, 'DOCUMENT_STATUS_READ', { version: d.version }); return view(d);
+        await this.audit(tx, actor, id, 'DOCUMENT_STATUS_READ', { version: d.version }); return documentView(d);
       });
   }
   /** Consumer boundary for later preflight/AI/attachment modules. Same transaction as the consumer effect. */
   async consume<T>(call: DocumentCall, id: string, effect: (tx: IdentityTransaction, object: UploadObject, version: string) => Promise<T>): Promise<T> {
     if (!UUID.test(id)) throw hidden();
     return this.identity.withMembership(call.identity, call.membershipContext, async (tx, actor) => {
-      const { rows: [d] } = await tx.query<DocumentRow>(`${DOCUMENT} WHERE d.id=$1 FOR SHARE OF s`, [id]);
-      if (!d) throw hidden(); this.owner(actor, d);
-      await this.currentConsent(tx, actor, d.member_id, d.consent_id);
-      if (d.status !== 'CLEAN') throw domain();
+      const d = await lockConsumableDocument(tx, actor, id, this.uploadPurpose);
       await this.audit(tx, actor, id, 'DOCUMENT_CONTENT_ACCESS', { version: d.version });
       return effect(tx, object(d), d.object_version);
     });
