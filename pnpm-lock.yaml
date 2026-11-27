@@ -26,6 +26,9 @@ importers:
       '@tpa/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@tpa/workflow':
+        specifier: workspace:*
+        version: link:../../packages/workflow
       jose:
         specifier: 6.2.18
         version: 6.2.18
@@ -347,6 +350,9 @@ importers:
       '@temporalio/client':
         specifier: 1.27.0
         version: 1.27.0(long@5.3.2)(protobufjs@8.8.1)
+      '@tpa/shared-contracts':
+        specifier: workspace:*
+        version: link:../shared-contracts
     devDependencies:
       '@tpa/event-contracts':
         specifier: workspace:*

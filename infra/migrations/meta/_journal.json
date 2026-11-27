@@ -71,6 +71,13 @@
       "when": 1795576610000,
       "tag": "0009_identity_tenant",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795576612000,
+      "tag": "0011_workflow_definitions",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,7 @@
 import { DefaultLogger, NativeConnection, Runtime } from '@temporalio/worker';
 import { createTenantDatabase } from '@tpa/database/tenant';
 import { createTransitionActivities } from './activities/transitions.ts';
+import { createDefinitionActivities } from './activities/definition.ts';
 import { readWorkflowWorkerConfig } from './config.ts';
 import { createClaimWorkers } from './worker.ts';
 
@@ -18,7 +19,7 @@ try {
   const db = createTenantDatabase({ connectionString: config.databaseUrl, max: 8, connectionTimeoutMillis: 10_000 });
   const connection = await NativeConnection.connect({ address: config.temporalAddress });
   try {
-    const workers = await createClaimWorkers({ connection, namespace: config.namespace, activities: createTransitionActivities(db) });
+    const workers = await createClaimWorkers({ connection, namespace: config.namespace, activities: { ...createTransitionActivities(db), ...createDefinitionActivities(db) } });
     for (const signal of ['SIGTERM', 'SIGINT'] as const) process.once(signal, () => { log('info', 'workflow worker draining'); workers.shutdown(); });
     log('info', 'workflow worker started');
     await workers.run(); // resolves after graceful shutdown drained in-flight tasks

@@ -18,7 +18,8 @@ const MARKER = 'PII-MARKER-0912345678-079123456789';
 
 test('spec 06 minimal events are registered on domain topics', () => {
   assert.deepEqual(eventTypes(), ['catalog.proposal-reviewed', 'claim.state-changed', 'claim.submitted',
-    'eob.published', 'payment.status-changed', 'workspace.changed']);
+    'eob.published', 'payment.status-changed', 'workflow.definition-published', 'workflow.definition-revoked',
+    'workflow.execution-changed', 'workspace.changed']);
   assert.equal(domainTopic('claim.submitted'), 'claim');
   assert.equal(domainTopic('eob.published'), 'eob');
   assert.equal(topicName('tpa.dev', 'claim'), 'tpa.dev.claim');

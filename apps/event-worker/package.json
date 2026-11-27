@@ -10,7 +10,8 @@
     "start": "node src/main.ts",
     "test": "node --test test/*.unit.test.ts",
     "test:e2e": "node --test --test-concurrency=1 --test-timeout=420000 test/*.e2e.test.ts",
-    "start:workflow": "node src/consumers/workflow-main.ts"
+    "start:workflow": "node src/consumers/workflow-main.ts",
+    "start:workflow-definitions": "node src/consumers/definition-main.ts"
   },
   "dependencies": {
     "@tpa/database": "workspace:*",

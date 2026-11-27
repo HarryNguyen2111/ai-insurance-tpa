@@ -48,6 +48,30 @@
       "versions": {
         "1.0.0": "d32ef4f0f05a1b4eb32c20adf4931667ae5252b1f5f13879bdf6497d36b3a1ae"
       }
+    },
+    "workflow.definition-published": {
+      "topic": "workflow",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": null,
+      "versions": {
+        "1.0.0": "d1a7957b924a1dc42cb147b8b1ec903c61cd164bf5938c8e569ff0cbd88ddf60"
+      }
+    },
+    "workflow.definition-revoked": {
+      "topic": "workflow",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": null,
+      "versions": {
+        "1.0.0": "365c8e35db9e3b2e202fdc728dbee69f72add9325895c9fa6e5bb2c2fad5643c"
+      }
+    },
+    "workflow.execution-changed": {
+      "topic": "workflow",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": null,
+      "versions": {
+        "1.0.0": "63cdbbbf92866553d529f4995ba5c2f7621e170a43712fdffb98bdf935fc8c7b"
+      }
     }
   }
 }
