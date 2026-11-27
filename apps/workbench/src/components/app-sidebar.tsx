@@ -22,6 +22,7 @@ import { ORG_TYPE_LABELS } from '@/lib/workspace-profile';
 const MAIN = [
   { href: '/', label: 'Tổng quan', icon: LayoutDashboard },
   { href: '/tiep-nhan', label: 'Tiếp nhận hồ sơ', icon: FileText, badge: 'Xem trước' },
+  { href: '/quy-trinh', label: 'Thiết kế quy trình', icon: FormInput, badge: 'Cục bộ' },
 ];
 const ADMIN = [
   { href: '/to-chuc/cai-dat', label: 'Cài đặt tổ chức', icon: Settings2 },
