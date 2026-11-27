@@ -88,6 +88,14 @@
       "versions": {
         "1.0.0": "11aed57b81b42154262c4f52e9644df997dc6caa79e17ac99669eedecef66210"
       }
+    },
+    "ledger.account-changed": {
+      "topic": "ledger",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": null,
+      "versions": {
+        "1.0.0": "5fb138ccff7862f2a66f98559e7e8a5e8ab30ec112f9af3486bfeff43cca84ff"
+      }
     }
   }
 }
