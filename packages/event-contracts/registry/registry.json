@@ -56,6 +56,14 @@
       "versions": {
         "1.0.0": "ea7393bd1c77fcfe7d37017f584ab94aa795c6eb3b18a37d86e0da072bc5171d"
       }
+    },
+    "invoice.allocation-changed": {
+      "topic": "invoice",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": null,
+      "versions": {
+        "1.0.0": "11aed57b81b42154262c4f52e9644df997dc6caa79e17ac99669eedecef66210"
+      }
     }
   }
 }

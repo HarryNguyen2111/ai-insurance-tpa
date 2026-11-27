@@ -98,7 +98,7 @@ test('PT01 foundation: PG16 app role through real PgBouncer transaction pool', a
       assert.equal(tables.length, 2);
       for (const table of tables) { assert.equal(table.owner, 'tpa_migrator'); assert.equal(table.relrowsecurity, true); assert.equal(table.relforcerowsecurity, true); }
       const policies = (await admin.query("SELECT policyname, qual, with_check FROM pg_policies WHERE schemaname='tpa'")).rows;
-      assert.equal(policies.length, 27); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01), +6 BEN-01 snapshot tables, +6 AUTH-01 identity tables, +4 BEN-03 benefit ledger tables
+      assert.equal(policies.length, 29); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01), +6 BEN-01 snapshot tables, +6 AUTH-01 identity tables, +4 BEN-03 benefit ledger tables, +2 BEN-04 tenant invoice allocation tables (global invoice tables have no policy and no app grant)
       // AUTH-01: identity discovery happens BEFORE a tenant is chosen, so exactly these two global
       // policies are scoped to the verified principal instead of a tenant. Every other policy stays tenant-scoped.
       const principalScoped: Record<string, RegExp> = {
