@@ -49,6 +49,14 @@
         "1.0.0": "d32ef4f0f05a1b4eb32c20adf4931667ae5252b1f5f13879bdf6497d36b3a1ae"
       }
     },
+    "benefit.limit-changed": {
+      "topic": "benefit",
+      "compatibility": "BACKWARD_TRANSITIVE",
+      "openapiComponent": null,
+      "versions": {
+        "1.0.0": "ea7393bd1c77fcfe7d37017f584ab94aa795c6eb3b18a37d86e0da072bc5171d"
+      }
+    },
     "workflow.definition-published": {
       "topic": "workflow",
       "compatibility": "BACKWARD_TRANSITIVE",

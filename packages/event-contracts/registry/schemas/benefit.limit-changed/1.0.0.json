@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "tenantId",
+    "aggregateId",
+    "aggregateVersion",
+    "occurredAt",
+    "correlationId",
+    "causationId",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "benefit.limit-changed"
+      ]
+    },
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "tenantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregateVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changeKind"
+      ],
+      "properties": {
+        "changeKind": {
+          "type": "string",
+          "enum": [
+            "ACCOUNT_OPENED",
+            "RESERVED",
+            "CONSUMED",
+            "RELEASED",
+            "EXPIRED"
+          ]
+        },
+        "reservationId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    }
+  },
+  "description": "Internal outbox envelope; tenantId derived by trusted core, aggregateId is the benefit limit (account) id and aggregateVersion its version. Payload carries no amounts, members or claim facts; consumers reload the authorized state. Inbox dedup and aggregate version ordering required.",
+  "$schema": "http://json-schema.org/draft-04/schema#"
+}
