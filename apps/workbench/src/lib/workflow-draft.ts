@@ -53,3 +53,28 @@ export function saveDraft(storage: DraftStorage, scope: string, document: Editor
   storage.setItem(draftKey(scope), raw);
   return next;
 }
+
+// Server versions (#80) carry canonical content only; the contract has no layout field. Geometry is a
+// browser-local convenience keyed by definition and reused only when the server contentHash matches.
+// It is P0 coordinates only; a missing/tampered entry falls back to the deterministic grid placement.
+export const LAYOUT_KEY = 'tpa.workflow.layout.v1';
+const HASH = /^[0-9a-f]{64}$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+export const EMPTY_LAYOUT = (): WorkflowLayout => ({ nodes: {}, edges: {} });
+export function saveServerLayout(storage: DraftStorage, definitionId: string, contentHash: string, document: EditorDocument): boolean {
+  if (!UUID.test(definitionId) || !HASH.test(contentHash)) return false;
+  try {
+    parseDocument(canonicalJson(document));
+    storage.setItem(`${LAYOUT_KEY}:${definitionId}`, canonicalJson({ contentHash, layout: document.layout }));
+    return true;
+  } catch { return false; }
+}
+export function readServerLayout(storage: DraftStorage, definitionId: string, contentHash: string, content: EditorDocument['content']): WorkflowLayout {
+  try {
+    const raw = UUID.test(definitionId) ? storage.getItem(`${LAYOUT_KEY}:${definitionId}`) : null;
+    if (!raw || byteLength(raw) > MAX_DRAFT_BYTES) return EMPTY_LAYOUT();
+    const value = JSON.parse(raw) as { contentHash?: unknown; layout?: unknown };
+    if (!plain(value) || Object.keys(value).sort().join() !== 'contentHash,layout' || value.contentHash !== contentHash) return EMPTY_LAYOUT();
+    return parseDocument(canonicalJson({ content, layout: value.layout })).layout;
+  } catch { return EMPTY_LAYOUT(); }
+}

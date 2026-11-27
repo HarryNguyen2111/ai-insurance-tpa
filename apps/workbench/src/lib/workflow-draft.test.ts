@@ -57,3 +57,17 @@ test('orphan geometry and duplicate canonical IDs cannot be silently discarded d
   assert.throws(() => parseDocument(canonicalJson(doc)), /DUPLICATE_ID/);
   assert.throws(() => saveDraft(storage(), 'sandbox', newDocument(), Number.MAX_SAFE_INTEGER), /LIMIT_EXCEEDED/);
 });
+
+test('server layout cache: reused only for the same definition + contentHash; tampered or stale entries fall back', async () => {
+  const { saveServerLayout, readServerLayout, LAYOUT_KEY } = await import('./workflow-draft.ts');
+  const store = storage(), doc = newDocument(), id = '0b9c7a52-6a7e-4c1e-9d7a-1f2e3d4c5b6a', hash = 'a'.repeat(64);
+  doc.layout.nodes.start.x = 333;
+  assert.equal(saveServerLayout(store, id, hash, doc), true);
+  assert.deepEqual(readServerLayout(store, id, hash, doc.content), doc.layout);
+  assert.deepEqual(readServerLayout(store, id, 'b'.repeat(64), doc.content), { nodes: {}, edges: {} }, 'other content version');
+  const fewer = structuredClone(doc.content); fewer.nodes = fewer.nodes.filter(n => n.nodeId !== 'start');
+  assert.deepEqual(readServerLayout(store, id, hash, fewer), { nodes: {}, edges: {} }, 'layout ids must exist in content');
+  store.setItem(`${LAYOUT_KEY}:${id}`, '{"contentHash":"' + hash + '","layout":{"nodes":{"start":{"x":"<script>","y":0,"width":36,"height":36}},"edges":{}}}');
+  assert.deepEqual(readServerLayout(store, id, hash, doc.content), { nodes: {}, edges: {} });
+  assert.equal(saveServerLayout(store, '../x', hash, doc), false);
+});
