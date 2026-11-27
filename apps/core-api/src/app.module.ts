@@ -3,6 +3,8 @@ import { HealthController } from './health.controller';
 import { IdentityTenantModule } from './identity-tenant/identity.module';
 import { WorkflowDefinitionModule } from './workflow-definition/workflow-definition.module';
 
+import { DocumentsModule } from './documents-consents/documents.module';
+
 const identity = IdentityTenantModule.register();
-@Module({ imports: [identity, WorkflowDefinitionModule.register({ identity })], controllers: [HealthController] })
+@Module({ imports: [identity, WorkflowDefinitionModule.register({ identity }), DocumentsModule.register({ identity })], controllers: [HealthController] })
 export class AppModule {}
