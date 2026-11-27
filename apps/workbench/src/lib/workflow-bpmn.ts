@@ -78,9 +78,10 @@ export function fromBpmnXml(xml: string): EditorDocument {
   if (root.namespaceURI !== NS.bpmn || root.localName !== 'definitions') fail();
   const all = [root, ...Array.from(root.getElementsByTagName('*'))];
   if (all.length > 5000) fail('LIMIT_EXCEEDED');
+  // Parallel constructs get their specific spec 14 §2 code even when nested where structure checks would fail first.
+  if (all.some(el => /^(parallelGateway|inclusiveGateway|complexGateway|multiInstanceLoopCharacteristics)$/.test(el.localName))) fail('PARALLEL_NOT_SUPPORTED');
   const ids = new Set<string>();
   for (const el of all) {
-    if (/^(parallelGateway|inclusiveGateway|complexGateway|multiInstanceLoopCharacteristics)$/.test(el.localName)) fail('PARALLEL_NOT_SUPPORTED');
     if (!allowedTags[el.namespaceURI ?? '']?.includes(el.localName)) fail();
     for (const attr of Array.from(el.attributes)) {
       if (attr.namespaceURI === 'http://www.w3.org/2000/xmlns/') {

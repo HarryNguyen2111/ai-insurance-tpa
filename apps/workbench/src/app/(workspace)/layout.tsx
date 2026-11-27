@@ -17,7 +17,8 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
         <div role="note" data-testid="preview-banner" className="border-b bg-muted/50 px-4 py-1.5 text-xs text-muted-foreground">
           <strong className="text-foreground">BẢN XEM TRƯỚC CỤC BỘ.</strong> Chỉ kiểm tra liveness Core API là kết nối thật. Tổ chức là prototype lưu trên trình duyệt; không tạo hồ sơ, không tính quyền lợi, không chạy AI.
         </div>
-        <main className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-6">{children}</main>
+        {/* Pages may opt into full width (the workflow builder canvas) with a data-full-bleed root. */}
+        <main className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-6 has-[[data-full-bleed]]:max-w-none has-[[data-full-bleed]]:p-3 md:has-[[data-full-bleed]]:p-3">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

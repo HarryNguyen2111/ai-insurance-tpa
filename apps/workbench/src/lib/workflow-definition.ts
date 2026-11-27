@@ -85,7 +85,14 @@ export function suggestedGuard(node: WorkflowNode, existing: WorkflowEdge[]): Wo
 export function validateLocal(content: unknown): WorkflowIssue[] {
   if (byteLength(canonicalJson(content)) > MAX_CONTENT_BYTES) return [{ detailCode: 'LIMIT_EXCEEDED', path: '/' }];
   if (!validate('WorkflowDefinitionContent', content)) return [{ detailCode: 'SCHEMA_INVALID', path: '/' }];
-  const c = content as WorkflowContent;
+  return graphIssues(content as WorkflowContent);
+}
+
+/**
+ * Semantic graph rules (spec 14 §3.5) only. Callable on a shape-correct but incomplete draft (values out of range),
+ * so the builder can show routing problems while fields are still being configured. Feedback only, never permission.
+ */
+export function graphIssues(c: WorkflowContent): WorkflowIssue[] {
   const issues: WorkflowIssue[] = [];
   const add = (detailCode: string, path: string, nodeId?: string) => issues.push({ detailCode, path, ...(nodeId ? { nodeId } : {}) });
   const nodes = new Map(c.nodes.map(n => [n.nodeId, n]));
