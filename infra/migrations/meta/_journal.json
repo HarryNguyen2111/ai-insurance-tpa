@@ -64,6 +64,13 @@
       "when": 1795576609000,
       "tag": "0008_policy_benefit_versions",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795576611000,
+      "tag": "0010_benefit_reservations",
+      "breakpoints": true
     }
   ]
 }
