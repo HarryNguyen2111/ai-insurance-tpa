@@ -23,6 +23,15 @@ importers:
       '@nestjs/platform-express':
         specifier: 12.6.0
         version: 12.6.0(@nestjs/common@12.6.0(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.6.0)(rxjs@7.8.2)
+      '@tpa/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      jose:
+        specifier: 6.2.18
+        version: 6.2.18
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -48,6 +57,9 @@ importers:
       '@types/node':
         specifier: ^24.0.0
         version: 24.19.2
+      '@types/pg':
+        specifier: 8.23.1
+        version: 8.23.1
       '@types/supertest':
         specifier: ^7.0.0
         version: 7.2.1
@@ -4867,6 +4879,9 @@ packages:
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
+
+  jose@6.2.18:
+    resolution: {integrity: sha512-doV4thUwgkrycJH4yLeqwTGIIZphHl+pk7CPReuMIhYhncmgzdko85MaCG4YQFTxqMFr1/oEH32tZuKKovcDEg==}
 
   js-levenshtein@1.1.6:
     resolution: {integrity: sha512-X2BB11YZtrRqY4EnQcLX5Rh373zbK4alC1FW7D7MBhL2gtcC17cTnr6DmfHZeS0s2rTHjUTMMHfG7gO8SSdw+g==}
@@ -10929,6 +10944,8 @@ snapshots:
       - ts-node
 
   jiti@2.7.0: {}
+
+  jose@6.2.18: {}
 
   js-levenshtein@1.1.6: {}
 
