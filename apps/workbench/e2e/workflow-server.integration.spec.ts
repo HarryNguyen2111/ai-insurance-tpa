@@ -236,3 +236,21 @@ test('other tenant cannot see or address the published definition (404, empty li
   expect(await forged(page, 'designerB', 'GET', versionPath())).toMatchObject({ status: 404, body: { code: 'NOT_FOUND' } });
   expect((await state()).otherTenantRows).toBe(0);
 });
+
+test('liveness: real compiled /health and same-origin web health are ONLINE while the workflow API stays authorized', async ({ page, request }) => {
+  // Direct: the harness serves core-api's real compiled HealthController (process liveness only).
+  const direct = await request.get(`${harness!.apiUrl}/health`);
+  expect(direct.status()).toBe(200);
+  expect(await direct.json()).toEqual({ status: 'ok' });
+  // Same-origin web route reaches it through the fixed loopback origin; scope stays liveness-only.
+  const viaWeb = await request.get(`${webUrl}/api/backend-health`);
+  expect(viaWeb.status()).toBe(200);
+  expect(await viaWeb.json()).toMatchObject({ state: 'ONLINE', scope: 'PROCESS_LIVENESS_ONLY', httpStatus: 200, detail: 'LIVENESS_OK' });
+  await page.goto(`${webUrl}/quy-trinh`);
+  await expect(page.getByTestId('backend-status-pill')).toHaveAttribute('data-state', 'ONLINE');
+  // Liveness grants nothing: without a bearer the workflow API refuses, on the server and at the bridge.
+  expect((await request.get(`${harness!.apiUrl}/v1/admin/workflow-definitions`)).status()).toBe(401);
+  expect((await request.get(`${webUrl}/api/workflow/v1/admin/workflow-definitions`)).status()).toBe(401);
+  // An authorized synthetic actor still reaches it through the same web origin.
+  expect((await forged(page, 'observer', 'GET', 'admin/workflow-definitions')).status).toBe(200);
+});

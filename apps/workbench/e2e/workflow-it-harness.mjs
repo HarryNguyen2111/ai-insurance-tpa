@@ -1,5 +1,5 @@
 // VWF-02 (#79) integrated-test harness. Test-only; never imported by application code.
-// Runs the REAL compiled core-api identity (#21) + workflow-definition (#80) controllers over
+// Runs the REAL compiled core-api identity (#21) + workflow-definition (#80) + health (liveness) controllers over
 // real PostgreSQL (PG16 via Docker in CI; real migrations; non-privileged tpa_app role; FORCE RLS)
 // with core-api's test-only synthetic OIDC issuer. Synthetic tenants/principals only.
 // Production AppModule deliberately has no identity provider (503), so the composition below mirrors
@@ -83,6 +83,8 @@ async function main() {
   const { IdentityTenantModule } = coreRequire('./dist/identity-tenant/identity.module.js');
   const { WorkflowDefinitionModule } = coreRequire('./dist/workflow-definition/workflow-definition.module.js');
   const { workflowRuntime } = coreRequire('./dist/workflow-definition/workflow-runtime.js');
+  // The real compiled liveness controller, exactly as AppModule registers it (process liveness only).
+  const { HealthController } = coreRequire('./dist/health.controller.js');
   coreRequire('reflect-metadata');
   const { Module } = coreRequire('@nestjs/common');
   const { NestFactory } = coreRequire('@nestjs/core');
@@ -115,7 +117,7 @@ async function main() {
   cleanup.push(() => store.close());
   const identity = IdentityTenantModule.register({ verifier, store });
   class HarnessModule {}
-  Module({ imports: [identity, WorkflowDefinitionModule.register({ identity })] })(HarnessModule);
+  Module({ imports: [identity, WorkflowDefinitionModule.register({ identity })], controllers: [HealthController] })(HarnessModule);
   const app = await NestFactory.create(HarnessModule, { logger: false });
   await app.listen(Number(process.env.HARNESS_API_PORT ?? 0), '127.0.0.1');
   cleanup.push(() => app.close());
