@@ -67,11 +67,11 @@ test('PG16: reproducible migrations, PT01 role subset and NUMERIC string roundtr
       await migrateDatabase(url('tpa_migrator'));
       await Promise.all([migrateDatabase(url('tpa_migrator')), migrateDatabase(url('tpa_migrator'))]);
       const { rows: [row] } = await migrator.query('SELECT count(*)::int AS count FROM drizzle.__drizzle_migrations');
-      assert.equal(row.count, 12);
+      assert.equal(row.count, 13);
       const { rows } = await admin.query("SELECT extname FROM pg_extension WHERE extname IN ('vector','pg_trgm','pgcrypto') ORDER BY extname");
       assert.deepEqual(rows.map(r => r.extname), ['pg_trgm', 'pgcrypto', 'vector']);
       const { rows: tables } = await migrator.query("SELECT tablename FROM pg_tables WHERE schemaname='tpa'");
-      assert.deepEqual(tables.map(r => r.tablename).sort(), ['audit_anchors', 'audit_chain_heads', 'audit_logs', 'benefit_accounts', 'benefit_movements', 'benefit_operations', 'benefit_reservations', 'benefit_rule_versions', 'consumer_aggregate_positions', 'consumer_inbox', 'consumer_parked_events', 'consumer_quarantine', 'contract_clauses', 'endorsements', 'idempotency_records', 'identity_contexts', 'identity_member_grants', 'identity_membership_directory', 'identity_memberships', 'identity_object_assignments', 'identity_principals', 'member_coverages', 'outbox_events', 'outbox_relay_tenants', 'policy_version_usages', 'policy_versions', 'workflow_command_ledger', 'workflow_definition_versions', 'workflow_definitions', 'workflow_execution_steps', 'workflow_executions', 'workflow_reference_versions', 'workflow_scope_bindings']);
+      assert.deepEqual(tables.map(r => r.tablename).sort(), ['audit_anchors', 'audit_chain_heads', 'audit_logs', 'benefit_accounts', 'benefit_movements', 'benefit_operations', 'benefit_reservations', 'benefit_rule_versions', 'consumer_aggregate_positions', 'consumer_inbox', 'consumer_parked_events', 'consumer_quarantine', 'contract_clauses', 'endorsements', 'idempotency_records', 'identity_contexts', 'identity_member_grants', 'identity_membership_directory', 'identity_memberships', 'identity_object_assignments', 'identity_principals', 'invoice_allocation_operations', 'invoice_allocations', 'invoice_registry', 'invoice_registry_allocations', 'member_coverages', 'outbox_events', 'outbox_relay_tenants', 'policy_version_usages', 'policy_versions', 'workflow_command_ledger', 'workflow_definition_versions', 'workflow_definitions', 'workflow_execution_steps', 'workflow_executions', 'workflow_reference_versions', 'workflow_scope_bindings']);
     });
     await t.test('incremental upgrade matches fresh database catalog/history', async () => {
       await admin.query('CREATE DATABASE tpa_upgrade');
