@@ -92,6 +92,13 @@
       "when": 1795576613000,
       "tag": "0012_invoice_allocation",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795576615000,
+      "tag": "0014_ledger_journal",
+      "breakpoints": true
     }
   ]
 }
