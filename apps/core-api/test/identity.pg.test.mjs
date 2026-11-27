@@ -9,6 +9,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { test } from 'node:test';
 import pg from 'pg';
 import { migrateDatabase } from '@tpa/database/migrate';
+import { createTenantDatabase } from '@tpa/database/tenant';
 import { IdentityStore } from '../src/identity-tenant/identity-store.ts';
 import { OidcVerifier, identityHash } from '../src/identity-tenant/oidc-verifier.ts';
 import { withObjectAccess } from '../src/identity-tenant/object-authorization.ts';
@@ -24,7 +25,7 @@ const denied = { status: 403, code: 'FORBIDDEN' }, hidden = { status: 404, code:
 
 test('AUTH-01 PG16: verified principal, tenant membership, MFA gate and object RBAC (PT01/PT17 synthetic)', async t => {
   const name = `tpa-auth01-${randomBytes(6).toString('hex')}`, password = randomBytes(24).toString('hex');
-  let started = false, admin, store, issuer;
+  let started = false, admin, store, issuer, appDb;
   try {
     docker('run', '-d', '--name', name, '--label', `ao.session=${process.env.AO_SESSION_ID ?? name}`,
       '--memory', '384m', '--cpus', '1', '--tmpfs', '/var/lib/postgresql/data:rw,size=512m', '-p', '127.0.0.1::5432',
@@ -109,30 +110,36 @@ test('AUTH-01 PG16: verified principal, tenant membership, MFA gate and object R
       await assert.rejects(store.withMembership(await login('alice-sub'), ctx, async () => 1), denied);
       const seen = await store.withMembership(a, ctx, async (tx, actor) => {
         const count = async sql => (await tx.query(sql)).rows[0].n;
-        const writes = {};
-        for (const [label, sql, values] of [
-          ['grant', `INSERT INTO tpa.identity_member_grants(tenant_id,membership_id,member_id,relation) VALUES(tpa.current_tenant_id(),$1,$2,'GUARDIAN')`, [actor.membershipId, mBob]],
-          ['assignment', `INSERT INTO tpa.identity_object_assignments(tenant_id,membership_id,object_kind,object_id,action) VALUES(tpa.current_tenant_id(),$1,'CLAIM',$2,'WRITE')`, [actor.membershipId, claimY]],
-          ['membership', `UPDATE tpa.identity_memberships SET roles=ARRAY['FINANCE'] WHERE id=$1`, [actor.membershipId]],
-          ['context', `UPDATE tpa.identity_contexts SET expires_at=expires_at WHERE membership_id=$1`, [actor.membershipId]],
-          ['forged-context', `INSERT INTO tpa.identity_contexts(tenant_id,id,membership_id,principal_id,membership_version,principal_version,token_hash,expires_at)
-            VALUES(tpa.current_tenant_id(),$1,$2,$3,1,1,$4,now()+interval '1 minute')`, [randomUUID(), bobT1, bob, 'a'.repeat(64)]],
-        ]) {
-          await tx.query('SAVEPOINT probe');
-          try { await tx.query(sql, values); writes[label] = 'ALLOWED'; } catch (error) { writes[label] = error.code; }
-          await tx.query('ROLLBACK TO SAVEPOINT probe');
-        }
-        return { tenant: actor.tenantId, writes,
+        return { tenant: actor.tenantId, membershipId: actor.membershipId,
           memberships: await count('SELECT count(*)::int AS n FROM tpa.identity_memberships'),
           directory: await count('SELECT count(*)::int AS n FROM tpa.identity_membership_directory'),
           principals: await count('SELECT count(*)::int AS n FROM tpa.identity_principals'),
           assignments: await count('SELECT count(*)::int AS n FROM tpa.identity_object_assignments'),
           grants: await count('SELECT count(*)::int AS n FROM tpa.identity_member_grants') };
       });
-      assert.equal(seen.tenant, T1);
       // Only alice's own T1 membership/grants; directory shows only alice's own entries; bob and T2 assignment invisible.
-      assert.deepEqual({ ...seen, writes: undefined }, { tenant: T1, writes: undefined, memberships: 1, directory: 2, principals: 1, assignments: 0, grants: 2 });
-      assert.deepEqual(seen.writes, { grant: '42501', assignment: '42501', membership: '42501', context: '42501', 'forged-context': '42501' });
+      assert.deepEqual(seen, { tenant: T1, membershipId: aliceT1, memberships: 1, directory: 2, principals: 1, assignments: 0, grants: 2 });
+      // The shared tenant wrapper fails a whole transaction on ANY query error, so each forbidden write gets
+      // its own real tpa_app transaction with the same SET LOCAL tenant + verified identity the store uses.
+      appDb ??= createTenantDatabase({ connectionString: url('tpa_app'), max: 2 });
+      const writes = {};
+      for (const [label, sql, values] of [
+          ['grant', `INSERT INTO tpa.identity_member_grants(tenant_id,membership_id,member_id,relation) VALUES(tpa.current_tenant_id(),$1,$2,'GUARDIAN')`, [aliceT1, mBob]],
+          ['assignment', `INSERT INTO tpa.identity_object_assignments(tenant_id,membership_id,object_kind,object_id,action) VALUES(tpa.current_tenant_id(),$1,'CLAIM',$2,'WRITE')`, [aliceT1, claimY]],
+          ['membership', `UPDATE tpa.identity_memberships SET roles=ARRAY['FINANCE'] WHERE id=$1`, [aliceT1]],
+          ['context', `UPDATE tpa.identity_contexts SET expires_at=expires_at WHERE membership_id=$1`, [aliceT1]],
+          ['forged-context', `INSERT INTO tpa.identity_contexts(tenant_id,id,membership_id,principal_id,membership_version,principal_version,token_hash,expires_at)
+            VALUES(tpa.current_tenant_id(),$1,$2,$3,1,1,$4,now()+interval '1 minute')`, [randomUUID(), bobT1, bob, 'a'.repeat(64)]],
+      ]) {
+        try {
+          await appDb.withTenantTransaction(T1, async tx => {
+            await tx.query("SELECT pg_catalog.set_config('app.identity_hash', $1, true)", [a.identityHash]);
+            await tx.query(sql, values);
+          });
+          writes[label] = 'ALLOWED';
+        } catch (error) { writes[label] = error.code; }
+      }
+      assert.deepEqual(writes, { grant: '42501', assignment: '42501', membership: '42501', context: '42501', 'forged-context': '42501' });
     });
 
     await t.test('PT17: SELF/GUARDIAN member links and staff assignment, everything else hidden', async () => {
@@ -181,7 +188,7 @@ test('AUTH-01 PG16: verified principal, tenant membership, MFA gate and object R
       await assert.rejects(store.select(a, aliceT2, randomUUID()), denied);
     });
   } finally {
-    await store?.close().catch(() => {}); await issuer?.close().catch(() => {}); await admin?.end().catch(() => {});
+    await appDb?.close().catch(() => {}); await store?.close().catch(() => {}); await issuer?.close().catch(() => {}); await admin?.end().catch(() => {});
     if (started) docker('rm', '-f', '-v', name);
   }
 });
