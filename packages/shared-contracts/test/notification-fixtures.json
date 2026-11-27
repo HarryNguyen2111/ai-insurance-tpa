@@ -1,0 +1,1668 @@
+[
+  {
+    "name": "NotificationScope personal",
+    "schema": "NotificationScope",
+    "valid": true,
+    "value": "PERSONAL"
+  },
+  {
+    "name": "NotificationScope tenant",
+    "schema": "NotificationScope",
+    "valid": true,
+    "value": "TENANT"
+  },
+  {
+    "name": "NotificationScope all-tenant aggregate rejected",
+    "schema": "NotificationScope",
+    "valid": false,
+    "value": "ALL"
+  },
+  {
+    "name": "NotificationService tpa",
+    "schema": "NotificationService",
+    "valid": true,
+    "value": "TPA_INSURANCE"
+  },
+  {
+    "name": "NotificationService loyalty",
+    "schema": "NotificationService",
+    "valid": true,
+    "value": "LOYALTY360"
+  },
+  {
+    "name": "NotificationService unknown",
+    "schema": "NotificationService",
+    "valid": false,
+    "value": "PAYMENTS"
+  },
+  {
+    "name": "NotificationCategory claim status",
+    "schema": "NotificationCategory",
+    "valid": true,
+    "value": "CLAIM_STATUS"
+  },
+  {
+    "name": "NotificationCategory marketing rejected",
+    "schema": "NotificationCategory",
+    "valid": false,
+    "value": "MARKETING"
+  },
+  {
+    "name": "NotificationPriority action required",
+    "schema": "NotificationPriority",
+    "valid": true,
+    "value": "ACTION_REQUIRED"
+  },
+  {
+    "name": "NotificationPriority unknown",
+    "schema": "NotificationPriority",
+    "valid": false,
+    "value": "URGENT_OTP"
+  },
+  {
+    "name": "NotificationTarget claim",
+    "schema": "NotificationTarget",
+    "valid": true,
+    "value": {
+      "kind": "CLAIM",
+      "id": "00000000-0000-4000-8000-0000000000b2"
+    }
+  },
+  {
+    "name": "NotificationTarget url target rejected",
+    "schema": "NotificationTarget",
+    "valid": false,
+    "value": {
+      "kind": "CLAIM",
+      "id": "00000000-0000-4000-8000-0000000000b2",
+      "url": "https://example.invalid/x"
+    }
+  },
+  {
+    "name": "NotificationTarget unknown kind",
+    "schema": "NotificationTarget",
+    "valid": false,
+    "value": {
+      "kind": "DOCUMENT",
+      "id": "00000000-0000-4000-8000-0000000000b2"
+    }
+  },
+  {
+    "name": "NotificationTarget non-uuid id",
+    "schema": "NotificationTarget",
+    "valid": false,
+    "value": {
+      "kind": "CLAIM",
+      "id": "../claims"
+    }
+  },
+  {
+    "name": "Notification tenant unread",
+    "schema": "Notification",
+    "valid": true,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "Notification tenant read",
+    "schema": "Notification",
+    "valid": true,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 2,
+      "readAt": "2026-11-27T03:05:00.000Z"
+    }
+  },
+  {
+    "name": "Notification personal without target",
+    "schema": "Notification",
+    "valid": true,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "PERSONAL",
+      "service": "LOYALTY360",
+      "category": "SERVICE_NOTICE",
+      "priority": "INFO",
+      "templateKey": "SYNTHETIC_SERVICE_NOTICE",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "Notification tenant id rejected",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1,
+      "tenantId": "00000000-0000-4000-8000-0000000000b2"
+    }
+  },
+  {
+    "name": "Notification recipient rejected",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1,
+      "recipientPrincipalId": "00000000-0000-4000-8000-0000000000b2"
+    }
+  },
+  {
+    "name": "Notification html title too long",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "Notification empty body",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "Notification lowercase template key",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "claim",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "Notification version 3",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 3
+    }
+  },
+  {
+    "name": "Notification missing expiresAt",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "version": 1
+    }
+  },
+  {
+    "name": "Notification null readAt",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1,
+      "readAt": null
+    }
+  },
+  {
+    "name": "Notification amount rejected",
+    "schema": "Notification",
+    "valid": false,
+    "value": {
+      "notificationId": "00000000-0000-4000-8000-0000000000a1",
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "category": "CLAIM_STATUS",
+      "priority": "ACTION_REQUIRED",
+      "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+      "templateVersion": 1,
+      "titleVi": "Hồ sơ cần bổ sung chứng từ",
+      "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+      "target": {
+        "kind": "CLAIM",
+        "id": "00000000-0000-4000-8000-0000000000b2"
+      },
+      "occurredAt": "2026-11-27T03:00:00.000Z",
+      "createdAt": "2026-11-27T03:00:00.000Z",
+      "expiresAt": "2027-02-25T03:00:00.000Z",
+      "version": 1,
+      "amount": "720000.00"
+    }
+  },
+  {
+    "name": "NotificationList page",
+    "schema": "NotificationList",
+    "valid": true,
+    "value": {
+      "scope": "TENANT",
+      "items": [
+        {
+          "notificationId": "00000000-0000-4000-8000-0000000000a1",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        }
+      ],
+      "nextCursor": "abc",
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationList empty",
+    "schema": "NotificationList",
+    "valid": true,
+    "value": {
+      "scope": "PERSONAL",
+      "items": [],
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationList missing asOf",
+    "schema": "NotificationList",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "items": [
+        {
+          "notificationId": "00000000-0000-4000-8000-0000000000a1",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        }
+      ],
+      "nextCursor": "abc"
+    }
+  },
+  {
+    "name": "NotificationList over 50 items",
+    "schema": "NotificationList",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "items": [
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000000",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000001",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000002",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000003",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000004",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000005",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000006",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000007",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000008",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000009",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000010",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000011",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000012",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000013",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000014",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000015",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000016",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000017",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000018",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000019",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000020",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000021",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000022",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000023",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000024",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000025",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000026",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000027",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000028",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000029",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000030",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000031",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000032",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000033",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000034",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000035",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000036",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000037",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000038",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000039",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000040",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000041",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000042",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000043",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000044",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000045",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000046",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000047",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000048",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000049",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        },
+        {
+          "notificationId": "00000000-0000-4000-8000-000000000050",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        }
+      ],
+      "nextCursor": "abc",
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationList empty cursor",
+    "schema": "NotificationList",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "items": [
+        {
+          "notificationId": "00000000-0000-4000-8000-0000000000a1",
+          "scope": "TENANT",
+          "service": "TPA_INSURANCE",
+          "category": "CLAIM_STATUS",
+          "priority": "ACTION_REQUIRED",
+          "templateKey": "CLAIM_SUPPLEMENT_REQUIRED",
+          "templateVersion": 1,
+          "titleVi": "Hồ sơ cần bổ sung chứng từ",
+          "bodyVi": "Vui lòng mở hồ sơ để xem yêu cầu bổ sung.",
+          "target": {
+            "kind": "CLAIM",
+            "id": "00000000-0000-4000-8000-0000000000b2"
+          },
+          "occurredAt": "2026-11-27T03:00:00.000Z",
+          "createdAt": "2026-11-27T03:00:00.000Z",
+          "expiresAt": "2027-02-25T03:00:00.000Z",
+          "version": 1
+        }
+      ],
+      "nextCursor": "",
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationUnreadCount count",
+    "schema": "NotificationUnreadCount",
+    "valid": true,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "unreadCount": 3,
+      "capped": false,
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationUnreadCount capped",
+    "schema": "NotificationUnreadCount",
+    "valid": true,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "unreadCount": 999,
+      "capped": true,
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationUnreadCount over cap",
+    "schema": "NotificationUnreadCount",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "unreadCount": 1000,
+      "capped": false,
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationUnreadCount negative",
+    "schema": "NotificationUnreadCount",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "unreadCount": -1,
+      "capped": false,
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationUnreadCount string count",
+    "schema": "NotificationUnreadCount",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "unreadCount": "3",
+      "capped": false,
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationUnreadCount missing capped",
+    "schema": "NotificationUnreadCount",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "unreadCount": 3,
+      "asOf": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationReadRequest tenant",
+    "schema": "NotificationReadRequest",
+    "valid": true,
+    "value": {
+      "scope": "TENANT"
+    }
+  },
+  {
+    "name": "NotificationReadRequest client tenant rejected",
+    "schema": "NotificationReadRequest",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "tenantId": "00000000-0000-4000-8000-0000000000b2"
+    }
+  },
+  {
+    "name": "NotificationReadRequest missing scope",
+    "schema": "NotificationReadRequest",
+    "valid": false,
+    "value": {}
+  },
+  {
+    "name": "NotificationReadAllRequest scope cutoff",
+    "schema": "NotificationReadAllRequest",
+    "valid": true,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "cutoff": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationReadAllRequest personal no service",
+    "schema": "NotificationReadAllRequest",
+    "valid": true,
+    "value": {
+      "scope": "PERSONAL",
+      "cutoff": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationReadAllRequest missing cutoff",
+    "schema": "NotificationReadAllRequest",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE"
+    }
+  },
+  {
+    "name": "NotificationReadAllRequest non-date cutoff",
+    "schema": "NotificationReadAllRequest",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "cutoff": "now"
+    }
+  },
+  {
+    "name": "NotificationReadAllRequest ids rejected",
+    "schema": "NotificationReadAllRequest",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "cutoff": "2026-11-27T03:00:00.000Z",
+      "notificationIds": [
+        "00000000-0000-4000-8000-0000000000a1"
+      ]
+    }
+  },
+  {
+    "name": "NotificationReadAllRequest all scope",
+    "schema": "NotificationReadAllRequest",
+    "valid": false,
+    "value": {
+      "scope": "ALL",
+      "service": "TPA_INSURANCE",
+      "cutoff": "2026-11-27T03:00:00.000Z"
+    }
+  },
+  {
+    "name": "NotificationReadAllResult marked",
+    "schema": "NotificationReadAllResult",
+    "valid": true,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "cutoff": "2026-11-27T03:00:00.000Z",
+      "markedCount": 2
+    }
+  },
+  {
+    "name": "NotificationReadAllResult repeat zero",
+    "schema": "NotificationReadAllResult",
+    "valid": true,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "cutoff": "2026-11-27T03:00:00.000Z",
+      "markedCount": 0
+    }
+  },
+  {
+    "name": "NotificationReadAllResult negative",
+    "schema": "NotificationReadAllResult",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "cutoff": "2026-11-27T03:00:00.000Z",
+      "markedCount": -1
+    }
+  },
+  {
+    "name": "NotificationReadAllResult missing count",
+    "schema": "NotificationReadAllResult",
+    "valid": false,
+    "value": {
+      "scope": "TENANT",
+      "service": "TPA_INSURANCE",
+      "cutoff": "2026-11-27T03:00:00.000Z"
+    }
+  }
+]

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import YAML from 'yaml';
 import { validate } from '../src/validate.cjs';
-const fixtures = ['fixtures.json', 'c2-fixtures.json', 'workspace-fixtures.json', 'workflow-fixtures.json'].flatMap(name => JSON.parse(readFileSync(new URL(name, import.meta.url))));
+import { isNotificationExempt } from './notification-exemption.mjs';
+const fixtures = ['fixtures.json', 'c2-fixtures.json', 'workspace-fixtures.json', 'workflow-fixtures.json', 'notification-fixtures.json'].flatMap(name => JSON.parse(readFileSync(new URL(name, import.meta.url))));
 const spec = YAML.parse(readFileSync(new URL('../../../docs/ai-specs/02-openapi-contracts.yaml', import.meta.url), 'utf8'));
 for (const fixture of fixtures) test(fixture.name, () => {
   const before = structuredClone(fixture.value);
@@ -20,7 +21,8 @@ test('all scoped operations declare authentication, errors, and durable mutation
   for (const [path, methods] of Object.entries(spec.paths)) for (const [method, operation] of Object.entries(methods)) {
     if (!operation.operationId) continue;
     for (const status of ['401','403','404','409','422','429','503']) assert.ok(operation.responses[status], `${path} ${status}`);
-    if (method === 'post' && !path.startsWith('/internal/')) assert.ok(operation.parameters.some(p => p.$ref?.endsWith('/IdempotencyKey')), path);
+    // D3 (#107): only the 4 allowlisted notification operations are naturally idempotent without a key.
+    if (method === 'post' && !path.startsWith('/internal/') && !isNotificationExempt(operation)) assert.ok(operation.parameters.some(p => p.$ref?.endsWith('/IdempotencyKey')), path);
     assert.deepEqual(operation.security ?? spec.security, path.startsWith('/internal/') ? [{internalHmac: []}] : path.includes('/auth/') ? [] : [{bearerAuth: []}]);
     assert.ok(operation.responses['200'] || operation.responses['201'] || operation.responses['202'], path);
   }

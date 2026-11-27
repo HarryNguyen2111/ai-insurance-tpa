@@ -53,7 +53,8 @@ const opsFound = () => {
 };
 
 test('API 1.4.0 adds exactly the 17 VWF-01 operations; all bearer + membership context, mutations keyed and MFA-gated', () => {
-  assert.equal(spec.info.version, '1.4.0');
+  // NOTIF-01 (#107) made the API 1.5.0 additively; pre-notif1-baseline.json pins every 1.4.0 path/component.
+  assert.equal(spec.info.version, '1.5.0');
   const found = opsFound();
   assert.deepEqual(Object.fromEntries(Object.entries(found).map(([k, op]) => [k, op.operationId])), EXPECTED_OPS);
   for (const [key, op] of Object.entries(found)) {
@@ -85,7 +86,8 @@ test('pre-VWF-01 snapshot: every 1.3.0 path, component and top-level block is by
   for (const [g, entries] of Object.entries(baseline.components)) for (const [n, hash] of Object.entries(entries)) {
     assert.equal(h(spec.components[g][n]), hash, `${g}.${n}`);
   }
-  const added = Object.keys(S).filter(n => !(n in baseline.components.schemas));
+  // Notification* schemas were added after 1.4.0 and are pinned by notification-contracts.test.mjs.
+  const added = Object.keys(S).filter(n => !(n in baseline.components.schemas) && !n.startsWith('Notification'));
   assert.deepEqual(added.sort(), [...workflowSchemas].sort(), 'only Workflow* schemas are new');
   assert.deepEqual(S.Membership.properties.roles.items.enum, ['MEMBER', 'GUARDIAN', 'CLAIM_REVIEWER', 'INSURER_REVIEWER', 'FINANCE', 'CURATOR'], 'C1 roles untouched');
 });

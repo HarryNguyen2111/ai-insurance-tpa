@@ -1235,6 +1235,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/me/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the caller's in-app notifications for one explicit scope
+         * @description NOTIF-01 (#107). Exactly one explicit scope per request, never a mixed or all-tenant inbox. PERSONAL lists only rows addressed to the verified principal and MUST NOT carry X-Membership-Context (422). TENANT requires X-Membership-Context and lists only rows addressed to the verified principal in that currently active membership; the membership is re-authorized on every request (revoked 403, stale 409). Allowlist scope/service/status/cursor/limit only; unknown or repeated parameters 422. Stable createdAt+notificationId order (newest first), opaque cursor bound to principal, scope, membership and filters. Expired notifications are excluded. Text is minimal server-rendered template output; no amounts, diagnosis, identifiers, document URLs or OTP. Reading a list never marks anything read. Unread/read is in-app state only, distinct from provider delivery and from any EOB/OTP/consent/claim action.
+         */
+        get: operations["listMyNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count unread, unexpired notifications for one explicit scope
+         * @description NOTIF-01 (#107). Same scope, membership and service rules as listMyNotifications; counts exactly the rows listMyNotifications returns with status=UNREAD. The count is capped at 999 with capped=true; never estimated or fabricated. asOf is the server time of the count and is the recommended cutoff for markMyNotificationsRead.
+         */
+        get: operations["getMyNotificationUnreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/notifications/{notificationId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark one notification read (idempotent, server-authoritative across devices)
+         * @description NOTIF-01 (#107). Naturally idempotent, so no Idempotency-Key header; the first call sets readAt and version 2; repeats (any device) return the same readAt and never revert to unread. Unknown, expired, other-recipient, other-tenant, other-membership or other-scope notifications are 404 without revealing existence. TENANT scope re-authorizes the current membership and records an immutable audit entry for the first transition only; PERSONAL read-state is recipient UI state and is not a tenant audit event. Marking read never signs OTP, approves an EOB, accepts consent or advances a claim.
+         */
+        post: operations["markMyNotificationRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark the current scope read up to an explicit cutoff (idempotent)
+         * @description NOTIF-01 (#107). Marks unread, unexpired notifications of exactly one scope (and optional service) whose createdAt is at or before cutoff; notifications created after the cutoff, in another scope, membership or tenant are never touched, so concurrent new events stay unread. cutoff is normally the asOf of the list or count the user saw; a cutoff in the future is 422. Naturally idempotent; repeats return markedCount 0. TENANT scope re-authorizes the membership and audits one entry when markedCount > 0. Never an EOB/OTP/consent/claim action.
+         */
+        post: operations["markMyNotificationsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2928,6 +3008,100 @@ export interface components {
             workflowRoles: components["schemas"]["WorkflowStaffRole"][];
             capabilities: ("DESIGN_DRAFT" | "VALIDATE_DRAFT" | "PUBLISH_VERSION" | "REVOKE_VERSION" | "VIEW_TASKS" | "CLAIM_TASK" | "ACT_ON_TASK" | "REASSIGN_TASK" | "ANNOTATE" | "OBSERVE")[];
         };
+        /**
+         * @description PERSONAL is the principal's own inbox with no tenant; TENANT is the current verified membership.
+         * @enum {string}
+         */
+        NotificationScope: "PERSONAL" | "TENANT";
+        /** @enum {string} */
+        NotificationService: "TPA_INSURANCE" | "LOYALTY360";
+        /** @enum {string} */
+        NotificationCategory: "CLAIM_STATUS" | "SERVICE_NOTICE";
+        /**
+         * @description Presentation urgency only; ACTION_REQUIRED never performs or authorizes the action.
+         * @enum {string}
+         */
+        NotificationPriority: "INFO" | "ACTION_REQUIRED";
+        /** @description Internal target descriptor, never a URL. The client maps kind to its own route and the target API re-authorizes membership and object access (unauthorized targets are 404 there). */
+        NotificationTarget: {
+            /** @enum {string} */
+            kind: "CLAIM";
+            /** Format: uuid */
+            id: string;
+        };
+        /** @description No recipient, tenant, membership, source event or claim fields beyond the target descriptor. */
+        Notification: {
+            /** Format: uuid */
+            notificationId: string;
+            scope: components["schemas"]["NotificationScope"];
+            service: components["schemas"]["NotificationService"];
+            category: components["schemas"]["NotificationCategory"];
+            priority: components["schemas"]["NotificationPriority"];
+            templateKey: string;
+            templateVersion: number;
+            /** @description Server-rendered allowlisted template text; plain text, no markup, URLs or PII. */
+            titleVi: string;
+            /** @description Server-rendered allowlisted template text; plain text, no markup, URLs or PII. */
+            bodyVi: string;
+            target?: components["schemas"]["NotificationTarget"];
+            /**
+             * Format: date-time
+             * @description Business time of the source event.
+             */
+            occurredAt: string;
+            /**
+             * Format: date-time
+             * @description Server time the notification was created; order and read-all cutoff use this.
+             */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /**
+             * Format: date-time
+             * @description Absent while unread. In-app read state only; not provider delivery and not a confirmation.
+             */
+            readAt?: string;
+            /** @description 1 unread, 2 read. Read is monotonic. */
+            version: number;
+        };
+        NotificationList: {
+            scope: components["schemas"]["NotificationScope"];
+            items: components["schemas"]["Notification"][];
+            nextCursor?: string;
+            /**
+             * Format: date-time
+             * @description Server time of the query; use as markMyNotificationsRead cutoff.
+             */
+            asOf: string;
+        };
+        NotificationUnreadCount: {
+            scope: components["schemas"]["NotificationScope"];
+            service?: components["schemas"]["NotificationService"];
+            unreadCount: number;
+            /** @description True when at least 999 unread notifications exist. */
+            capped: boolean;
+            /** Format: date-time */
+            asOf: string;
+        };
+        NotificationReadRequest: {
+            scope: components["schemas"]["NotificationScope"];
+        };
+        NotificationReadAllRequest: {
+            scope: components["schemas"]["NotificationScope"];
+            service?: components["schemas"]["NotificationService"];
+            /**
+             * Format: date-time
+             * @description Inclusive createdAt upper bound; must not be in the future.
+             */
+            cutoff: string;
+        };
+        NotificationReadAllResult: {
+            scope: components["schemas"]["NotificationScope"];
+            service?: components["schemas"]["NotificationService"];
+            /** Format: date-time */
+            cutoff: string;
+            markedCount: number;
+        };
     };
     responses: {
         /** @description Missing/invalid/expired authentication or service signature */
@@ -3019,6 +3193,12 @@ export interface components {
         /** @description TEAM requires WORKFLOW_SUPERVISOR; OBSERVED requires WORKFLOW_OBSERVER. */
         WorkflowTaskQueue: "MINE" | "CANDIDATE" | "TEAM" | "OBSERVED";
         WorkflowTaskStatusFilter: components["schemas"]["WorkflowTaskStatus"];
+        /** @description Explicit inbox scope. There is no all-scope or all-tenant aggregation. */
+        NotificationScopeQuery: components["schemas"]["NotificationScope"];
+        /** @description Optional service filter inside the scope. LOYALTY360 has no producer yet (design gap). */
+        NotificationServiceQuery: components["schemas"]["NotificationService"];
+        /** @description Required when scope=TENANT and forbidden (422) when scope=PERSONAL. Same opaque server-issued context as MembershipContext; never a tenant ID. */
+        NotificationMembershipContext: string;
     };
     requestBodies: never;
     headers: never;
@@ -5474,6 +5654,157 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WorkflowAnnotation"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    listMyNotifications: {
+        parameters: {
+            query: {
+                /** @description Explicit inbox scope. There is no all-scope or all-tenant aggregation. */
+                scope: components["parameters"]["NotificationScopeQuery"];
+                /** @description Optional service filter inside the scope. LOYALTY360 has no producer yet (design gap). */
+                service?: components["parameters"]["NotificationServiceQuery"];
+                status?: "UNREAD" | "ALL";
+                cursor?: string;
+                limit?: number;
+            };
+            header?: {
+                /** @description Required when scope=TENANT and forbidden (422) when scope=PERSONAL. Same opaque server-issued context as MembershipContext; never a tenant ID. */
+                "X-Membership-Context"?: components["parameters"]["NotificationMembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    /** @description Must be no-store for sensitive data */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationList"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    getMyNotificationUnreadCount: {
+        parameters: {
+            query: {
+                /** @description Explicit inbox scope. There is no all-scope or all-tenant aggregation. */
+                scope: components["parameters"]["NotificationScopeQuery"];
+                /** @description Optional service filter inside the scope. LOYALTY360 has no producer yet (design gap). */
+                service?: components["parameters"]["NotificationServiceQuery"];
+            };
+            header?: {
+                /** @description Required when scope=TENANT and forbidden (422) when scope=PERSONAL. Same opaque server-issued context as MembershipContext; never a tenant ID. */
+                "X-Membership-Context"?: components["parameters"]["NotificationMembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    /** @description Must be no-store for sensitive data */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationUnreadCount"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    markMyNotificationRead: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when scope=TENANT and forbidden (422) when scope=PERSONAL. Same opaque server-issued context as MembershipContext; never a tenant ID. */
+                "X-Membership-Context"?: components["parameters"]["NotificationMembershipContext"];
+            };
+            path: {
+                notificationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationReadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    /** @description Must be no-store for sensitive data */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Notification"];
+                };
+            };
+            401: components["responses"]["Error401"];
+            403: components["responses"]["Error403"];
+            404: components["responses"]["Error404"];
+            409: components["responses"]["Error409"];
+            422: components["responses"]["Error422"];
+            429: components["responses"]["Error429"];
+            503: components["responses"]["Error503"];
+        };
+    };
+    markMyNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Required when scope=TENANT and forbidden (422) when scope=PERSONAL. Same opaque server-issued context as MembershipContext; never a tenant ID. */
+                "X-Membership-Context"?: components["parameters"]["NotificationMembershipContext"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationReadAllRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    /** @description Must be no-store for sensitive data */
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationReadAllResult"];
                 };
             };
             401: components["responses"]["Error401"];
