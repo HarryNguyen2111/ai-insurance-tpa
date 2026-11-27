@@ -56,8 +56,8 @@ test('health route is GET-only, fixed-target and does not echo the internal addr
   expect(body).toMatchObject({ state: 'ONLINE', scope: 'PROCESS_LIVENESS_ONLY', httpStatus: 200, detail: 'LIVENESS_OK' });
   expect(JSON.stringify(body)).not.toContain(String(apiPort));
   expect((await request.post(`${webUrl}/api/backend-health`)).status()).toBe(405);
-  // Existing scaffold expectation preserved: no claims API exists on core-api yet.
-  expect((await request.post(`http://127.0.0.1:${apiPort}/v1/claims`, { data: {} })).status()).toBe(404);
+  // CLM-02 (#37) claims API exists on core-api but is never reachable without verified identity.
+  expect((await request.post(`http://127.0.0.1:${apiPort}/v1/claims`, { data: {} })).status()).toBe(401);
 });
 
 test('intake preview is honest: local draft only, upload and submit disabled, no backend calls', async ({ page }) => {
