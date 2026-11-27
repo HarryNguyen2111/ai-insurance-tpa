@@ -97,9 +97,22 @@ test('PT01 foundation: PG16 app role through real PgBouncer transaction pool', a
         WHERE n.nspname='tpa' AND c.relname IN ('isolation_parent','isolation_child') ORDER BY c.relname`)).rows;
       assert.equal(tables.length, 2);
       for (const table of tables) { assert.equal(table.owner, 'tpa_migrator'); assert.equal(table.relrowsecurity, true); assert.equal(table.relforcerowsecurity, true); }
-      const policies = (await admin.query("SELECT qual, with_check FROM pg_policies WHERE schemaname='tpa'")).rows;
-      assert.equal(policies.length, 17); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01), +6 BEN-01 snapshot tables
-      for (const policy of policies) { assert.match(policy.qual, /tenant_id = tpa.current_tenant_id/); assert.equal(policy.qual, policy.with_check); }
+      const policies = (await admin.query("SELECT policyname, qual, with_check FROM pg_policies WHERE schemaname='tpa'")).rows;
+      assert.equal(policies.length, 27); // +outbox_events (EVT-01), +consumer_inbox/positions/parked_events (EVT-02), +workflow_command_ledger (WF-01), +6 BEN-01 snapshot tables, +6 AUTH-01 identity tables, +4 BEN-03 benefit ledger tables
+      // AUTH-01: identity discovery happens BEFORE a tenant is chosen, so exactly these two global
+      // policies are scoped to the verified principal instead of a tenant. Every other policy stays tenant-scoped.
+      const principalScoped: Record<string, RegExp> = {
+        identity_principals_self: /^\(identity_hash = current_setting\('app\.identity_hash'::text, true\)\)$/,
+        identity_directory_self: /^\(principal_id = tpa\.identity_principal_id\(\)\)$/,
+      };
+      assert.equal(policies.filter(p => p.policyname in principalScoped).length, 2);
+      for (const policy of policies) {
+        if (policy.policyname in principalScoped) { assert.match(policy.qual, principalScoped[policy.policyname]); assert.equal(policy.qual, policy.with_check); continue; }
+        assert.match(policy.qual, /tenant_id = tpa.current_tenant_id/);
+        // Context inserts additionally require the current membership/principal versions.
+        if (policy.policyname === 'identity_context_self') { assert.match(policy.with_check, /tenant_id = tpa.current_tenant_id/); assert.match(policy.with_check, /principal_version/); continue; }
+        assert.equal(policy.qual, policy.with_check);
+      }
       const fk = (await admin.query("SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE conrelid='tpa.isolation_child'::regclass AND contype='f'")).rows;
       assert.deepEqual(fk, [{ definition: 'FOREIGN KEY (tenant_id, parent_id) REFERENCES tpa.isolation_parent(tenant_id, id)' }]);
       for (const tenant of [a, b]) await run(tenant, tx => tx.query('INSERT INTO tpa.isolation_parent VALUES ($1,$2,$3)', [tenant, tenant === a ? pa : pb, 'synthetic']));

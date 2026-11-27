@@ -68,6 +68,13 @@
     {
       "idx": 9,
       "version": "7",
+      "when": 1795576610000,
+      "tag": "0009_identity_tenant",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
       "when": 1795576611000,
       "tag": "0010_benefit_reservations",
       "breakpoints": true
