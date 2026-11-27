@@ -114,7 +114,7 @@ export class NotificationsStore implements NotificationsApi {
       table: 'tpa.personal_notifications', owner: '$1::uuid IS NULL AND n.recipient_principal_id=$2', ownerValue: null as unknown as string }));
   }
 
-  list(call: NotificationCall, raw: unknown): Promise<JsonValue> {
+  async list(call: NotificationCall, raw: unknown): Promise<JsonValue> {
     const query = parseListQuery(raw);
     return this.inScope(call, query.scope, async s => {
       const membershipId = s.actor?.membershipId ?? null;
@@ -132,7 +132,7 @@ export class NotificationsStore implements NotificationsApi {
     });
   }
 
-  unreadCount(call: NotificationCall, raw: unknown): Promise<JsonValue> {
+  async unreadCount(call: NotificationCall, raw: unknown): Promise<JsonValue> {
     const filter = parseCountQuery(raw);
     return this.inScope(call, filter.scope, async s => {
       // Bounded, index-backed count of exactly the rows list(status=UNREAD) returns.

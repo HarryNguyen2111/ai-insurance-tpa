@@ -57,7 +57,8 @@ export class IdentityStore {
       await client.query('BEGIN'); began = true;
       await client.query("SELECT pg_catalog.set_config('app.identity_hash', $1, true)", [identity.identityHash]);
       const { rows: [principal] } = await client.query<{ id: string }>(
-        `SELECT id FROM tpa.identity_principals WHERE identity_hash=$1 AND active AND kind='HUMAN' FOR SHARE`, [identity.identityHash]);
+        `SELECT id FROM tpa.identity_principals WHERE identity_hash=$1 AND active AND kind='HUMAN'`, [identity.identityHash]);
+      // No row lock: tpa_app has no UPDATE right on principals, and RLS re-checks the active principal on every query.
       if (!principal) throw denied();
       const tx: IdentityTransaction = Object.freeze({ query: <R extends pg.QueryResultRow>(sql: string, values?: unknown[]) => client.query<R>(sql, values) });
       const value = await fn(tx, principal.id);
