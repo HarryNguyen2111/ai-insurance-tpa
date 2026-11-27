@@ -1,0 +1,15 @@
+{
+  "name": "@tpa/domain",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": { "./waterfall": { "types": "./dist/src/waterfall/index.d.ts", "default": "./dist/src/waterfall/index.js" } },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "test": "node --test test/*.test.ts"
+  },
+  "dependencies": { "decimal.js": "10.6.0" },
+  "devDependencies": { "@types/node": "^24.0.0", "typescript": "6.0.3" }
+}
