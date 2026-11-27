@@ -1,30 +1,34 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { CheckCheck, Eye, FilePlus2, LayoutTemplate, MoreHorizontal, Redo2, RotateCw, Save, Send, Undo2 } from 'lucide-react';
 import { useWorkspaces } from '@/components/workspace-provider';
 import { Button } from '@/components/ui/button';
-import { AI_ACTIONS, HUMAN_ACTIONS, NODE_LABELS, NODE_TYPES, canonicalJson, isAssignmentPolicy, isWorkflowNode, isWorkflowEdge, newDocument, validateLocal as validateLocalWorkflow, type EditorDocument, type WorkflowContent, type WorkflowIssue, type WorkflowNode } from '@/lib/workflow-definition';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { canonicalJson, newDocument, NODE_LABELS, validateLocal as validateLocalWorkflow, type EditorDocument, type NodeType, type Point } from '@/lib/workflow-definition';
 import { DRAFT_KEY, DraftConflict, MAX_DRAFT_BYTES, parseDocument, readDraft, readServerLayout, saveDraft, saveServerLayout } from '@/lib/workflow-draft';
 import { MAX_XML_BYTES, fromBpmnXml, toBpmnXml } from '@/lib/workflow-bpmn';
+import { addNode, connect, CONNECTION_MESSAGES, moveNodes, normalizeLayout, removeElements } from '@/lib/workflow-graph';
+import { issueCounts, localIssues, serverIssues, type BuilderIssue } from '@/lib/workflow-inspector';
+import { createHistory, record, redo as redoHistory, reset, undo as undoHistory, type History } from '@/lib/workflow-history';
+import { TEMPLATES } from '@/lib/workflow-templates';
 import { WorkflowApiFailure, workflowApi, type ValidationReport, type WorkflowSession, type WorkflowVersion } from '@/lib/workflow-api';
 import { STATUS_LABELS, WorkflowServerPanel, failureText } from './workflow-server-panel';
-import type { CanvasApi } from './workflow-canvas';
+import { WorkflowPalette } from './workflow-palette';
+import { WorkflowInspector, type FocusRequest } from './workflow-inspector';
+import { AdvancedTools, WorkflowDrawer, type DrawerTab } from './workflow-drawer';
+import type { CanvasApi } from './workflow-flow-canvas';
 import styles from './workflow-designer.module.css';
 
-const BPMN_LICENSE = "Copyright (c) 2014-present Camunda Services GmbH\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \"Software\"), to deal in the\nSoftware without restriction, including without limitation the rights to use, copy,\nmodify, merge, publish, distribute, sublicense, and/or sell copies of the Software,\nand to permit persons to whom the Software is furnished to do so, subject to the\nfollowing conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nThe source code responsible for displaying the bpmn.io project watermark that\nlinks back to https://bpmn.io as part of rendered diagrams MUST NOT be\nremoved or changed. When this software is being used in a website or application,\nthe watermark must stay fully visible and not visually overlapped by other elements.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,\nINCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR\nPURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE\nLIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,\nTORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE\nOR OTHER DEALINGS IN THE SOFTWARE.\n";
-
-const Canvas = dynamic(() => import('./workflow-canvas'), { ssr: false, loading: () => <p role="status">Đang tải trình vẽ…</p> });
+// Upstream React Flow is loaded only when the editor opens (separate chunk).
+const Canvas = dynamic(() => import('./workflow-flow-canvas'), { ssr: false, loading: () => <p role="status" className={styles.canvasLoading}>Đang tải trình vẽ…</p> });
 
 function download(name: string, text: string, type: string) {
   const url = URL.createObjectURL(new Blob([text], { type })), link = document.createElement('a');
   link.href = url; link.download = name; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-const ESCALATIONS = ['CASE_OWNER', 'SUPERVISOR_QUEUE'] as const;
-const CANDIDATE_ROLES = ['CLAIM_REVIEWER', 'INSURER_REVIEWER'] as const;
-const END_OUTCOMES = ['REVIEW_COMPLETED', 'ROUTED_TO_MANUAL_REVIEW', 'SUPPLEMENT_EXPIRED'] as const;
-type Rule = WorkflowContent['assignmentPolicy']['rules'][number];
 
 /** Server binding of the open document (#80). Content is authoritative from the server; layout is local only. */
 interface ServerState {
@@ -38,74 +42,101 @@ const fromView = (v: WorkflowVersion): ServerState => ({ definitionId: v.definit
 export function WorkflowDesigner({ allowSyntheticSession = false }: { allowSyntheticSession?: boolean }) {
   const { loaded, active } = useWorkspaces();
   if (!loaded) return <p role="status">Đang tải bản nháp cục bộ…</p>;
+  // Keyed by tenant/workspace: switching remounts the editor, so no draft, history or server state leaks across tenants.
   const scope = `${DRAFT_KEY}.${active?.id ?? 'sandbox'}`;
   return <Editor key={scope} scope={scope} allowSyntheticSession={allowSyntheticSession} />;
 }
 
 function Editor({ scope, allowSyntheticSession }: { scope: string; allowSyntheticSession: boolean }) {
-  const [doc, setDoc] = useState<EditorDocument>(newDocument);
-  const [revision, setRevision] = useState(0), [opened, setOpened] = useState(false), [epoch, setEpoch] = useState(0);
-  const [api, setApi] = useState<CanvasApi | null>(null), [selected, setSelected] = useState('n_start');
-  const [propertyText, setPropertyText] = useState(''), [policyText, setPolicyText] = useState('');
-  const [issues, setIssues] = useState<WorkflowIssue[] | null>(null), [error, setError] = useState(''), [message, setMessage] = useState('');
-  const [readOnly, setReadOnly] = useState(false), [source, setSource] = useState('start'), [target, setTarget] = useState('end');
-  const [preview, setPreview] = useState(false), [summary, setSummary] = useState(false), [busy, setBusy] = useState(false);
+  const [history, setHistory] = useState<History<EditorDocument>>(() => createHistory(normalizeLayout(newDocument())));
+  const doc = history.present;
+  const [revision, setRevision] = useState(0), [opened, setOpened] = useState(false), [hasSaved, setHasSaved] = useState(false);
+  const [api, setApi] = useState<CanvasApi | null>(null), [selected, setSelected] = useState('');
+  const [checked, setChecked] = useState<EditorDocument | null>(null), [error, setError] = useState(''), [message, setMessage] = useState('');
+  const [readOnly, setReadOnly] = useState(false), [busy, setBusy] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<DrawerTab>('issues'), [drawerOpen, setDrawerOpen] = useState(false);
   const [session, setSession] = useState<WorkflowSession | null>(null), [server, setServer] = useState<ServerState | null>(null);
   const [report, setReport] = useState<ValidationReport | null>(null), [conflict, setConflict] = useState(false);
-  const [confirmPublish, setConfirmPublish] = useState(false), [refresh, setRefresh] = useState(0);
+  const [confirmPublish, setConfirmPublish] = useState(false), [refresh, setRefresh] = useState(0), [focus, setFocus] = useState<FocusRequest | null>(null);
+  const [focusDrawer, setFocusDrawer] = useState(0), [focusReport, setFocusReport] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
   const errorsRef = useRef<HTMLDivElement>(null), reportRef = useRef<HTMLDivElement>(null), conflictRef = useRef<HTMLDivElement>(null), alive = useRef(true);
   const remote = useMemo(() => session?.membershipContext ? workflowApi(session) : null, [session]);
   useEffect(() => {
     alive.current = true;
-    try { const saved = readDraft(localStorage, scope); if (saved) { setDoc({ content: saved.content, layout: saved.layout }); setRevision(saved.revision); } }
+    try { const saved = readDraft(localStorage, scope); if (saved) { setHistory(reset(normalizeLayout({ content: saved.content, layout: saved.layout }))); setRevision(saved.revision); setHasSaved(true); } }
     catch { setError('Không thể đọc bản nháp cục bộ. Dữ liệu không được hiển thị; bản đã lưu vẫn được giữ nguyên.'); }
     return () => { alive.current = false; };
   }, [scope]);
-  const node = selected.startsWith('n_') ? doc.content.nodes.find(n => n.nodeId === selected.slice(2)) : undefined;
-  const edge = selected.startsWith('e_') ? doc.content.edges.find(e => e.edgeId === selected.slice(2)) : undefined;
-  useEffect(() => { setPropertyText(JSON.stringify(node ?? edge ?? {}, null, 2)); }, [selected, node, edge]);
-  useEffect(() => { setPolicyText(JSON.stringify(doc.content.assignmentPolicy, null, 2)); }, [doc.content.assignmentPolicy]);
   // Server versions other than DRAFT are immutable (spec 14 §3.4): the editor is a read-only view.
   const immutable = !!server && server.status !== 'DRAFT';
   const locked = readOnly || busy || immutable || confirmPublish;
   const dirty = !!server && canonicalJson(doc.content) !== server.savedContent;
+  const issues = useMemo(() => localIssues(doc), [doc]);
+  const counts = useMemo(() => issueCounts(issues), [issues]);
 
-  function changed(next: EditorDocument) { setDoc(next); setIssues(null); setReport(null); setMessage('Có chỉnh sửa chưa lưu.'); }
-  function replace(next: EditorDocument) { changed(next); setEpoch(v => v + 1); setSelected(next.content.nodes[0] ? `n_${next.content.nodes[0].nodeId}` : ''); }
-  function run(action: () => void) { setError(''); try { action(); } catch { setError('Thao tác không hợp lệ; bản nháp hiện tại được giữ nguyên.'); } }
-  useEffect(() => { if (report) reportRef.current?.focus(); }, [report]);
+  // Fit the editor to the viewport below the shell header/banner (their height varies with width), so the canvas,
+  // rail and inspector scroll internally and nothing is clipped behind the page fold.
+  useLayoutEffect(() => {
+    const el = sectionRef.current;
+    if (!el || !opened) return;
+    const fit = () => { el.style.setProperty('--editor-top', `${Math.max(0, el.getBoundingClientRect().top + window.scrollY)}px`); };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [opened]);
+  useEffect(() => { if (focusReport) reportRef.current?.focus(); }, [focusReport]);
   useEffect(() => { if (conflict) conflictRef.current?.focus(); }, [conflict]);
-  useEffect(() => { if (issues?.length) errorsRef.current?.focus(); }, [issues]);
-  function validateLocal() { const result = validateLocalWorkflow(doc.content); setIssues(result); }
-  function changeProperty(key: string, value: unknown) { run(() => { const n = JSON.parse(propertyText) as Record<string, unknown>; n[key] = value; setPropertyText(JSON.stringify(n, null, 2)); }); }
-  function updateRule(ruleKey: string, patch: Partial<Rule>) {
-    run(() => {
-      const policy = { ...doc.content.assignmentPolicy, rules: doc.content.assignmentPolicy.rules.map(r => r.ruleKey === ruleKey ? { ...r, ...patch } : r) };
-      if (!isAssignmentPolicy(policy)) throw new Error();
-      changed({ ...doc, content: { ...doc.content, assignmentPolicy: policy } });
-    });
-  }
-  let formNode: WorkflowNode | undefined;
-  try {
-    const value: unknown = JSON.parse(propertyText);
-    if (value && typeof value === 'object' && !Array.isArray(value)) formNode = value as WorkflowNode;
-  } catch { /* Raw JSON errors are reported when applying. */ }
-  const field = <T,>(key: string, fallback: T): T => formNode && key in formNode ? (formNode as unknown as Record<string, T>)[key] : fallback;
-  function applyProperties() {
-    setError('');
-    try {
-      const value: unknown = JSON.parse(propertyText);
-      if (node) {
-        if (!isWorkflowNode(value) || value.nodeId !== node.nodeId || value.type !== node.type) throw new Error();
-        changed({ ...doc, content: { ...doc.content, nodes: doc.content.nodes.map(n => n.nodeId === node.nodeId ? value : n) } });
-      } else if (edge) {
-        const candidate = { ...doc.content, edges: doc.content.edges.map(e => e.edgeId === edge.edgeId ? value : e) };
-        // Edge schema can be checked independently even while other new nodes are incomplete.
-        if (!isWorkflowEdge(value) || value.edgeId !== edge.edgeId || !doc.content.nodes.some(n => n.nodeId === value.source) || !doc.content.nodes.some(n => n.nodeId === value.target)) throw new Error();
-        changed({ ...doc, content: candidate as EditorDocument['content'] });
-      }
-      setEpoch(v => v + 1); setMessage('Đã áp dụng thuộc tính vào bản nháp chưa lưu.');
-    } catch { setError('SCHEMA_INVALID · thuộc tính: kiểm tra JSON, trường bắt buộc và giới hạn. Mã và loại phần tử không được đổi.'); }
+  useEffect(() => { if (focusDrawer) errorsRef.current?.focus(); }, [focusDrawer]);
+
+  /** Every user edit is an undoable step; server state is never touched until an explicit save. */
+  const change = useCallback((next: EditorDocument, tag?: string) => {
+    setHistory(h => record(h, next, tag)); setReport(null); setMessage('Có chỉnh sửa chưa lưu.');
+  }, []);
+  function replace(next: EditorDocument, text: string) { change(normalizeLayout(next)); setSelected(''); setMessage(text); }
+  function run(action: () => void) { setError(''); try { action(); } catch (cause) {
+    const code = cause instanceof Error ? cause.message : '';
+    setError(CONNECTION_MESSAGES[code] ? `${code} · ${CONNECTION_MESSAGES[code]}` : 'Thao tác không hợp lệ; bản nháp hiện tại được giữ nguyên.');
+  } }
+  const undo = useCallback(() => { if (!locked) { setHistory(undoHistory); setReport(null); setMessage('Đã hoàn tác.'); } }, [locked]);
+  const redo = useCallback(() => { if (!locked) { setHistory(redoHistory); setReport(null); setMessage('Đã làm lại.'); } }, [locked]);
+  useEffect(() => {
+    if (!opened) return;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.closest('input, textarea, select, [contenteditable="true"]'))) return;
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); } else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [opened, undo, redo]);
+
+  const addStep = (type: NodeType, position?: Point) => run(() => {
+    const { doc: next, id } = addNode(doc, type, position);
+    change(next); setSelected(`n_${id}`); setMessage(`Đã thêm ${NODE_LABELS[type]} (${id}). Cấu hình ở bảng bên phải.`);
+    setTimeout(() => api?.center(id), 50);
+  });
+  const connectSteps = (source: string, target: string) => run(() => {
+    const { doc: next, id } = connect(doc, source, target);
+    change(next); setSelected(`e_${id}`); setMessage(`Đã thêm nhánh ${id}. Chọn loại nhánh ở bảng bên phải.`);
+  });
+  const deleteElements = (nodeIds: string[], edgeIds: string[]) => {
+    if (locked) return;
+    change(removeElements(doc, nodeIds, edgeIds));
+    setSelected(''); setMessage(`Đã xóa ${nodeIds.length ? `${nodeIds.length} bước` : ''}${nodeIds.length && edgeIds.length ? ' và ' : ''}${edgeIds.length ? `${edgeIds.length} nhánh` : ''}. Có thể hoàn tác.`);
+  };
+  const focusIssue = (issue: BuilderIssue) => {
+    const id = issue.nodeId ? `n_${issue.nodeId}` : issue.edgeId ? `e_${issue.edgeId}` : '';
+    if (id && !(doc.content.nodes.some(n => `n_${n.nodeId}` === id) || doc.content.edges.some(e => `e_${e.edgeId}` === id))) return;
+    setSelected(id); setFocus({ ...(issue.field ? { field: issue.field } : {}), nonce: Date.now() });
+    if (issue.nodeId) api?.center(issue.nodeId);
+    setMessage(`Đang sửa: ${issue.message}`);
+  };
+  function validateLocal() {
+    setChecked(doc); setDrawerTab('issues'); setDrawerOpen(true); setFocusDrawer(v => v + 1);
+    if (remote && server?.status === 'DRAFT' && !dirty) void validateServer();
   }
   async function importFile(file: File | undefined, input: HTMLInputElement) {
     if (!file || busy || locked) return;
@@ -115,10 +146,18 @@ function Editor({ scope, allowSyntheticSession }: { scope: string; allowSyntheti
       if (file.size > (xml ? MAX_XML_BYTES : MAX_DRAFT_BYTES)) throw new Error('LIMIT_EXCEEDED');
       const raw = await file.text();
       const next = xml ? fromBpmnXml(raw) : parseDocument(raw);
-      if (alive.current) { replace(next); setMessage('Đã nhập vào bản nháp chưa lưu.'); }
+      if (alive.current) replace(next, 'Đã nhập vào bản nháp chưa lưu.');
     } catch (cause) {
       if (alive.current) setError(`Không nhập tệp: ${cause instanceof Error && /^[A-Z_]+$/.test(cause.message) ? cause.message : 'SCHEMA_INVALID'}. Bản nháp không đổi.`);
     } finally { if (alive.current) setBusy(false); input.value = ''; }
+  }
+  function saveLocal() {
+    setError('');
+    try { const saved = saveDraft(localStorage, scope, doc, revision); setRevision(saved.revision); setHasSaved(true); setMessage('Đã lưu bản nháp cục bộ.'); }
+    catch (cause) { setError(cause instanceof DraftConflict ? cause.message : 'Không lưu được. Kiểm tra các ô còn thiếu trong bảng Kiểm tra, dữ liệu đã lưu và dung lượng trình duyệt. Chỉnh sửa vẫn được giữ nguyên.'); }
+  }
+  function loadLocal() {
+    run(() => { const saved = readDraft(localStorage, scope); if (!saved) throw new Error(); setHistory(reset(normalizeLayout(saved))); setRevision(saved.revision); setSelected(''); setOpened(true); setMessage('Đã tải bản đã lưu; chưa gọi máy chủ.'); });
   }
 
   // ---- Server (#80) operations. Every failure keeps the in-memory edits untouched. ----
@@ -131,15 +170,15 @@ function Editor({ scope, allowSyntheticSession }: { scope: string; allowSyntheti
   }
   function openVersion(view: WorkflowVersion) {
     const layout = readServerLayout(localStorage, view.definitionId, view.contentHash, view.content);
-    setServer(fromView(view)); setDoc({ content: view.content, layout }); setEpoch(v => v + 1);
-    setSelected(view.content.nodes[0] ? `n_${view.content.nodes[0].nodeId}` : '');
-    setIssues(null); setReport(null); setConflict(false); setConfirmPublish(false); setOpened(true);
+    setServer(fromView(view)); setHistory(reset(normalizeLayout({ content: view.content, layout })));
+    setSelected(''); setChecked(null); setReport(null); setConflict(false); setConfirmPublish(false); setOpened(true);
     setMessage(`Đã tải ${view.workflowKey} v${view.versionNo} (${STATUS_LABELS[view.status]}) từ máy chủ.`);
   }
   /** Accept the server's view of a write; keep the local geometry for the returned contentHash. */
   function accepted(view: WorkflowVersion, text: string) {
-    saveServerLayout(localStorage, view.definitionId, view.contentHash, { content: view.content, layout: doc.layout });
-    setServer(fromView(view)); setDoc(d => ({ content: view.content, layout: d.layout })); setConflict(false); setReport(null);
+    const next = normalizeLayout({ content: view.content, layout: doc.layout });
+    saveServerLayout(localStorage, view.definitionId, view.contentHash, next);
+    setServer(fromView(view)); setHistory(h => record(h, normalizeLayout({ content: view.content, layout: h.present.layout }))); setConflict(false); setReport(null);
     setRefresh(v => v + 1); setMessage(text);
   }
   const saveServer = () => serverTask(async () => {
@@ -177,7 +216,7 @@ function Editor({ scope, allowSyntheticSession }: { scope: string; allowSyntheti
     if (!remote || !server) return;
     const result = await remote.validateDraft(server.definitionId, server.versionNo, server.revision);
     if (!alive.current) return;
-    setReport(result);
+    setReport(result); setDrawerTab('issues'); setDrawerOpen(true); setFocusReport(v => v + 1);
     if (result.revision !== server.revision) setMessage('Báo cáo thuộc revision khác; tải lại trước khi xuất bản.');
   });
   const publish = () => serverTask(async () => {
@@ -191,150 +230,121 @@ function Editor({ scope, allowSyntheticSession }: { scope: string; allowSyntheti
     }
   });
   const canPublish = !!server && server.status === 'DRAFT' && server.publishable && !dirty && !conflict;
-  const selectIssue = (i: { nodeId?: string; edgeId?: string }) => {
-    const id = i.nodeId ? `n_${i.nodeId}` : i.edgeId ? `e_${i.edgeId}` : '';
-    if (id && (doc.content.nodes.some(n => `n_${n.nodeId}` === id) || doc.content.edges.some(e => `e_${e.edgeId}` === id))) setSelected(id);
-  };
-  const humanTasks = doc.content.nodes.filter(n => n.type === 'HUMAN_TASK');
-  const rule = node?.type === 'HUMAN_TASK' ? doc.content.assignmentPolicy.rules.find(r => r.ruleKey === node.assignmentRuleKey) : undefined;
+  const reportReady = !!report?.valid && report.revision === server?.revision && report.contentHash === server?.contentHash;
+  // User-facing explanation of why publish is unavailable. UI hint only; the server re-checks everything.
+  const publishHint = !remote ? 'Xuất bản cần kết nối máy chủ quy trình và quyền người phát hành.'
+    : !server ? 'Lưu lên máy chủ trước; chỉ người phát hành khác người soạn mới xuất bản được.'
+      : immutable ? 'Phiên bản này đã khóa; tạo bản nháp mới để thay đổi.'
+        : conflict ? 'Giải quyết xung đột phiên bản trước.'
+          : dirty ? 'Có chỉnh sửa chưa lưu; lưu lên máy chủ rồi kiểm tra lại.'
+            : !server.publishable ? 'Bạn không thể xuất bản bản nháp này (cần vai trò người phát hành và không phải người đã soạn/sửa).'
+              : !reportReady ? 'Bấm “Kiểm tra” để máy chủ xác nhận đúng revision này trước khi xuất bản.' : 'Sẵn sàng xuất bản revision đã kiểm tra.';
+  const serverNote = remote && server && server.status === 'DRAFT' && dirty ? 'Có chỉnh sửa chưa lưu: lưu lên máy chủ để kiểm tra trên máy chủ.' : '';
+  const serverResult = report && server ? {
+    valid: report.valid, revision: report.revision, issues: serverIssues(report, doc.content),
+    publishText: report.valid ? (server.publishable ? 'Có thể xuất bản đúng revision và mã băm này.' : 'Chỉ người phát hành khác người soạn/sửa bản nháp mới xuất bản được.') : 'Không thể xuất bản cho tới khi sửa hết lỗi.',
+  } : null;
 
   const chip = server
     ? `Máy chủ · v${server.versionNo} · ${STATUS_LABELS[server.status]} · revision ${server.revision}${dirty ? ' · chưa lưu' : ''}`
     : `Bản nháp · cục bộ v${revision}`;
-  return <section className={styles.editor} aria-labelledby="workflow-title">
-    <header className={styles.header}><div><p className={styles.eyebrow}>THIẾT KẾ QUY TRÌNH · VWF-02</p><h1 id="workflow-title">Trình thiết kế quy trình</h1></div><span className={styles.chip} data-testid="workflow-status">{chip}</span></header>
-    {server ? <div role="note" className={styles.notice}><strong>Định nghĩa trên máy chủ (#80).</strong> Nội dung chuẩn do máy chủ lưu và kiểm tra; bố cục sơ đồ chỉ lưu trên trình duyệt này. Không nhập thông tin cá nhân.</div>
-      : <div role="note" className={styles.notice}><strong>Chỉ lưu trên trình duyệt này.</strong> Dùng cấu hình mẫu, không nhập thông tin cá nhân. Kết nối máy chủ quy trình bên dưới để lưu, kiểm tra và xuất bản; kiểm tra cục bộ không cấp quyền.</div>}
+  const layoutNote = server ? `Chỉ lưu trên trình duyệt này, gắn với định nghĩa và mã băm ${server.contentHash.slice(0, 12)}…; không gửi lên máy chủ.` : 'Lưu cùng bản nháp cục bộ trên trình duyệt này.';
+  const errorCount = issues.length;
+
+  return <section ref={sectionRef} className={styles.editor} aria-labelledby="workflow-title" data-full-bleed data-opened={opened || undefined}>
+    <header className={styles.toolbar}>
+      <div className={styles.titleBlock}>
+        <p className={styles.eyebrow}><span id="workflow-title">Trình thiết kế quy trình</span></p>
+        <input className={styles.titleInput} aria-label="Tên workflow" disabled={locked || !opened} value={doc.content.title} maxLength={120}
+          onChange={e => change({ ...doc, content: { ...doc.content, title: e.target.value } }, 'wf:title')} />
+      </div>
+      <span className={styles.chip} data-testid="workflow-status" data-state={server?.status ?? 'LOCAL'}>{chip}</span>
+      {opened && <div className={styles.toolGroup} role="group" aria-label="Lịch sử">
+        <button type="button" className={styles.iconButton} aria-label="Hoàn tác" title="Hoàn tác (Ctrl+Z)" disabled={locked || !history.past.length} onClick={undo}><Undo2 size={16} /></button>
+        <button type="button" className={styles.iconButton} aria-label="Làm lại" title="Làm lại (Ctrl+Shift+Z)" disabled={locked || !history.future.length} onClick={redo}><Redo2 size={16} /></button>
+      </div>}
+      <div className={styles.toolGroup}>
+        {opened && <Button variant="outline" size="sm" disabled={busy} onClick={validateLocal}><CheckCheck size={15} />Kiểm tra{errorCount ? <span className={styles.countBadge} aria-label={`${errorCount} vấn đề`}>{errorCount}</span> : null}</Button>}
+        {opened && <Button variant="outline" size="sm" aria-expanded={drawerOpen && drawerTab === 'preview'} onClick={() => { setDrawerTab('preview'); setDrawerOpen(!(drawerOpen && drawerTab === 'preview')); }}><Eye size={15} />Xem trước</Button>}
+        {!server && opened && <Button variant="outline" size="sm" disabled={readOnly || busy} onClick={saveLocal}><Save size={15} />Lưu cục bộ</Button>}
+        {remote && !immutable && opened && <Button size="sm" variant={canPublish ? 'outline' : 'default'} disabled={readOnly || busy || conflict} onClick={() => void saveServer()}><Save size={15} />{server ? 'Lưu lên máy chủ' : 'Tạo bản nháp trên máy chủ'}</Button>}
+        {remote && immutable && <Button size="sm" variant="outline" disabled={busy} onClick={() => void saveServer()}><FilePlus2 size={15} />Tạo bản nháp mới từ phiên bản này</Button>}
+        {/* UI hint only: the server re-checks role, MFA and maker-checker on every publish. */}
+        {canPublish ? <Button size="sm" disabled={busy || !reportReady} aria-describedby="publish-hint" onClick={() => setConfirmPublish(true)}><Send size={15} />Xuất bản</Button>
+          : !server && <Button size="sm" disabled aria-describedby="publish-hint" title={publishHint}><Send size={15} />Xuất bản (cần máy chủ)</Button>}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><button type="button" className={styles.iconButton} aria-label="Thêm thao tác"><MoreHorizontal size={16} /></button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {remote && server && <DropdownMenuItem disabled={busy} onSelect={() => void reloadServer()}><RotateCw size={14} />Tải lại từ máy chủ</DropdownMenuItem>}
+            {!server && <DropdownMenuItem disabled={busy} onSelect={loadLocal}><RotateCw size={14} />Tải bản đã lưu</DropdownMenuItem>}
+            <DropdownMenuItem disabled={locked} onSelect={() => setOpened(false)}><LayoutTemplate size={14} />Chọn mẫu khác…</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem checked={readOnly} onCheckedChange={v => setReadOnly(!!v)}>Chỉ xem cục bộ</DropdownMenuCheckboxItem>
+            <DropdownMenuItem onSelect={() => { setOpened(true); setDrawerTab('advanced'); setDrawerOpen(true); }}>Nâng cao: JSON / BPMN</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <p id="publish-hint" className={styles.publishHint}>{publishHint}</p>
+    </header>
+
+    {readOnly && <div role="note" className={styles.notice}>Đang ở chế độ chỉ xem cục bộ: mọi thao tác sửa bị tắt.</div>}
     {immutable && server && <div role="note" className={styles.notice} data-testid="immutable-notice"><strong>Phiên bản {STATUS_LABELS[server.status].toLowerCase()} là bất biến.</strong> Chỉ xem{server.publishedAt ? ` · xuất bản lúc ${new Date(server.publishedAt).toLocaleString('vi-VN')}` : ''} · mã băm <code>{server.contentHash.slice(0, 12)}…</code> · {server.inFlight} lượt chạy đang dùng. Tạo bản nháp mới để thay đổi.</div>}
     {allowSyntheticSession && <WorkflowServerPanel session={session} refresh={refresh} onSession={next => { setSession(next); if (!next) { setServer(null); setReport(null); setConflict(false); } }} onOpen={openVersion} />}
-    {!opened ? <div className={styles.empty}><h2>Thiết kế luồng xử lý có giới hạn</h2><p>7 loại bước; AI chỉ đề xuất, người phụ trách luôn là con người. Nhánh song song và mã thực thi không được hỗ trợ.</p><Button onClick={() => setOpened(true)}>Mở trình vẽ</Button><p className={styles.hint}>bpmn-js chỉ tải khi mở trình vẽ.</p></div> : <>
-      <div className={styles.toolbar}>
-        {!server && <>
-          <Button variant="outline" disabled={readOnly || busy || !api} onClick={() => {
-            setError(''); try { const saved = saveDraft(localStorage, scope, doc, revision); setRevision(saved.revision); setMessage('Đã lưu bản nháp cục bộ.'); }
-            catch (cause) { setError(cause instanceof DraftConflict ? cause.message : 'Không lưu được. Kiểm tra trường bắt buộc, dữ liệu đã lưu và dung lượng trình duyệt. Chỉnh sửa vẫn được giữ nguyên.'); }
-          }}>Lưu cục bộ</Button>
-          <Button variant="outline" disabled={busy} onClick={() => run(() => { const saved = readDraft(localStorage, scope); if (!saved) throw new Error(); replace(saved); setRevision(saved.revision); setMessage('Đã tải bản đã lưu; chưa gọi máy chủ.'); })}>Tải bản đã lưu</Button>
-        </>}
-        <Button variant="outline" disabled={busy} onClick={validateLocal}>Kiểm tra cục bộ</Button>
-        {remote && !immutable && <Button variant="outline" disabled={readOnly || busy || !api || conflict} onClick={() => void saveServer()}>{server ? 'Lưu lên máy chủ' : 'Tạo bản nháp trên máy chủ'}</Button>}
-        {remote && immutable && <Button variant="outline" disabled={busy} onClick={() => void saveServer()}>Tạo bản nháp mới từ phiên bản này</Button>}
-        {remote && server && server.status === 'DRAFT' && <Button variant="outline" disabled={busy || dirty} title={dirty ? 'Lưu trước khi kiểm tra trên máy chủ' : undefined} onClick={() => void validateServer()}>Kiểm tra trên máy chủ</Button>}
-        {remote && server && <Button variant="outline" disabled={busy} onClick={() => void reloadServer()}>Tải lại từ máy chủ</Button>}
-        <Button variant="outline" onClick={() => setSummary(v => !v)} aria-expanded={summary}>Xem trước</Button>
-        <Button variant="outline" onClick={() => setPreview(v => !v)}>Xem JSON chuẩn</Button>
-        {/* UI hint only: the server re-checks role, MFA and maker-checker on every publish. */}
-        {canPublish ? <Button disabled={busy || !report?.valid || report.revision !== server?.revision || report.contentHash !== server?.contentHash} onClick={() => setConfirmPublish(true)}>Xuất bản</Button>
-          : !server && <Button disabled title="Lưu lên máy chủ; chỉ người phát hành khác người soạn mới thấy nút này">Xuất bản (cần máy chủ)</Button>}
-        <label className={styles.inline}><input type="checkbox" checked={readOnly} onChange={e => setReadOnly(e.target.checked)} />Chỉ xem cục bộ</label>
+    {conflict && <div ref={conflictRef} tabIndex={-1} role="region" aria-label="Xung đột phiên bản" className={styles.alertBox}>
+      <h2>Bản nháp trên máy chủ đã được người khác thay đổi (409 STALE_VERSION)</h2>
+      <p>Chỉnh sửa của bạn vẫn được giữ nguyên trong trình vẽ. Chọn cách xử lý:</p>
+      <div className={styles.inlineRow}>
+        <Button variant="outline" size="sm" disabled={busy} onClick={() => download('workflow.unsaved.json', canonicalJson(doc), 'application/json')}>Xuất chỉnh sửa của tôi</Button>
+        <Button variant="outline" size="sm" disabled={busy} onClick={() => void overwriteLatest()}>Giữ chỉnh sửa của tôi và lưu lên revision mới nhất</Button>
+        <Button variant="outline" size="sm" disabled={busy} onClick={() => void reloadServer()}>Bỏ chỉnh sửa và tải bản máy chủ</Button>
       </div>
-      {conflict && <div ref={conflictRef} tabIndex={-1} role="region" aria-label="Xung đột phiên bản" className={styles.validation}>
-        <h2>Bản nháp trên máy chủ đã được người khác thay đổi (409 STALE_VERSION)</h2>
-        <p>Chỉnh sửa của bạn vẫn được giữ nguyên trong trình vẽ. Chọn cách xử lý:</p>
-        <div className={styles.toolbar}>
-          <Button variant="outline" disabled={busy} onClick={() => download('workflow.unsaved.json', canonicalJson(doc), 'application/json')}>Xuất chỉnh sửa của tôi</Button>
-          <Button variant="outline" disabled={busy} onClick={() => void overwriteLatest()}>Giữ chỉnh sửa của tôi và lưu lên revision mới nhất</Button>
-          <Button variant="outline" disabled={busy} onClick={() => void reloadServer()}>Bỏ chỉnh sửa và tải bản máy chủ</Button>
-        </div>
-      </div>}
-      {confirmPublish && server && <div role="dialog" aria-modal="false" aria-labelledby="publish-title" className={styles.validation}>
-        <h2 id="publish-title">Xác nhận xuất bản {server.workflowKey} v{server.versionNo}</h2>
-        <p>Nội dung đã xem: revision {server.revision} · mã băm <code>{server.contentHash}</code>. Sau khi xuất bản, phiên bản này bất biến và phiên bản đang xuất bản trước đó (nếu có) chuyển sang đã thay thế.</p>
-        <div className={styles.toolbar}>
-          <Button disabled={busy} onClick={() => void publish()}>Xác nhận xuất bản</Button>
-          <Button variant="outline" disabled={busy} onClick={() => setConfirmPublish(false)}>Hủy</Button>
-        </div>
-      </div>}
-      <div className={styles.fields}>
-        <label>Mã workflow<input disabled={locked || !!server} value={doc.content.workflowKey} onChange={e => changed({ ...doc, content: { ...doc.content, workflowKey: e.target.value } })} /></label>
-        <label>Tên workflow<input disabled={locked} value={doc.content.title} onChange={e => changed({ ...doc, content: { ...doc.content, title: e.target.value } })} /></label>
+    </div>}
+    {confirmPublish && server && <div role="dialog" aria-modal="false" aria-labelledby="publish-title" className={styles.alertBox}>
+      <h2 id="publish-title">Xác nhận xuất bản {server.workflowKey} v{server.versionNo}</h2>
+      <p>Nội dung đã xem: revision {server.revision} · mã băm <code>{server.contentHash}</code>. Sau khi xuất bản, phiên bản này bất biến và phiên bản đang xuất bản trước đó (nếu có) chuyển sang đã thay thế. Quy trình chỉ chạy trên Temporal sau khi có hồ sơ thật; trình thiết kế không chạy thử.</p>
+      <div className={styles.inlineRow}>
+        <Button size="sm" disabled={busy} onClick={() => void publish()}>Xác nhận xuất bản</Button>
+        <Button variant="outline" size="sm" disabled={busy} onClick={() => setConfirmPublish(false)}>Hủy</Button>
       </div>
-      <div className={styles.toolbox} aria-label="Các bước được phép">{NODE_TYPES.map(type => <button key={type} type="button" draggable={!locked && !!api} disabled={locked || !api}
-        onDragStart={event => event.dataTransfer.setData('application/x-tpa-node', type)}
-        onClick={() => run(() => { if (api) setSelected(`n_${api.add(type)}`); })}>{NODE_LABELS[type]}</button>)}</div>
-      <p className={styles.hint}>Bấm hoặc kéo bước vào sơ đồ. Dùng danh sách chọn và nút di chuyển/kết nối nếu không dùng chuột. Bước mới cần cấu hình; không có mặc định SLA hay chính sách AI.</p>
+    </div>}
+
+    {!opened ? <div className={styles.start}>
+      <div>
+        <h2>Bắt đầu thiết kế quy trình</h2>
+        <ol className={styles.steps}>
+          <li>Chọn một mẫu hoặc bản trống.</li><li>Kéo bước từ thư viện bên trái vào sơ đồ, hoặc bấm/Enter để thêm.</li>
+          <li>Kéo từ chấm bên phải của bước sang bước khác để nối; chọn loại nhánh ở bảng bên phải.</li>
+          <li>Bấm “Kiểm tra”, bấm từng lỗi để tới đúng ô cần sửa, rồi lưu.</li>
+        </ol>
+        <p className={styles.hint}>Không cần nhập JSON hay mã kỹ thuật. AI chỉ đề xuất; người phụ trách luôn là con người. Nhánh song song và mã thực thi không được hỗ trợ.</p>
+        <div className={styles.inlineRow}>
+          <Button onClick={() => setOpened(true)}>Mở trình vẽ</Button>
+          {hasSaved && !server && <Button variant="outline" onClick={loadLocal}>Tiếp tục bản nháp đã lưu</Button>}
+        </div>
+      </div>
+      <ul className={styles.templates} aria-label="Mẫu quy trình">{TEMPLATES.map(t => <li key={t.id}>
+        <button type="button" disabled={locked} onClick={() => { replace(t.build(), `Đã dùng mẫu “${t.title}”. Các ô cần cấu hình được liệt kê trong bảng Kiểm tra.`); setOpened(true); setDrawerTab('issues'); setDrawerOpen(false); }}>
+          <span className={styles.badge}>{t.badge}</span><strong>Dùng mẫu: {t.title}</strong><small>{t.description}</small>
+        </button></li>)}</ul>
+    </div> : <>
       <div className={styles.workspace}>
-        <div><Canvas key={epoch} document={doc} readOnly={locked} onChange={next => { setDoc(next); setIssues(null); }} onSelect={setSelected} onReady={setApi} onError={setError} />
-          <div className={styles.connections}>
-            <label>Từ bước<select value={source} disabled={locked} onChange={e => setSource(e.target.value)}>{doc.content.nodes.map(n => <option key={n.nodeId} value={n.nodeId}>{n.label} · {n.nodeId}</option>)}</select></label>
-            <label>Đến bước<select value={target} disabled={locked} onChange={e => setTarget(e.target.value)}>{doc.content.nodes.map(n => <option key={n.nodeId} value={n.nodeId}>{n.label} · {n.nodeId}</option>)}</select></label>
-            <Button variant="outline" disabled={locked || !api} onClick={() => run(() => api?.connect(source, target))}>Kết nối</Button>
-          </div>
+        <WorkflowPalette document={doc} selected={selected} disabled={locked} onAdd={type => addStep(type)} onSelect={id => { setSelected(id); if (id.startsWith('n_')) api?.center(id.slice(2)); }} />
+        <div className={styles.stage}>
+          <Canvas document={doc} selected={selected} readOnly={locked} counts={counts} onSelect={setSelected}
+            onMove={positions => change(moveNodes(doc, positions))} onConnect={connectSteps} onDelete={deleteElements}
+            onDropType={(type, position) => addStep(type, position)} onReady={setApi} />
+          {doc.content.nodes.length <= 2 && <p className={styles.canvasHint}>Gợi ý: kéo “Người xử lý” hoặc “AI đề xuất” từ thư viện vào giữa Bắt đầu và Kết thúc, hoặc chọn một mẫu trong menu ⋯.</p>}
         </div>
-        <aside className={styles.panel} aria-label="Thuộc tính phần tử">
-          <h2>Thuộc tính</h2><label>Chọn phần tử<select value={selected} onChange={e => setSelected(e.target.value)}>
-            {doc.content.nodes.map(n => <option key={`n_${n.nodeId}`} value={`n_${n.nodeId}`}>{NODE_LABELS[n.type]} · {n.nodeId}</option>)}
-            {doc.content.edges.map(e => <option key={`e_${e.edgeId}`} value={`e_${e.edgeId}`}>Cạnh · {e.edgeId}</option>)}
-          </select></label>
-          <fieldset disabled={locked || !api} className={styles.properties}>
-            {node && <><label>Nhãn bước<input value={formNode?.label ?? ''} onChange={e => changeProperty('label', e.target.value)} /></label>
-              {'accountableOwner' in node && <label>Người chịu trách nhiệm<select value={field('accountableOwner', '')} onChange={e => changeProperty('accountableOwner', e.target.value)}><option value="">Chọn người chịu trách nhiệm</option><option value="CASE_OWNER">CASE_OWNER · người phụ trách hồ sơ</option></select></label>}
-              {node.type === 'END' && <label>Kết quả kết thúc<select value={field('outcome', '')} onChange={e => changeProperty('outcome', e.target.value)}>{END_OUTCOMES.map(o => <option key={o} value={o}>{o}</option>)}</select></label>}
-              {node.type === 'TIMER' && <label>Thời gian chờ (giây, 60–604800)<input type="number" min={60} max={604800} value={field<number | ''>('delaySeconds', '')} onChange={e => changeProperty('delaySeconds', Number(e.target.value))} /></label>}
-              {node.type === 'SUPPLEMENT_WAIT' && <label>Hạn bổ sung (giây, 86400–2592000)<input type="number" min={86400} max={2592000} value={field<number | ''>('maxWaitSeconds', '')} onChange={e => changeProperty('maxWaitSeconds', Number(e.target.value))} /></label>}
-              {node.type === 'AI_ACTIVITY' && <label>Thời gian tối đa AI (giây, 30–600)<input type="number" min={30} max={600} value={field<number | ''>('timeoutSeconds', '')} onChange={e => changeProperty('timeoutSeconds', Number(e.target.value))} /></label>}
-              {node.type === 'HUMAN_TASK' && <>
-                <label>Quy tắc phân công<select value={field('assignmentRuleKey', '')} onChange={e => changeProperty('assignmentRuleKey', e.target.value)}>{doc.content.assignmentPolicy.rules.map(r => <option key={r.ruleKey} value={r.ruleKey}>{r.ruleKey} · {r.candidateRoles.join(', ')}</option>)}</select></label>
-                <label>SLA (giây)<input type="number" min={3600} max={1209600} value={field<{ dueSeconds?: number }>('sla', {}).dueSeconds ?? ''} onChange={e => changeProperty('sla', { ...field<object>('sla', {}), dueSeconds: Number(e.target.value) })} /></label>
-                <label>Chuyển cấp khi quá SLA<select value={field<{ escalateTo?: string }>('sla', {}).escalateTo ?? ''} onChange={e => changeProperty('sla', { ...field<object>('sla', {}), escalateTo: e.target.value })}>{ESCALATIONS.map(v => <option key={v} value={v}>{v}</option>)}</select></label>
-              </>}
-              {(node.type === 'HUMAN_TASK' || node.type === 'AI_ACTIVITY') && <fieldset><legend>Hành động được phép</legend>{(node.type === 'HUMAN_TASK' ? HUMAN_ACTIONS : AI_ACTIONS).map(action => {
-                const actions: string[] = Array.isArray(field<unknown>('allowedActionIds', [])) ? field<string[]>('allowedActionIds', []) : [];
-                return <label className={styles.inline} key={action}><input type="checkbox" checked={actions.includes(action)} onChange={e => changeProperty('allowedActionIds', e.target.checked ? [...actions, action] : actions.filter(a => a !== action))} />{action}</label>;
-              })}</fieldset>}
-              {'allowedEvidence' in node && <fieldset><legend>Phạm vi bằng chứng</legend>{([
-                ['documentTypes', ['INVOICE_PHOTO', 'ITEMIZED_LIST', 'PRESCRIPTION', 'LAB_ORDER', 'LAB_RESULT', 'DISCHARGE_PAPER', 'VNEID_HISTORY']],
-                ['sources', ['XML', 'OCR', 'VLM', 'QR', 'IMAGE_ANALYSIS']],
-              ] as const).map(([key, values]) => <div key={key}>{values.map(value => {
-                const raw = field<unknown>('allowedEvidence', null);
-                const evidence = raw && typeof raw === 'object' ? raw as Record<string, unknown> : { documentTypes: [], sources: [] };
-                const current: string[] = Array.isArray(evidence[key]) ? evidence[key] as string[] : [];
-                return <label className={styles.inline} key={value}><input type="checkbox" checked={current.includes(value)} onChange={e => changeProperty('allowedEvidence', { ...evidence, [key]: e.target.checked ? [...current, value] : current.filter(v => v !== value) })} />{value}</label>;
-              })}</div>)}</fieldset>}
-            </>}
-            <label>{edge ? 'Cạnh và điều kiện (JSON)' : 'Toàn bộ thuộc tính bước (JSON)'}<textarea data-testid="workflow-properties" rows={10} value={propertyText} onChange={e => setPropertyText(e.target.value)} spellCheck={false} /></label>
-            <Button variant="outline" onClick={applyProperties}>Áp dụng thuộc tính</Button>
-            {rule && <fieldset aria-label="Ứng viên"><legend>Ứng viên · quy tắc {rule.ruleKey} (áp dụng ngay)</legend>
-              {CANDIDATE_ROLES.map(role => <label className={styles.inline} key={role}><input type="checkbox" checked={rule.candidateRoles.includes(role)}
-                onChange={e => updateRule(rule.ruleKey, { candidateRoles: e.target.checked ? [...rule.candidateRoles, role] : rule.candidateRoles.filter(r => r !== role) })} />{role}</label>)}
-              <label>Cách nhận việc<select value={rule.strategy} onChange={e => updateRule(rule.ruleKey, { strategy: e.target.value as Rule['strategy'] })}><option value="QUEUE_CLAIM">QUEUE_CLAIM · nhận từ hàng đợi</option><option value="CASE_OWNER_DIRECT">CASE_OWNER_DIRECT · giao người phụ trách</option></select></label>
-              <label>Số việc tối đa mỗi người<input type="number" min={1} max={50} value={rule.maxActiveTasksPerAssignee} onChange={e => updateRule(rule.ruleKey, { maxActiveTasksPerAssignee: Number(e.target.value) })} /></label>
-              {humanTasks.filter(n => n.nodeId !== node?.nodeId).map(n => <label className={styles.inline} key={n.nodeId}><input type="checkbox" checked={rule.distinctFromNodeIds.includes(n.nodeId)}
-                onChange={e => updateRule(rule.ruleKey, { distinctFromNodeIds: e.target.checked ? [...rule.distinctFromNodeIds, n.nodeId] : rule.distinctFromNodeIds.filter(id => id !== n.nodeId) })} />Khác người xử lý {n.nodeId}</label>)}
-            </fieldset>}
-            <div className={styles.toolbar}>{node && <>{[['Trái', -20, 0], ['Phải', 20, 0], ['Lên', 0, -20], ['Xuống', 0, 20]].map(([label, dx, dy]) => <button key={label} type="button" onClick={() => run(() => api?.move(node.nodeId, Number(dx), Number(dy)))}>{label}</button>)}</>}<button type="button" onClick={() => run(() => { if (node || edge) api?.remove((node?.nodeId ?? edge?.edgeId)!, !!edge); })}>Xóa phần tử</button></div>
-          </fieldset>
-        </aside>
+        <WorkflowInspector doc={doc} selected={selected} disabled={locked} keyLocked={!!server} issues={issues} focus={focus} change={change}
+          onSelect={setSelected} onConnect={connectSteps} onDelete={id => deleteElements(id.startsWith('n_') ? [id.slice(2)] : [], id.startsWith('e_') ? [id.slice(2)] : [])} onCenter={id => api?.center(id)} />
       </div>
-      <details className={styles.policy}><summary>Ứng viên, phân công và tách nhiệm vụ</summary><p>Chỉ vai trò con người; nhóm chờ danh bạ #21. CASE_OWNER không phải AI. INSURER_REVIEWER chỉ dùng khi tenant bật rõ.</p>
-        <label>Chính sách phân công (JSON)<textarea rows={12} disabled={locked} value={policyText} onChange={e => setPolicyText(e.target.value)} /></label>
-        <Button variant="outline" disabled={locked} onClick={() => run(() => { const policy: unknown = JSON.parse(policyText); if (!isAssignmentPolicy(policy)) throw new Error(); changed({ ...doc, content: { ...doc.content, assignmentPolicy: policy } }); })}>Áp dụng phân công</Button>
-      </details>
-      <div className={styles.toolbar}><label className={styles.import}>Nhập JSON / BPMN<input type="file" accept=".json,.bpmn,.xml" disabled={locked || !api} onChange={e => void importFile(e.target.files?.[0], e.target)} /></label>
-        <Button variant="outline" disabled={busy} onClick={() => download('workflow.local.json', canonicalJson(doc), 'application/json')}>Xuất JSON</Button>
-        <Button variant="outline" disabled={busy || !api} onClick={() => run(() => { if (validateLocalWorkflow(doc.content).some(i => i.detailCode === 'SCHEMA_INVALID')) throw new Error(); download('workflow.local.bpmn', toBpmnXml(doc), 'application/xml'); })}>Xuất BPMN</Button>
-      </div>
-      {summary && <table className={styles.table} aria-label="Xem trước quy trình" data-testid="workflow-summary">
-        <thead><tr><th>Bước</th><th>Loại</th><th>Người chịu trách nhiệm</th><th>Ứng viên</th><th>SLA / thời hạn</th><th>Hành động</th><th>Bằng chứng</th></tr></thead>
-        <tbody>{doc.content.nodes.map(n => {
-          const r = n.type === 'HUMAN_TASK' ? doc.content.assignmentPolicy.rules.find(x => x.ruleKey === n.assignmentRuleKey) : undefined;
-          const due = n.type === 'HUMAN_TASK' ? `${n.sla.dueSeconds}s → ${n.sla.escalateTo}` : n.type === 'SUPPLEMENT_WAIT' ? `${n.maxWaitSeconds}s` : n.type === 'TIMER' ? `${n.delaySeconds}s` : n.type === 'AI_ACTIVITY' ? `${n.timeoutSeconds}s` : n.type === 'END' ? n.outcome : '—';
-          return <tr key={n.nodeId}><td>{n.label} · <code>{n.nodeId}</code></td><td>{NODE_LABELS[n.type]}</td><td>{'accountableOwner' in n ? n.accountableOwner : '—'}</td>
-            <td>{r ? `${r.candidateRoles.join(', ')} · ${r.strategy}` : '—'}</td><td>{due}</td>
-            <td>{'allowedActionIds' in n ? n.allowedActionIds.join(', ') || '—' : '—'}</td>
-            <td>{'allowedEvidence' in n ? [...n.allowedEvidence.documentTypes, ...n.allowedEvidence.sources].join(', ') || '—' : '—'}</td></tr>;
-        })}</tbody>
-      </table>}
-      {preview && <pre data-testid="canonical-preview" className={styles.preview}>{canonicalJson(doc)}</pre>}
-      {report && <div ref={reportRef} tabIndex={-1} className={styles.validation} role="region" aria-label="Kết quả kiểm tra máy chủ">
-        <h2>{report.valid ? `Máy chủ: hợp lệ (revision ${report.revision})` : `Máy chủ: ${report.issues.length} lỗi (revision ${report.revision})`}</h2>
-        <ul>{report.issues.map((issue, i) => <li key={i}><button type="button" onClick={() => selectIssue(issue)}><code>{issue.detailCode}</code> · <code>{issue.path}</code>{issue.nodeId && ` · ${issue.nodeId}`}{issue.edgeId && ` · ${issue.edgeId}`}</button></li>)}</ul>
-        <p>{report.valid ? (server?.publishable ? 'Có thể xuất bản đúng revision và mã băm này.' : 'Chỉ người phát hành khác người soạn/sửa bản nháp mới xuất bản được.') : 'Không thể xuất bản cho tới khi sửa hết lỗi.'}</p></div>}
-      {issues && <div ref={errorsRef} tabIndex={-1} className={styles.validation} role="region" aria-label="Kết quả kiểm tra"><h2>{issues.length ? `${issues.length} lỗi cục bộ` : 'Cấu trúc và đồ thị cục bộ hợp lệ'}</h2>
-        <ul>{issues.map((issue, i) => <li key={i}><code>{issue.detailCode}</code> · <code>{issue.path}</code>{issue.nodeId && ` · ${issue.nodeId}`}</li>)}</ul><p>Kiểm tra cục bộ không xét pin đã xuất bản, binding tenant, quyền, MFA hay maker-checker. Không đủ điều kiện xuất bản; dùng kiểm tra trên máy chủ.</p></div>}
+      <WorkflowDrawer ref={errorsRef} serverRef={reportRef} doc={doc} tab={drawerTab} open={drawerOpen} setTab={setDrawerTab} setOpen={setDrawerOpen}
+        issues={issues} checked={checked === doc} server={serverResult} serverNote={serverNote} onIssue={focusIssue}
+        advanced={<AdvancedTools doc={doc} disabled={locked} busy={busy} layoutNote={layoutNote} onImport={(f, i) => void importFile(f, i)}
+          onExportJson={() => download('workflow.local.json', canonicalJson(doc), 'application/json')}
+          onExportBpmn={() => run(() => { if (validateLocalWorkflow(doc.content).some(i => i.detailCode === 'SCHEMA_INVALID')) throw new Error(); download('workflow.local.bpmn', toBpmnXml(doc), 'application/xml'); })} />} />
     </>}
-    <details className={styles.policy} data-testid="bpmn-license"><summary>bpmn-js 18.33.1 · Giấy phép upstream</summary><pre className={styles.license}>{BPMN_LICENSE}</pre><a href="https://github.com/bpmn-io/bpmn-js/tree/v18.33.1" target="_blank" rel="noreferrer">Mã nguồn bpmn-js</a></details>
     {error && <div role="alert" className={styles.error}>{error}</div>}
-    <p role="status" aria-live="polite" className={styles.hint}>{message}</p>
+    <p role="status" aria-live="polite" className={styles.srStatus}>{message}</p>
   </section>;
 }
