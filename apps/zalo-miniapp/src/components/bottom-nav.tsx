@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { BottomNavigation, useLocation, useNavigate } from 'zmp-ui';
 import { SvgIcon } from './icons.tsx';
 import {
-  TABS,
+  HUB_TABS,
+  HUB_UNAVAILABLE_MESSAGE,
   UNAVAILABLE_MESSAGE,
+  tabsFor,
   activeTab,
   isKeyboardOpen,
   shouldShowBottomNav,
@@ -37,6 +39,9 @@ export function BottomNav() {
   const barRef = useRef<HTMLElement>(null);
   const visible = shouldShowBottomNav(pathname, keyboardOpen);
   const active = activeTab(pathname);
+  // Hub/Loyalty360 screens use the proposed hub bar; TPA screens keep the #104 service bar.
+  const tabs = tabsFor(pathname);
+  const unavailableMessage = tabs === HUB_TABS ? HUB_UNAVAILABLE_MESSAGE : UNAVAILABLE_MESSAGE;
 
   // zmp-ui marks the active item only with a class; expose it to assistive tech too.
   useEffect(() => {
@@ -71,7 +76,7 @@ export function BottomNav() {
         </p>
       )}
       <BottomNavigation activeKey={active ?? undefined}>
-        {TABS.map((t) =>
+        {tabs.map((t) =>
           t.raised ? (
             // Keeps the slot under the raised button (hidden from layout-free a11y tree via visibility).
             <BottomNavigation.Item key={t.key} itemKey={t.key} className="raised-slot" label="" />
@@ -89,12 +94,12 @@ export function BottomNav() {
               }
               className={t.available ? undefined : 'unavailable'}
               icon={<SvgIcon name={t.icon} />}
-              onClick={() => (t.available ? go(t.key) : setNotice(UNAVAILABLE_MESSAGE))}
+              onClick={() => (t.available ? go(t.key) : setNotice(unavailableMessage))}
             />
           ),
         )}
       </BottomNavigation>
-      {TABS.filter((t) => t.raised).map((t) => (
+      {tabs.filter((t) => t.raised).map((t) => (
         <div key={t.key} className="raised-action">
           <button
             type="button"

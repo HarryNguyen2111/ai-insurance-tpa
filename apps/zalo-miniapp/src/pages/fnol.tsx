@@ -1,9 +1,11 @@
 import { useId, useState, type ChangeEvent } from 'react';
 import { Button, useNavigate } from 'zmp-ui';
 import { Shell } from '../components/shell.tsx';
-import { ACCEPT_ATTRIBUTE, CAMERA_FALLBACK_STEPS, checkFile, type FileCheck } from '../lib/upload.ts';
+import { ServiceState } from '../components/service-state.tsx';
+import { ACCEPT_ATTRIBUTE, CAMERA_FALLBACK_STEPS, checkFile } from '../lib/upload.ts';
 import { openPermissionSettings, requestCamera } from '../lib/platform.ts';
-import { usePrototype } from '../state.tsx';
+import type { DraftFile, FnolDraft } from '../lib/scope.ts';
+import { usePrototype, useTpaView, useWorkspace } from '../state.tsx';
 
 const DOC_TYPES = [
   ['INVOICE_PHOTO', 'Hóa đơn'],
@@ -12,7 +14,6 @@ const DOC_TYPES = [
   ['LAB_RESULT', 'Kết quả xét nghiệm'],
 ] as const;
 
-type Picked = { key: string; name: string; sizeKb: string; check: FileCheck };
 type Camera = 'idle' | 'granted' | 'denied';
 
 function kb(size: number): string {
@@ -23,15 +24,28 @@ function kb(size: number): string {
 export function FnolPage() {
   const navigate = useNavigate();
   const { runtime, canSubmit } = usePrototype();
-  const [docType, setDocType] = useState<string>('INVOICE_PHOTO');
+  const view = useTpaView();
+  // The draft lives in the scoped store: principal + tenant + TPA + form version (lib/scope.ts). It is
+  // never moved to another tenant; switching away keeps or discards it via the pending-work dialog.
+  const { draft, setDraft } = useWorkspace();
+  const docType = draft?.docType ?? 'INVOICE_PHOTO';
+  const files = draft?.files ?? [];
+  const draftSaved = draft?.saved ?? false;
+  const update = (patch: Partial<FnolDraft>) => setDraft({ docType, files, saved: draftSaved, ...patch });
   const [simulateAllow, setSimulateAllow] = useState(false);
   const [camera, setCamera] = useState<Camera>('idle');
-  const [files, setFiles] = useState<Picked[]>([]);
   const [settingsNote, setSettingsNote] = useState('');
-  const [draftSaved, setDraftSaved] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState<number | null>(null);
   const galleryId = useId();
   const cameraInputId = useId();
+
+  if (view.status !== 'ready') {
+    return (
+      <Shell title="Gửi yêu cầu bồi thường">
+        <ServiceState view={view} serviceVi="Bảo hiểm sức khỏe" />
+      </Shell>
+    );
+  }
 
   if (!canSubmit) {
     return (
@@ -44,13 +58,18 @@ export function FnolPage() {
 
   const onPick = (e: ChangeEvent<HTMLInputElement>) => {
     // Only browser-supplied metadata is read; the file bytes are never opened, hashed or sent.
-    const list = Array.from(e.target.files ?? []).map((f, i) => ({
-      key: `${Date.now()}-${i}`,
-      name: f.name,
-      sizeKb: kb(f.size),
-      check: checkFile({ name: f.name, type: f.type, size: f.size }),
-    }));
-    setFiles((prev) => [...prev, ...list]);
+    const list: DraftFile[] = Array.from(e.target.files ?? []).map((f, i) => {
+      const check = checkFile({ name: f.name, type: f.type, size: f.size });
+      return {
+        key: `${Date.now()}-${i}`,
+        name: f.name,
+        sizeKb: kb(f.size),
+        ok: check.ok,
+        isHeic: check.ok && check.isHeic,
+        reasonVi: check.ok ? '' : check.reasonVi,
+      };
+    });
+    update({ files: [...files, ...list] });
     e.target.value = '';
   };
 
@@ -59,14 +78,14 @@ export function FnolPage() {
     setCamera(res.granted ? 'granted' : 'denied');
   };
 
-  const accepted = files.filter((f) => f.check.ok);
+  const accepted = files.filter((f) => f.ok);
 
-  if (submitted) {
+  if (submitted !== null) {
     return (
       <Shell title="Đã mô phỏng gửi hồ sơ">
         <section className="card" role="status" data-testid="fnol-done">
           <h2>Mô phỏng hoàn tất</h2>
-          <p>{accepted.length} tệp hợp lệ đã được kiểm tra trên máy. Không có tệp hay dữ liệu nào được gửi đi.</p>
+          <p>{submitted} tệp hợp lệ đã được kiểm tra trên máy. Không có tệp hay dữ liệu nào được gửi đi.</p>
           <p className="hint">
             Bản thật sẽ xin URL tải lên có chữ ký (pre-signed) từ máy chủ, gửi kèm Idempotency-Key và chỉ tạo hồ sơ sau
             khi máy chủ xác nhận.
@@ -84,7 +103,7 @@ export function FnolPage() {
           <legend id="doc-type-legend">Loại chứng từ</legend>
           {DOC_TYPES.map(([value, label]) => (
             <label key={value} className="radio">
-              <input type="radio" name="docType" value={value} checked={docType === value} onChange={() => setDocType(value)} />
+              <input type="radio" name="docType" value={value} checked={docType === value} onChange={() => update({ docType: value })} />
               {label}
             </label>
           ))}
@@ -148,7 +167,7 @@ export function FnolPage() {
                   )}
                   {s.id === 'later' && (
                     <span className="row">
-                      <Button size="small" variant="secondary" onClick={() => setDraftSaved(true)}>Lưu nháp</Button>
+                      <Button size="small" variant="secondary" onClick={() => update({ saved: true })}>Lưu nháp</Button>
                       {draftSaved && <span role="status">Đã lưu nháp tạm trong phiên này (giả lập, không lưu chứng từ).</span>}
                     </span>
                   )}
@@ -164,13 +183,13 @@ export function FnolPage() {
           <h2 id="files-title">Tệp đã chọn (chỉ kiểm tra trên máy)</h2>
           <ul className="files" data-testid="file-list">
             {files.map((f) => (
-              <li key={f.key} className={f.check.ok ? 'file ok' : 'file bad'}>
+              <li key={f.key} className={f.ok ? 'file ok' : 'file bad'}>
                 <span className="name">{f.name}</span>
                 <span className="meta">{f.sizeKb}</span>
-                {f.check.ok ? (
-                  <span className="tag">{f.check.isHeic ? 'HEIC — sẽ chuyển đổi trên máy chủ' : 'Hợp lệ'}</span>
+                {f.ok ? (
+                  <span className="tag">{f.isHeic ? 'HEIC — sẽ chuyển đổi trên máy chủ' : 'Hợp lệ'}</span>
                 ) : (
-                  <span className="tag bad">{f.check.reasonVi}</span>
+                  <span className="tag bad">{f.reasonVi}</span>
                 )}
               </li>
             ))}
@@ -178,7 +197,11 @@ export function FnolPage() {
         </section>
       )}
 
-      <Button fullWidth disabled={accepted.length === 0} onClick={() => setSubmitted(true)}>
+      <Button fullWidth disabled={accepted.length === 0} onClick={() => {
+          // Simulated submit consumes the draft of THIS scope only.
+          setSubmitted(accepted.length);
+          setDraft(undefined);
+        }}>
         Gửi hồ sơ (mô phỏng)
       </Button>
     </Shell>

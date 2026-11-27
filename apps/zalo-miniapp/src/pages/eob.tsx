@@ -1,6 +1,8 @@
 import { useParams } from 'zmp-ui';
 import { Shell } from '../components/shell.tsx';
-import { SYNTHETIC_EOBS } from '../fixtures/synthetic.ts';
+import { ServiceState } from '../components/service-state.tsx';
+import { useTpaView } from '../state.tsx';
+import { CONCEALED_VI } from './claims.tsx';
 import { formatVnd } from '../lib/money.ts';
 
 const LINE_STATUS_VI = { APPROVED: 'Chi trả toàn bộ', PARTIAL: 'Chi trả một phần', REJECTED: 'Không chi trả' } as const;
@@ -8,7 +10,22 @@ const LINE_TONE = { APPROVED: 'success', PARTIAL: 'action', REJECTED: 'danger' }
 
 export function EobPage() {
   const { claimId = '' } = useParams();
-  const eob = SYNTHETIC_EOBS[claimId];
+  const view = useTpaView();
+  if (view.status !== 'ready') {
+    return (
+      <Shell title="Bảng giải trình">
+        <ServiceState view={view} serviceVi="Bảo hiểm sức khỏe" />
+      </Shell>
+    );
+  }
+  if (!view.data.claimDetails[claimId]) {
+    return (
+      <Shell title="Bảng giải trình">
+        <p className="card notice" role="alert" data-testid="claim-concealed">{CONCEALED_VI}</p>
+      </Shell>
+    );
+  }
+  const eob = view.data.eobs[claimId];
   if (!eob) {
     return (
       <Shell title="Bảng giải trình">

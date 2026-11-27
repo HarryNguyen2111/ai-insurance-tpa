@@ -3,10 +3,11 @@ import { Button, useNavigate } from 'zmp-ui';
 import { SvgIcon } from '../components/icons.tsx';
 import { Section } from '../components/section.tsx';
 import { Shell } from '../components/shell.tsx';
-import { SYNTHETIC_CLAIMS, SYNTHETIC_ECARD, SYNTHETIC_PLAN } from '../fixtures/synthetic.ts';
+import { ContextHeader } from '../components/context-header.tsx';
+import { ServiceState } from '../components/service-state.tsx';
 import { statusView } from '../lib/claim-status.ts';
 import { formatVnd } from '../lib/money.ts';
-import { usePrototype } from '../state.tsx';
+import { usePrototype, useTpaView } from '../state.tsx';
 
 /** Neutral, text-only slides (reference `pages/index/banner.tsx` shows a 2:1 image carousel). No images,
  * no tenant logo, no autoplay; the user swipes or scrolls. */
@@ -43,23 +44,40 @@ function Banner() {
 }
 
 /** Reference `components/welcome_vimid.tsx`: app title + "Chào mừng, {name}!" under the banner. */
-function Welcome() {
+function Welcome({ name }: { name: string | null }) {
   return (
     <header className="welcome" data-testid="welcome">
       <h1 className="sr-only">Trang chủ</h1>
       <p className="welcome-title">Bồi thường Sức khỏe</p>
-      <p className="welcome-sub">Chào mừng, {SYNTHETIC_ECARD.displayNameMasked}!</p>
+      <p className="welcome-sub">Chào mừng{name ? `, ${name}` : ''}!</p>
     </header>
   );
 }
 
 const viDate = (iso: string) => iso.slice(0, 10).split('-').reverse().join('/');
 
+/** H3 — TPA Insurance service home (#74/#104 content), rendered only for a committed TPA-capable tenant. */
 export function HomePage() {
   const navigate = useNavigate();
   const { canSubmit, decision } = usePrototype();
+  const view = useTpaView();
+  const hero = (
+    <>
+      <ContextHeader service={{ label: 'Bảo hiểm sức khỏe', icon: 'shield' }} />
+      <Banner />
+      <Welcome name={view.status === 'ready' ? view.data.ecard.displayNameMasked : null} />
+    </>
+  );
+  if (view.status !== 'ready') {
+    return (
+      <Shell title="Trang chủ" back={false} tone="warm" hero={hero}>
+        <ServiceState view={view} serviceVi="Bảo hiểm sức khỏe" />
+      </Shell>
+    );
+  }
+  const { plan, ecard, claims } = view.data;
   return (
-    <Shell title="Trang chủ" back={false} tone="warm" hero={<><Banner /><Welcome /></>}>
+    <Shell title="Trang chủ" back={false} tone="warm" hero={hero}>
       {!canSubmit && (
         <div className="card notice" role="status" data-testid="restricted-mode">
           <p>
@@ -73,12 +91,12 @@ export function HomePage() {
 
       <Section title="Hợp đồng của bạn">
         <div className="plan-card" aria-label="Thông tin hợp đồng mẫu" role="group">
-          <span className="plan-insurer">{SYNTHETIC_PLAN.insurerLabel}</span>
-          <strong className="plan-name">{SYNTHETIC_PLAN.planLabel}</strong>
+          <span className="plan-insurer">{plan.insurerLabel}</span>
+          <strong className="plan-name">{plan.planLabel}</strong>
           <span className="plan-row">
-            <span>Người được bảo hiểm: <span>{SYNTHETIC_ECARD.displayNameMasked}</span></span>
+            <span>Người được bảo hiểm: <span>{ecard.displayNameMasked}</span></span>
           </span>
-          <span className="plan-row muted">Hiệu lực {viDate(SYNTHETIC_PLAN.effectiveFrom)} – {viDate(SYNTHETIC_PLAN.effectiveTo)}</span>
+          <span className="plan-row muted">Hiệu lực {viDate(plan.effectiveFrom)} – {viDate(plan.effectiveTo)}</span>
         </div>
       </Section>
 
@@ -104,7 +122,7 @@ export function HomePage() {
         action={<button type="button" className="link" onClick={() => navigate('/claims')}>Xem tất cả</button>}
       >
         <ul className="recent" aria-label="Hồ sơ gần đây (mẫu)">
-          {SYNTHETIC_CLAIMS.slice(0, 2).map((c) => {
+          {claims.slice(0, 2).map((c) => {
             const v = statusView(c.status);
             return (
               <li key={c.claimId}>
