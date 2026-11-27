@@ -1,8 +1,9 @@
-# tpa-ai-worker (AI-01)
+# tpa-ai-worker (AI-01, AI-02)
 
 Python FastAPI worker for image quality checks and immutable preprocessing. It
 **proposes technical evidence only**: it never approves a claim, never writes
-money, makes **no network calls**, and does not log content or personal data.
+money, and does not log content or personal data. The only network access is
+the SSRF-hardened invoice XML fetch in `tpa_ai_worker/invoice/fetch.py`.
 
 ## What it does
 
@@ -30,11 +31,46 @@ money, makes **no network calls**, and does not log content or personal data.
     original is never modified or replaced.
   - Every response carries `proposalOnly: true` and `decisionAuthority: "NONE"`.
 
+## Invoice QR/XML extraction (AI-02, `tpa_ai_worker.invoice`)
+
+- **QR:** `pyzbar` decodes QR codes only; payloads > 2 KiB or non-UTF-8 are
+  dropped; more than one distinct payload is `QR_AMBIGUOUS`.
+- **Trusted hosts:** `AI_WORKER_INVOICE_FETCH_ALLOWED_HOSTS` is a comma list
+  of exact host names (no wildcards, schemes, ports or IPs). **Empty means no
+  fetch at all.** The real provider lookup hosts are an owner/provider
+  decision and are not shipped as defaults.
+- **SSRF:** `https` on port 443 only; userinfo, IP literals, backslashes and
+  control characters are refused. Each hop resolves DNS once, requires
+  *every* address to be public (private, loopback, link-local/metadata,
+  CGNAT, multicast, reserved, documentation, IPv4-mapped/6to4/Teredo/NAT64
+  IPv6 are refused), then connects to that pinned IP with TLS SNI and
+  certificate verification for the host name (DNS-rebinding safe). Redirects
+  (max 3) are re-validated from scratch.
+- **Limits:** 10 s total deadline, 5 s per socket operation, 2 MiB on the
+  wire (`AI_WORKER_INVOICE_MAX_FETCH_BYTES` may only tighten), 5 MiB after
+  gzip/deflate/zip decompression with a 100x ratio cap; zip must contain
+  exactly one `.xml` member.
+- **XML:** lxml with `resolve_entities=False`, `load_dtd=False`,
+  `no_network=True`, `huge_tree=False`; any DOCTYPE/ENTITY is refused (also
+  in UTF-16), XInclude is never processed, depth ≤ 64 and ≤ 20 000 elements.
+- **Extraction:** TT78 GDT layout (`HDon/DLHDon/TTChung`, `NDHDon/NBan`,
+  `DSHHDVu/HHDVu`, `TToan`), namespace-agnostic. Money is `Decimal` and a
+  2-dp string (`ROUND_HALF_UP`); exponents, signs, separators and NaN are
+  refused. `isMergedSummary` is true when the XML has at most one goods line
+  (TChat 1), so it must be reconciled against the itemized list (TC05).
+  Buyer name is used only for PERSONAL/COMPANY classification and is never
+  kept; no buyer address, phone or identifier is returned.
+- **Verification:** `parseStatus` (`PARSED`/`FAILED`/`UNAVAILABLE`) is kept
+  apart from `verificationStatus`, which this worker can only set to
+  `UNVERIFIED` (typed and guarded at runtime). An `MCCQT` code or signature
+  block in the XML is recorded as present but is **not** verification.
+
 ## Not in scope (honest limits)
 
 - No Viettel AI / VLM / model call and no OCR or field extraction (#30).
-- No QR decoding or XML fetch/parse behaviour (#29). pyzbar and lxml are only
-  bootstrapped and smoke-tested.
+- QR/XML invoice extraction (#29) is a library (`tpa_ai_worker.invoice`) with
+  no HTTP endpoint yet; wiring it to a job/endpoint needs service identity.
+- No tax verification: parsed QR/XML is always `UNVERIFIED` (see below).
 - No S3/MinIO access: storing the derived artifact is the caller's job. Derived
   bytes are returned base64-encoded.
 - No service identity (mTLS/HMAC) yet, so the endpoint must not be deployed or

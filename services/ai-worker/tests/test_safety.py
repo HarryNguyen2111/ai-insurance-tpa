@@ -45,6 +45,31 @@ def test_source_imports_no_network_clients() -> None:
         assert not (_imports(path) & NETWORK_MODULES), path.name
 
 
+def _full_imports(path: Path) -> set[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    found: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            found.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            found.add(node.module)
+    return found
+
+
+def test_only_invoice_fetch_module_may_use_the_network() -> None:
+    """AI-02 needs outbound HTTPS for QR XML lookup; keep it confined to fetch.py."""
+    files = sorted((SRC / "invoice").glob("*.py"))
+    assert files
+    for path in files:
+        network = {m for m in _full_imports(path) if m.split(".")[0] in NETWORK_MODULES}
+        if path.name == "fetch.py":
+            assert network == {"socket", "ssl", "http.client", "urllib.parse"}, network
+        elif path.name == "urlpolicy.py":
+            assert network == {"urllib.parse"}, network  # pure string parsing
+        else:
+            assert network == set(), path.name
+
+
 def test_pipeline_runs_with_network_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
     def _blocked(*_: object, **__: object) -> None:
         raise AssertionError("network access attempted")

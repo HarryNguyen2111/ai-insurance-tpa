@@ -1,7 +1,7 @@
 [project]
 name = "tpa-ai-worker"
 version = "0.1.0"
-description = "TPA AI worker: image quality pre-filter and immutable preprocessing (AI-01). Proposes evidence only; never approves claims or mutates money."
+description = "TPA AI worker: image quality pre-filter, immutable preprocessing (AI-01) and QR/XML invoice extraction (AI-02). Proposes evidence only; never approves claims or mutates money."
 readme = "README.md"
 # AGENTS.md requires Python 3.10+. 3.12 is the floor because the maintained
 # FastAPI (>=3.11) and numpy (>=3.12) releases no longer support 3.10.
@@ -13,9 +13,9 @@ dependencies = [
   "uvicorn>=0.54,<0.55",
   "opencv-python-headless>=5.1,<5.2",
   "numpy>=2.5,<3",
-  # QR decoding (pyzbar) and XML parsing (lxml) are bootstrapped here for the
-  # approved stack but are only exercised by a dependency smoke test; QR/XML
-  # behaviour is issue #29.
+  # QR decoding (pyzbar) and hardened XML parsing (lxml) for invoice QR/XML
+  # extraction (AI-02, issue #29). Secure fetch uses only the stdlib
+  # (ssl/http.client) so DNS answers can be pinned per connection.
   "pyzbar==0.1.9",
   "lxml>=6.1,<7",
 ]
