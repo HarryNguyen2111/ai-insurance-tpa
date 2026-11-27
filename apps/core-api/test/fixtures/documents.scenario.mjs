@@ -53,7 +53,8 @@ try{
   assert.ok((await put(grant,payload)).ok,'direct S3 PUT must succeed');
   await assert.rejects(api.complete(call(),grant.uploadId,{...completeBody,sizeBytes:1}),rejected);
   assert.equal((await put(grant,payload,{'Content-Type':'image/png'})).ok,false,'signed type cannot change');
-  assert.equal((await put(grant,Buffer.from('wrong checksum'))).ok,false,'signed size/checksum cannot change');
+  assert.equal((await put(grant,Buffer.from('wrong checksum'))).ok,false,'signed size cannot change');
+  assert.equal((await put(grant,Buffer.alloc(payload.length))).ok,false,'signed checksum cannot change even at the same size');
   const expired=randomUUID();
   await admin.query(`INSERT INTO tpa.upload_sessions(tenant_id,id,member_id,principal_id,membership_id,consent_id,object_key,content_type,doc_type,size_bytes,sha256,created_at,expires_at) SELECT tenant_id,$1,member_id,principal_id,membership_id,consent_id,$2,content_type,doc_type,size_bytes,sha256,clock_timestamp()-interval '10 minutes',clock_timestamp()-interval '9 minutes' FROM tpa.upload_sessions WHERE id=$3`,[expired,`quarantine/expired/${expired}`,grant.uploadId]);
   await assert.rejects(api.complete(call(),expired,completeBody),conflict);
@@ -84,10 +85,13 @@ try{
   }
   const attack=await create(Buffer.from('MZ executable'));await assert.rejects(api.complete(call(),attack.g.uploadId,attack.body),rejected);
   // Wrong object metadata/size/checksum cannot pass even when privileged upload bypasses signature.
-  const mismatch=(await api.presign(call(),request())).body;
-  const key=(await admin.query('SELECT object_key FROM tpa.upload_sessions WHERE id=$1',[mismatch.uploadId])).rows[0].object_key;
-  await client.send(new PutObjectCommand({Bucket:bucket,Key:key,Body:payload,ContentType:'image/png',ChecksumSHA256:Buffer.from(hash(payload),'hex').toString('base64')}));
-  await assert.rejects(api.complete(call(),mismatch.uploadId,completeBody),rejected);
+  for(const [actualType,actualBytes] of [['image/png',payload],['application/pdf',Buffer.alloc(20971521)],['application/pdf',Buffer.alloc(payload.length)]]){
+    const mismatch=(await api.presign(call(),request())).body;
+    const key=(await admin.query('SELECT object_key FROM tpa.upload_sessions WHERE id=$1',[mismatch.uploadId])).rows[0].object_key;
+    await client.send(new PutObjectCommand({Bucket:bucket,Key:key,Body:actualBytes,ContentType:actualType,ChecksumSHA256:Buffer.from(hash(actualBytes),'hex').toString('base64')}));
+    assert.equal((await fetch(`${e.DOC_S3_ENDPOINT}/${bucket}/${key}`)).status,403,'anonymous object reads are private');
+    await assert.rejects(api.complete(call(),mismatch.uploadId,completeBody),rejected);
+  }
   const outage=await create(Buffer.from('%PDF-1.7\nOUTAGE\n%%EOF')),pending=(await api.complete(call(),outage.g.uploadId,outage.body)).body;
   await assert.rejects(db.withTenantTransaction(T,tx=>scanNext(tx,runtime,storage,scanner,service)));
   assert.equal((await api.get(a,pending.documentId)).scanStatus,'QUARANTINED');
